@@ -1,26 +1,210 @@
+/* https://medium.com/@kevstrosky/theme-colors-with-tailwind-css-v4-0-and-next-themes-dark-light-custom-mode-36dca1e20419 */
+
+
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100..900&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* custom variant for dark theme dark:bg-red-500 */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@custom-variant custom (&:where([data-theme=custom], [data-theme=custom] *));
+
+
+/* define colors for different theme names */
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #000000;
+  --color-primary: #ED62FF;
+  --color-secondary: #9479FF;
+  --color-tertiary: #8b5cf6;
+  /* --color-orange-500: #ff7a00; */
+
+  --color-custom-gray-1: #F1F0F0; /* card, button background */
+  --color-custom-gray-2: #3D3D3D
+
+  --breakpoint-*: initial;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  /* --breakpoint-md2: 1000px; */
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+  /* --font-display: 'Raleway', sans-serif; */
+
+  
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* custom bg-background, foreground, primary, secondary, tertiary etc.. */
+@layer base {
+  [data-theme="light"] {
+    --color-background: #b1b1b1;
+    --color-foreground: #000000;
+    --color-primary: #3b82f6;
+    --color-secondary: #10b981;
+    --color-tertiary: #8b5cf6;
+  }
+  [data-theme="dark"] {
+    --color-background: #000000;
+    --color-foreground: #ffffff;
+    --color-primary: #4c1472;
+    --color-secondary: #34d399;
+    --color-tertiary: #a78bfa;
+  }
+  [data-theme="custom"] {
+    --color-background: #14144d;
+    --color-foreground: #9b1414;
+    --color-primary: #00ffbf;
+    --color-secondary: #ff00ff;
+    --color-tertiary: #ffff00;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  body {
+    /* @apply bg-background text-foreground */
+  }
 }
+
+/* /////////////////////////////////////////////////////////////////// */
+/* /////////////////////////////////////////////////////////////////// */
+
+
+
+.cf1 {
+  @apply font-['font-ogg-reg']
+}
+/* imported font use */
+.cf2 {
+  @apply font-['Raleway']
+}
+
+/* testing border class */
+.tb {
+  /* @apply border border-foreground */
+}
+
+/* smooth css transition  */
+.trans1 {
+  @apply duration-150 ease-linear transition-all
+}
+
+/* put items at center */
+.flex-c-c {
+  @apply flex flex-col items-center justify-center
+}
+
+
+/* /////////////////////////////////////////////////////////////////// */
+/* /////////////////////////////////////////////////////////////////// */
+
+.radius-1 {
+  @apply rounded-lg
+}
+
+.heading1 {
+  @apply text-6xl md:text-8xl xl:text-[7rem] font-medium tracking-tighter
+}
+
+.heading2 {
+  @apply text-5xl md:text-6xl xl:text-[5rem] font-light
+}
+
+.heading3 {
+  @apply text-5xl md:text-6xl xl:text-7xl font-light
+}
+
+.paragraph1 {
+  @apply text-sm md:text-xl font-extralight
+}
+
+.paragraph2 {
+  @apply text-base md:text-base font-extralight
+}
+
+/* used for flow cards */
+.paragraph3 {
+  @apply text-xs md:text-sm text-base
+}
+
+
+.buttonText {
+  @apply text-base md:text-lg font-medium
+}
+
+/* media screen landscape and width less than 900 px and height less than 600 px */
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 500px) {
+  .Heading1 {
+    @apply text-5xl
+  }
+  .Heading2 {
+    @apply text-3xl
+  }
+  .Heading3 {
+    @apply text-3xl
+  }
+  .Paragraph1 {
+    @apply text-sm
+  }
+  .Paragraph2 {
+    @apply text-sm
+  }
+  .Paragraph3 {
+    @apply text-sm
+  }
+}
+
+/* //////////////////////////////////////////////////////////////////////// */
+
+
+html::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+html::-webkit-scrollbar-track {
+  background-color: var(--background);
+}
+
+html::-webkit-scrollbar-thumb {
+  /* @apply rounded-lg bg-primary */
+}
+
+/* Shimmer animation for loader text */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.dark .shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+

@@ -1,0 +1,51 @@
+/**
+ * Discussion Card Component
+ * 
+ * Purpose: Renders discussion content with a topic button at the bottom
+ * Used in: message-part-orchestrator-renderer.tsx
+ * Why: Separates discussion rendering logic into a reusable component
+ */
+
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { MarkdownText } from './markdown-text';
+
+interface DiscussionCardProps {
+  text: string;
+  topic: string;
+  className?: string;
+  sendMessage: (message: { text: string }, options?: { body: any }) => void;
+}
+
+export const DiscussionCard = ({ text, topic, className, sendMessage }: DiscussionCardProps) => {
+  const handleButtonClick = () => {
+    const messageText = `@ Return products containing ${topic}`;
+    sendMessage(
+      { 
+        text: messageText,
+      },
+      {
+        body: {
+          // Body will be prepared by the chat hook if needed
+        },
+      }
+    );
+  };
+
+  return (
+    <div className={className}>
+      <MarkdownText className="!text-black">
+        {text}
+      </MarkdownText>
+      <Button
+        variant="outline"
+        className="mt-3 bg-gradient-to-r from-primary to-secondary hover:bg-[#e0e0e0] cursor-pointer text-left text-white"
+        onClick={handleButtonClick}
+      >
+        Search {topic}
+      </Button>
+    </div>
+  );
+};
+
