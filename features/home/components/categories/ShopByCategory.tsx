@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { useShop } from '@/providers/shop-context';
+import { useShop } from '@/features/ai-assistant/providers/shop-context';
 import { CategoryImageCard } from './CategoryImageCard';
 
 export const ShopByCategory = () => {

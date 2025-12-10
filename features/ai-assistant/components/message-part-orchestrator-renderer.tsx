@@ -16,6 +16,7 @@ import { DefaultToolRenderer } from '../tools/default-tool-renderer';
 import { MarkdownText } from './ui/markdown-text';
 import { DiscussionCard } from './ui/discussion-card';
 import { CartState, CartAction } from '@/features/ai-assistant/types/cart';
+import { DocumentPreview } from '@/features/ai-assistant/artifacts/components';
 
 interface MessagePartRendererProps {
   part: any;
@@ -95,9 +96,39 @@ export const MessagePartRenderer = ({
     );
   }
 
-  // Render tool parts
+
+  // Render tool parts (dynamic-tool type)
   if (part.type === 'dynamic-tool') {
     const dynamicToolPart = part as any;
+
+    // Custom rendering for createDocument tool
+    if (dynamicToolPart.toolName === 'createDocument') {
+      // Check if we have output (result) or input (args)
+      if (dynamicToolPart.output && 
+          (dynamicToolPart.output.id || dynamicToolPart.output.title || dynamicToolPart.output.kind)) {
+        // Tool has completed - show result
+        return (
+          <DocumentPreview
+            key={`${messageId}-${partIndex}`}
+            result={{
+              id: dynamicToolPart.output.id || '',
+              title: dynamicToolPart.output.title || 'Untitled Document',
+              kind: dynamicToolPart.output.kind || 'text',
+            }}
+            isReadonly={false}
+          />
+        );
+      } else if (dynamicToolPart.input) {
+        // Tool is being called - show args
+        return (
+          <DocumentPreview
+            key={`${messageId}-${partIndex}`}
+            args={dynamicToolPart.input || {}}
+            isReadonly={false}
+          />
+        );
+      }
+    }
 
     // Custom rendering for productSearch tool
     if (dynamicToolPart.toolName === 'productSearch') {
@@ -135,10 +166,13 @@ export const MessagePartRenderer = ({
     );
   }
 
+
+    
   // Filter out internal AI SDK parts that shouldn't be displayed
-  // These include: step-finish, text-delta, tool-call, tool-result
+  // These include: step-finish, text-delta
+  // Note: tool-call and tool-result are handled above for createDocument
   // Note: reasoning and step-start are handled above
-  const internalPartTypes = ['step-finish', 'text-delta', 'tool-call', 'tool-result'];
+  const internalPartTypes = ['step-finish', 'text-delta'];
   if (internalPartTypes.includes(part.type)) {
     return null;
   }

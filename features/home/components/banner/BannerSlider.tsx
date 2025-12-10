@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useShop } from '@/providers/shop-context';
+import { useShop } from '@/features/ai-assistant/providers/shop-context';
 import Image from 'next/image';
 import {
   Carousel,

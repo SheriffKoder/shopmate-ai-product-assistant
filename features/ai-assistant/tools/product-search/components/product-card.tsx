@@ -13,6 +13,7 @@ import { Product } from '@/features/ai-assistant/types/product';
 import { Star, Trash2 } from 'lucide-react';
 import { CartAction, CartState } from '@/features/ai-assistant/types/cart';
 import Image from 'next/image';
+import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 
 interface ProductCardProps {
   product: Product;
@@ -29,19 +30,21 @@ export const ProductCard = ({ product, dispatchCartAction, cart }: ProductCardPr
     router.push(`/products/${product.id}`);
   };
 
+  const { isFullScreen } = useFullscreen();
+
   return (
     <div
       onClick={handleCardClick}
-      className="bg-[#000000] rounded-lg p-2 border-2 border-[#000000] transition-all duration-200 cursor-pointer hover:border-primary"
+      className={`bg-[#000000] ${isFullScreen ? 'lg:w-[630px] lg:h-[320px] lg:flex-row lg:flex lg:gap-4' : 'w-[320px] h-[630px] flex flex-col'} rounded-lg p-2 border-2 border-[#000000] transition-all duration-200 cursor-pointer hover:border-primary`}
     >
 
-      <div className=''>
+      <div className={`${isFullScreen ? 'lg:h-[100%] lg:w-[40%]' : 'h-[40%]'}`}>
         <Image src={product.image_url || '/images/placeholder.png'} alt={product.name} width={100} height={100}
-        className='w-full h-full object-contain rounded-lg bg-white' />
+        className='w-full h-full object-contain rounded-md bg-white' />
       </div>
 
 
-      <div className='flex flex-col p-2'>
+      <div className={`flex flex-col p-2 ${isFullScreen ? 'lg:h-[100%] lg:w-[60%]' : 'h-[60%]'}`}>
 
       {/* Product Name */}
       <h3 className="text-lg font-semibold text-white mb-2">{product.name}</h3>
@@ -84,7 +87,7 @@ export const ProductCard = ({ product, dispatchCartAction, cart }: ProductCardPr
 
       {/* Cart Action Buttons */}
       {dispatchCartAction && (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-auto flex gap-2">
 
           {/* Price */}
           <div className="flex items-center justify-start">

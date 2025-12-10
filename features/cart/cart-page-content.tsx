@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useShop } from '@/providers/shop-context';
+import { useShop } from '@/features/ai-assistant/providers/shop-context';
 import { CartItemCard } from '@/features/ai-assistant/tools/cart-info/components/CartItemCard';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';

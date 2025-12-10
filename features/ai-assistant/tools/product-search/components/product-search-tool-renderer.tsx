@@ -57,7 +57,7 @@ export const ProductSearchToolRenderer = ({
 
       {/* Products Grid */}
       {searchOutput.products && searchOutput.products.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 mt-4">
+        <div className="flex flex-row gap-4 mt-4 flex-wrap">
           {searchOutput.products.map((product) => (
             <ProductCard
               key={product.id}

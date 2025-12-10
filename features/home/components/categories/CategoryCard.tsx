@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { useShop } from '@/providers/shop-context';
+import { useShop } from '@/features/ai-assistant/providers/shop-context';
 import { getFirstProductImageByCategory } from '@/features/home/utils/category-utils';
 import Image from 'next/image';
 

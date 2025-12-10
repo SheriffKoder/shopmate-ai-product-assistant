@@ -11,7 +11,7 @@
  * - footer: Optional footer text
  */
 
-import { dynamicTool } from 'ai';
+import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
 import { Product } from '../../types/product';
 import { analyzeItemsWithAI } from '../../utils/ai-search-agent';
@@ -40,7 +40,10 @@ const productSearchOutputSchema = z.object({
   footer: z.string().optional().describe('Optional footer text in markdown format'),
 });
 
-export const createProductSearchTool = (products: Product[] = []) => dynamicTool({
+export const createProductSearchTool = (
+  products: Product[] = [],
+  dataStream?: UIMessageStreamWriter<any>
+) => dynamicTool({
   description: 'MANDATORY: Use this tool whenever a user asks about products, wants to buy something, asks to see products, requests recommendations, or searches for specific items. This tool displays products in visual cards that users can see. Examples: "I want to buy an AirPod" → use this tool, "show me smartphones" → use this tool, "what are the best laptops?" → use this tool, "recommend products under $500" → use this tool, "show me tablets" → use this tool, "what products do you have?" → use this tool. DO NOT just describe products from memory - always use this tool to show actual products from the catalog. Filter and return products that match the user\'s query based on name, category, price range, rating, or features.',
   inputSchema: z.object({
     query: z.string().describe('The user\'s search query or request. Extract keywords like product type (smartphone, laptop, tablet, etc.), price range, rating requirements, or specific features. Examples: "smartphones", "laptops under $1000", "best rated products", "gaming laptops", "products with 5G"'),
@@ -53,6 +56,16 @@ export const createProductSearchTool = (products: Product[] = []) => dynamicTool
       maxResults?: number;
       sortBy?: 'rating' | 'price-low' | 'price-high' | 'reviews' | 'name';
     };
+
+    //////////////////////////////////
+    // Stream Search Status: Notify client that search has started
+    // Why: Provides immediate feedback to user
+    //////////////////////////////////
+    dataStream?.write({
+      type: "data-productSearchStatus",
+      data: { status: "searching" },
+      transient: true, // UI-only, don't save to message history
+    });
 
     // Use AI to analyze and rank products by relevance to the query
     let matchingProducts: Product[] = [];
@@ -88,6 +101,29 @@ export const createProductSearchTool = (products: Product[] = []) => dynamicTool
         .sort((a, b) => b.rating - a.rating)
         .slice(0, maxResults);
     }
+
+    //////////////////////////////////
+    // Stream Products: Send each product as it's found
+    // Why: Real-time product cards appear as AI finds them
+    // How: Streams each product individually for progressive UI updates
+    //////////////////////////////////
+    for (const product of matchingProducts) {
+      dataStream?.write({
+        type: "data-productCard",
+        data: product,
+        transient: true, // UI-only, don't save to message history
+      });
+    }
+
+    //////////////////////////////////
+    // Stream Completion Status: Notify client that search is complete
+    // Why: Provides feedback on search results count
+    //////////////////////////////////
+    dataStream?.write({
+      type: "data-productSearchStatus",
+      data: { status: "complete", count: matchingProducts.length },
+      transient: true,
+    });
 
     // Normalize query to lowercase for header generation
     const queryLower = query.toLowerCase();

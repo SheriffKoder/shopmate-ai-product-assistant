@@ -10,7 +10,7 @@
 
 import { CartItem, CartAction, CartState } from '@/features/ai-assistant/types/cart';
 import { MarkdownText } from '../../../components/ui/markdown-text';
-import { CartItemCard } from '../components/CartItemCard';
+import { CartItemCard } from './CartItemCard';
 import { Button } from '@/components/ui/button';
 
 interface CartInfoToolRendererProps {

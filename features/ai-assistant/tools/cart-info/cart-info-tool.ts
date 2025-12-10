@@ -11,7 +11,7 @@
  * - footer: Optional footer text
  */
 
-import { dynamicTool } from 'ai';
+import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
 import { CartState, CartItem } from '../../types/cart';
 import { searchInTarget, searchInProduct } from '../../utils/search-utils';
@@ -52,7 +52,10 @@ const cartInfoOutputSchema = z.object({
   footer: z.string().optional().describe('Optional footer text in markdown format'),
 });
 
-export const createCartInfoTool = (cart: CartState) => dynamicTool({
+export const createCartInfoTool = (
+  cart: CartState,
+  dataStream?: UIMessageStreamWriter<any>
+) => dynamicTool({
   description: 'MANDATORY: Use this tool when users ask about their shopping cart, want to see cart items, want to modify cart items, or ask questions about items in their cart. Examples: "show me my cart" → use this tool, "what\'s in my cart?" → use this tool, "show me the iPhone in my cart" → use this tool with specific product, "remove item from cart" → use this tool, "how much is my cart?" → use this tool. CRITICAL: When users ask to modify, change, update, adjust, or remove items (e.g., "can I modify the iPhone?", "change quantity", "update item"), you MUST use this tool immediately to display the item with controls. Do NOT ask for clarification first - show the item so they can use the controls. DO NOT use this tool for general product questions - use productSearch instead. This tool is specifically for cart-related queries.',
   inputSchema: z.object({
     query: z.string().describe('The user\'s query about their cart. Can be "all" for all items, a product name/ID for specific item, or a general question about the cart. For modification requests, extract the product name/ID from the query (e.g., "modify the iPhone" → "iPhone", "change quantity of AirPods" → "AirPods"). Examples: "all", "show all items", "iPhone 15", "iPhone", "what\'s in my cart?", "how much does my cart cost?", "modify iPhone", "change AirPods quantity".'),
@@ -144,6 +147,17 @@ export const createCartInfoTool = (cart: CartState) => dynamicTool({
     const footer = (display === 'all' || matchingProductIds.length > 0)
       ? 'You can adjust quantities or remove items using the controls below each item.'
       : undefined;
+
+    //////////////////////////////////
+    // Stream Cart Update: Send current cart state to client
+    // Why: Real-time cart updates appear immediately
+    // How: Streams full cart state for UI synchronization
+    //////////////////////////////////
+    dataStream?.write({
+      type: "data-cartUpdate",
+      data: cart,
+      transient: true, // UI-only, don't save to message history
+    });
 
     return {
       header,

@@ -6,13 +6,18 @@
  * Why: Separates recommendation logic from general product queries
  */
 
-import { streamText, UIMessage, convertToModelMessages } from 'ai';
+import { streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
 import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { smoothStream } from 'ai';
 import { getRecommendationPrompt } from './prompt';
 import { getProductCatalogContext, getCartContext } from '@/features/ai-assistant/config/system-prompt';
 import { createProductSearchTool } from '@/features/ai-assistant/tools';
 import { CartState } from '@/features/ai-assistant/types/cart';
+import { createDocumentTool } from '@/features/ai-assistant/artifacts/text/tool/create-document-tool';
+import { createTextDocument } from '@/features/ai-assistant/artifacts/text/tool/server';
+import { createSheetDocument } from '@/features/ai-assistant/artifacts/sheet/server';
+import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { logger } from '@/features/ai-assistant/lib/logger';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -26,9 +31,13 @@ interface RecommendationRequest {
 /**
  * Process recommendation request
  * @param request - Request containing messages, products, and cart
+ * @param dataStream - Optional data stream writer for custom UI data types
  * @returns Streaming response with recommendation output
  */
-export async function processRecommendationRequest(request: RecommendationRequest) {
+export async function processRecommendationRequest(
+  request: RecommendationRequest,
+  dataStream?: UIMessageStreamWriter<any>
+) {
   const { messages, products = [], cart } = request;
 
   // Get system prompt
@@ -66,6 +75,10 @@ export async function processRecommendationRequest(request: RecommendationReques
     return msg;
   });
 
+  // Shared document ID storage for syncing tool and agent
+  // The agent generates the ID, and the tool uses it via closure
+  let sharedDocumentId: string | null = null;
+
   // Stream Text with AI model
   const result = streamText({
     // Model: Using OpenAI o3-mini
@@ -75,7 +88,7 @@ export async function processRecommendationRequest(request: RecommendationReques
     system: systemPrompt,
     messages: convertToModelMessages(messagesWithProductData),
 
-    maxOutputTokens: 1000,
+    maxOutputTokens: 2000, // Increased to allow for reasoning + tool calls
 
     // Reasoning Component: Thinking in UI (if the model supports it)
     providerOptions: {
@@ -93,13 +106,105 @@ export async function processRecommendationRequest(request: RecommendationReques
 
     // Tools - use productSearch to display products when found
     // Note: Do NOT use cartInfo tool - handle cart recommendations with text only
+    // Pass dataStream to enable streaming custom data types
+    // Pass sharedDocumentId getter/setter so tool can use the agent's ID
     tools: {
-      productSearch: createProductSearchTool(products),
+      productSearch: createProductSearchTool(products, dataStream),
+      ...(dataStream && { 
+        createDocument: createDocumentTool(
+          dataStream, 
+          () => sharedDocumentId, 
+          (id: string) => { sharedDocumentId = id; }
+        ) 
+      }),
+    },
+
+    // Handle tool calls - trigger artifact handler when createDocument is called
+    onStepFinish: async ({ toolCalls }) => {
+      if (!dataStream || !toolCalls) {
+        logger.debug('[Recommendation Agent] onStepFinish: No dataStream or toolCalls');
+        return;
+      }
+
+      logger.debug('[Recommendation Agent] onStepFinish called', {
+        toolCallsCount: toolCalls.length,
+        toolNames: toolCalls.map(tc => tc?.toolName).filter(Boolean),
+      });
+
+      for (const toolCall of toolCalls) {
+        if (toolCall && toolCall.toolName === 'createDocument') {
+          // Access tool call input (args)
+          const input = 'input' in toolCall ? toolCall.input : undefined;
+          if (!input) continue;
+          
+          const { title, kind } = input as { title: string; kind?: 'text' | 'code' | 'sheet' };
+          logger.debug('[Recommendation Agent] Extracted tool call input', { title, kind });
+          
+          // Use the shared ID that was set by the tool
+          // The tool generates the ID and sets it via setSharedId, ensuring sync
+          if (!sharedDocumentId) {
+            // Tool didn't set it (shouldn't happen if tool is working correctly)
+            // Generate one as fallback
+            sharedDocumentId = generateUUID();
+            logger.warn('[Recommendation Agent] Shared documentId was not set by tool, generated fallback', {
+              documentId: sharedDocumentId,
+            });
+          }
+          
+          const documentId = sharedDocumentId;
+          
+          logger.debug('[Recommendation Agent] Using documentId for persistence', {
+            documentId,
+            sharedDocumentId,
+            note: 'Tool and agent use the same ID via shared closure',
+          });
+          
+          // Handle different artifact types
+          if (kind === 'text' || !kind) {
+            logger.info('[Recommendation Agent] Calling createTextDocument', {
+              title,
+              documentId,
+            });
+            await createTextDocument({
+              title,
+              dataStream,
+              documentId, // Use synced documentId for Supabase persistence
+            });
+            logger.debug('[Recommendation Agent] createTextDocument completed');
+          } else if (kind === 'sheet') {
+            logger.info('[Recommendation Agent] Calling createSheetDocument', {
+              title,
+              documentId,
+            });
+            await createSheetDocument({
+              title,
+              dataStream,
+              documentId, // Use synced documentId for Supabase persistence
+            });
+            logger.debug('[Recommendation Agent] createSheetDocument completed');
+          } else {
+            logger.debug('[Recommendation Agent] Skipping artifact creation (unsupported kind)', { kind });
+          }
+          
+          // Reset shared ID for next tool call
+          sharedDocumentId = null;
+          // Future: Handle code artifacts here
+        }
+      }
     },
   });
 
-  // Send sources and reasoning back to the client
-  return result.toUIMessageStreamResponse({
+  //////////////////////////////////
+  // Consume and Merge Stream: Process the stream and merge with dataStream
+  // Why: Ensures the stream is processed and can be merged with custom data types
+  //////////////////////////////////
+  result.consumeStream();
+
+  //////////////////////////////////
+  // Return Stream: Return UI message stream instead of Response
+  // Why: Allows merging with dataStream in the API route
+  //////////////////////////////////
+  return result.toUIMessageStream({
     sendSources: true, // receive as parts on the frontend.
     sendReasoning: true, // receive as parts on the frontend.
   });

@@ -97,6 +97,20 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       break;
     }
 
+    case 'SET_CART': {
+      // Set entire cart state (used for stream updates)
+      const cartState = action.payload as CartState;
+      // Validate and use the provided state directly
+      // Totals should already be calculated in the payload, but recalculate to be safe
+      const { totalItems, totalPrice } = calculateTotals(cartState.items);
+      newState = {
+        ...cartState,
+        totalItems,
+        totalPrice,
+      };
+      break;
+    }
+
     default:
       return state;
   }

@@ -1,0 +1,54 @@
+/**
+ * Artifact Close Button Component
+ * 
+ * Purpose: Button to close the artifact panel
+ * Used in: ArtifactPanel component
+ * Why: Allows users to close the artifact panel and return to full chat view
+ * 
+ * Behavior:
+ * - If artifact is streaming: Just hides the panel (preserves state)
+ * - If artifact is complete: Resets to initial state
+ */
+
+'use client';
+
+import { memo } from 'react';
+import { useArtifact, initialArtifactData } from '../hooks/use-artifact';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
+
+/**
+ * Artifact Close Button Component
+ * 
+ * Closes the artifact panel with smart behavior:
+ * - Streaming artifacts: Just hide panel (preserve streaming state)
+ * - Completed artifacts: Reset to initial state
+ */
+function PureArtifactCloseButton() {
+  const { setArtifact } = useArtifact();
+
+  const handleClose = () => {
+    setArtifact((currentArtifact) => ({
+      ...currentArtifact,
+      isVisible: false,
+      // Preserve all content - don't reset to initial state
+      // This allows the preview card to show content when panel is closed
+    }));
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      className="absolute top-4 right-4 z-50 h-fit p-2 dark:hover:bg-zinc-700 text-black cursor-pointer bg-background border"
+      onClick={handleClose}
+      aria-label="Close artifact panel"
+      data-testid="artifact-close-button"
+    >
+      <X size={18} />
+    </Button>
+  );
+}
+
+export const ArtifactCloseButton = memo(PureArtifactCloseButton, () => true);
+

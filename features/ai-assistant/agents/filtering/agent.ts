@@ -6,7 +6,7 @@
  * Why: Separates filtering logic from general product queries
  */
 
-import { streamText, UIMessage, convertToModelMessages } from 'ai';
+import { streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
 import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { smoothStream } from 'ai';
 import { getFilteringPrompt } from './prompt';
@@ -26,9 +26,13 @@ interface FilteringRequest {
 /**
  * Process filtering request
  * @param request - Request containing messages, products, and cart
+ * @param dataStream - Optional data stream writer for custom UI data types
  * @returns Streaming response with filtering output
  */
-export async function processFilteringRequest(request: FilteringRequest) {
+export async function processFilteringRequest(
+  request: FilteringRequest,
+  dataStream?: UIMessageStreamWriter<any>
+) {
   const { messages, products = [], cart } = request;
 
   // Get system prompt
@@ -92,14 +96,24 @@ export async function processFilteringRequest(request: FilteringRequest) {
     }),
 
     // Tools - use productSearch to display products when found
+    // Pass dataStream to enable streaming custom data types
     tools: {
-      productSearch: createProductSearchTool(products),
-      ...(cart && { cartInfo: createCartInfoTool(cart) }),
+      productSearch: createProductSearchTool(products, dataStream),
+      ...(cart && { cartInfo: createCartInfoTool(cart, dataStream) }),
     },
   });
 
-  // Send sources and reasoning back to the client
-  return result.toUIMessageStreamResponse({
+  //////////////////////////////////
+  // Consume and Merge Stream: Process the stream and merge with dataStream
+  // Why: Ensures the stream is processed and can be merged with custom data types
+  //////////////////////////////////
+  result.consumeStream();
+
+  //////////////////////////////////
+  // Return Stream: Return UI message stream instead of Response
+  // Why: Allows merging with dataStream in the API route
+  //////////////////////////////////
+  return result.toUIMessageStream({
     sendSources: true, // receive as parts on the frontend.
     sendReasoning: true, // receive as parts on the frontend.
   });

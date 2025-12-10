@@ -21,7 +21,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.8,
       shortDescription: 'Flagship smartphone with advanced AI features and stunning display',
       description: 'The Samsung Galaxy S24 Ultra is a premium smartphone featuring a 6.8-inch Dynamic AMOLED 2X display, Snapdragon 8 Gen 3 processor, and advanced AI capabilities. With a 200MP camera system, S Pen support, and all-day battery life, it\'s designed for power users and creative professionals.',
-      price: 899.99,
+      price: 1199.99,
       reviewsCount: 2847,
       features: [
         '6.8-inch Dynamic AMOLED 2X Display (120Hz)',
@@ -46,7 +46,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.7,
       shortDescription: 'Apple\'s most advanced iPhone with titanium design and A17 Pro chip',
       description: 'The iPhone 15 Pro Max features a premium titanium design, the powerful A17 Pro chip, and an advanced camera system. With ProRes video recording, Action Button, and USB-C connectivity, it delivers exceptional performance for professionals and enthusiasts.',
-      price: 729.99,
+      price: 1199.00,
       reviewsCount: 3124,
       features: [
         '6.7-inch Super Retina XDR Display',
@@ -71,7 +71,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.9,
       shortDescription: 'Professional laptop with M3 Max chip for creators and developers',
       description: 'The MacBook Pro 16-inch with M3 Max chip delivers exceptional performance for professional workflows. Featuring a stunning Liquid Retina XDR display, up to 128GB unified memory, and all-day battery life, it\'s the ultimate tool for video editing, software development, and creative work.',
-      price: 1259.00,
+      price: 3999.00,
       reviewsCount: 892,
       features: [
         '16.2-inch Liquid Retina XDR Display',
@@ -100,7 +100,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.6,
       shortDescription: 'Premium Windows laptop with OLED display and powerful performance',
       description: 'The Dell XPS 15 combines stunning design with powerful performance. Featuring an optional 3.5K OLED touch display, Intel Core i9 processor, and NVIDIA RTX graphics, it\'s perfect for content creation, gaming, and productivity.',
-      price: 1789.00,
+      price: 2299.99,
       reviewsCount: 1456,
       features: [
         '15.6-inch 3.5K OLED Touch Display',
@@ -129,7 +129,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.8,
       shortDescription: 'Powerful tablet with M2 chip and Liquid Retina XDR display',
       description: 'The iPad Pro 12.9-inch with M2 chip redefines what a tablet can do. With a stunning Liquid Retina XDR display, Apple Pencil support, and desktop-class performance, it\'s perfect for artists, designers, and professionals on the go.',
-      price: 338.95,
+      price: 1099.00,
       reviewsCount: 2134,
       features: [
         '12.9-inch Liquid Retina XDR Display',
@@ -158,7 +158,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.7,
       shortDescription: 'Rugged smartwatch built for adventure and extreme sports',
       description: 'The Apple Watch Ultra 2 is the most capable Apple Watch ever. With a titanium case, Action Button, dual-frequency GPS, and up to 36 hours of battery life, it\'s designed for athletes, adventurers, and outdoor enthusiasts.',
-      price: 599.00,
+      price: 799.00,
       reviewsCount: 1876,
       features: [
         '49mm Titanium Case',
@@ -183,7 +183,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.8,
       shortDescription: 'Premium noise-canceling headphones with exceptional sound quality',
       description: 'The Sony WH-1000XM5 headphones deliver industry-leading noise cancellation and exceptional sound quality. With 30-hour battery life, quick charge, and comfortable design, they\'re perfect for travel, work, and music lovers.',
-      price: 248.99,
+      price: 399.99,
       reviewsCount: 3421,
       features: [
         'Industry-Leading Noise Cancellation',
@@ -208,7 +208,7 @@ export function getInitialProducts(): Product[] {
       rating: 4.6,
       shortDescription: 'Premium wireless earbuds with active noise cancellation',
       description: 'The AirPods Pro (2nd generation) feature advanced Active Noise Cancellation, personalized Spatial Audio, and up to 6 hours of listening time. With a new H2 chip and improved sound quality, they deliver an immersive audio experience.',
-      price: 189.00,
+      price: 249.00,
       reviewsCount: 4523,
       features: [
         'Active Noise Cancellation',

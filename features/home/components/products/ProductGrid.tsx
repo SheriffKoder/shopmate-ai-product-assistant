@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { useShop } from '@/providers/shop-context';
+import { useShop } from '@/features/ai-assistant/providers/shop-context';
 import { ProductCard } from './ProductCard';
 
 interface ProductGridProps {

@@ -14,7 +14,7 @@ import { ShoppingCart, Home, User } from 'lucide-react';
 import ButtonDropdown from './ButtonDropdown';
 import { HeaderIconButton } from './HeaderIconButton';
 import { HeaderSearchBar } from './HeaderSearchBar';
-import { useShop } from '@/providers/shop-context';
+import { useShop } from '@/features/ai-assistant/providers/shop-context';
 import { navigateToProductSearch } from '@/features/products/utils/navigation-utils';
 
 interface MainHeaderProps {

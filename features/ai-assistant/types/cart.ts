@@ -24,5 +24,6 @@ export type CartAction =
   | { type: 'ADD_TO_CART'; payload: Product }
   | { type: 'REMOVE_FROM_CART'; payload: string } // productId
   | { type: 'INCREASE_QUANTITY'; payload: string } // productId
-  | { type: 'DECREASE_QUANTITY'; payload: string }; // productId
+  | { type: 'DECREASE_QUANTITY'; payload: string } // productId
+  | { type: 'SET_CART'; payload: CartState }; // Full cart state (for stream updates)
 

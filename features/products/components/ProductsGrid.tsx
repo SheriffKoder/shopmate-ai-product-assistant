@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useShop } from '@/providers/shop-context';
+import { useShop } from '@/features/ai-assistant/providers/shop-context';
 import { searchInProduct } from '@/features/ai-assistant/utils/search-utils';
 import { ProductCard } from '@/features/home/components/products/ProductCard';
 

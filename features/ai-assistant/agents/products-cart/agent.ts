@@ -6,7 +6,7 @@
  * Why: Separates business logic from API route handling
  */
 
-import { smoothStream, streamText, UIMessage, convertToModelMessages } from 'ai';
+import { smoothStream, streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
 import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { getSystemPrompt, getProductCatalogContext } from '@/features/ai-assistant/config/system-prompt';
 import { createProductSearchTool, createCartInfoTool } from '@/features/ai-assistant/tools';
@@ -24,9 +24,13 @@ interface AgentRequest {
 /**
  * Process AI assistant request for product promotion and Q&A
  * @param request - Request containing messages and product catalog
+ * @param dataStream - Optional data stream writer for custom UI data types
  * @returns Streaming response with AI assistant output
  */
-export async function processProductAssistantRequest(request: AgentRequest) {
+export async function processProductAssistantRequest(
+  request: AgentRequest,
+  dataStream?: UIMessageStreamWriter<any>
+) {
   const {
     messages,
     products = [],
@@ -91,18 +95,27 @@ export async function processProductAssistantRequest(request: AgentRequest) {
       chunking: "word", // RegExp | "word" | "line" | ChunkDetector | undefined
     }),
 
-    // Tools
+    // Tools - Pass dataStream to enable streaming custom data types
     tools: {
-      productSearch: createProductSearchTool(products),
-      ...(cart && { cartInfo: createCartInfoTool(cart) }),
+      productSearch: createProductSearchTool(products, dataStream),
+      ...(cart && { cartInfo: createCartInfoTool(cart, dataStream) }),
     },
     // stopWhen: stepCountIs(20), // not do more than 20 tool calls to avoid infinite loops
   });
 
-  console.log('result', result);
+  //////////////////////////////////
+  // Consume and Merge Stream: Process the stream and merge with dataStream
+  // Why: Ensures the stream is processed and can be merged with custom data types
+  // How: consumeStream() processes the stream, then we return the UI message stream
+  //////////////////////////////////
+  result.consumeStream();
 
-  // Send sources and reasoning back to the client
-  return result.toUIMessageStreamResponse({
+  //////////////////////////////////
+  // Return Stream: Return UI message stream instead of Response
+  // Why: Allows merging with dataStream in the API route
+  // How: toUIMessageStream() returns a stream that can be merged
+  //////////////////////////////////
+  return result.toUIMessageStream({
     sendSources: true, // receive as parts on the frontend.
     sendReasoning: true, // receive as parts on the frontend.
   });

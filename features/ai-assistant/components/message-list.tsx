@@ -68,9 +68,10 @@ export const MessageList = ({
           >
             {message.parts.map((part: any, i: number) => {
               // Filter out internal AI SDK parts that shouldn't be displayed
-              // These include: step-finish, text-delta, tool-call, tool-result
+              // These include: step-finish, text-delta
+              // Note: tool-call and tool-result for createDocument are handled in MessagePartRenderer
               // Note: reasoning and step-start are now displayed
-              const internalPartTypes = ['step-finish', 'text-delta', 'tool-call', 'tool-result'];
+              const internalPartTypes = ['step-finish', 'text-delta'];
               if (internalPartTypes.includes(part.type)) {
                 return null;
               }
