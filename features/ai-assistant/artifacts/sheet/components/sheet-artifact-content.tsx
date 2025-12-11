@@ -106,6 +106,21 @@ export function SheetArtifactContent() {
     latestCsvRef.current = localCsv;
   }, [localTitle, localCsv]);
 
+  // Sync local state with artifact state during streaming and when status changes to complete
+  // This ensures localCsv stays in sync with artifact.content as it streams
+  useEffect(() => {
+    if (artifact.status === 'streaming' || artifact.status === 'complete') {
+      // During streaming or when just completed, sync with artifact state
+      // Only sync if user is not actively editing
+      if (!isUserEditingRef.current) {
+        setLocalCsv(artifact.content);
+        if (artifact.title) {
+          setLocalTitle(artifact.title);
+        }
+      }
+    }
+  }, [artifact.content, artifact.title, artifact.status]);
+
   // Sync with active document (when navigating versions)
   // Only sync when:
   // 1. Document ID or createdAt changes (version navigation)
@@ -179,7 +194,7 @@ export function SheetArtifactContent() {
             justSavedRef.current = false;
           }, 2000); // Wait 2 seconds for new version to be available
         } catch (err) {
-          console.error('[Sheet Artifact] Error saving version:', err);
+          logger.error('[Sheet Artifact] Error saving version', err);
           justSavedRef.current = false; // Reset flag on error
           // Error is already handled by save hook
         }

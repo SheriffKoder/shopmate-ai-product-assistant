@@ -24,6 +24,7 @@ import { useProductStream } from '../hooks/use-product-stream';
 import { useCartStream } from '../hooks/use-cart-stream';
 import { useArtifact, initialArtifactData } from '../artifacts/hooks/use-artifact';
 import { useFullscreen } from '../providers/fullscreen-context';
+import { logger } from '../lib/logger';
 
 /**
  * Data Stream Handler Component
@@ -101,19 +102,22 @@ export function DataStreamHandler() {
         case "data-productCard":
           // Add product to UI state
           addProduct(delta.data);
-          console.log('[DataStreamHandler] Product card added:', delta.data.name);
+          logger.debug('[DataStreamHandler] Product card added', { name: delta.data.name });
           break;
 
         case "data-productList":
           // Update product list with multiple products
           addProducts(delta.data);
-          console.log('[DataStreamHandler] Product list updated:', delta.data.length, 'products');
+          logger.info('[DataStreamHandler] Product list updated', { count: delta.data.length });
           break;
 
         case "data-productSearchStatus":
           // Search status update (can be used for UI indicators)
           // Status: 'searching' | 'found' | 'complete'
-          console.log('[DataStreamHandler] Search status:', delta.data.status, delta.data.count ? `(${delta.data.count} found)` : '');
+          logger.debug('[DataStreamHandler] Search status', { 
+            status: delta.data.status, 
+            count: delta.data.count 
+          });
           break;
 
         //////////////////////////////////
@@ -124,20 +128,23 @@ export function DataStreamHandler() {
         case "data-cartUpdate":
           // Update cart state from stream
           updateCart(delta.data);
-          console.log('[DataStreamHandler] Cart updated:', delta.data.totalItems, 'items');
+          logger.info('[DataStreamHandler] Cart updated', { totalItems: delta.data.totalItems });
           break;
 
         case "data-cartItemAdded":
           // FUTURE IMPLEMENTATION: Show notification
           // For now, cart updates are handled via cartUpdate type
           // This type can be used for specific item-added notifications
-          console.log('[DataStreamHandler] Cart item added:', delta.data.productId, `x${delta.data.quantity}`);
+          logger.debug('[DataStreamHandler] Cart item added', { 
+            productId: delta.data.productId, 
+            quantity: delta.data.quantity 
+          });
           break;
 
         case "data-cartItemRemoved":
           // Remove cart item
           removeCartItem(delta.data.productId);
-          console.log('[DataStreamHandler] Cart item removed:', delta.data.productId);
+          logger.debug('[DataStreamHandler] Cart item removed', { productId: delta.data.productId });
           break;
 
         //////////////////////////////////
@@ -148,13 +155,13 @@ export function DataStreamHandler() {
         case "data-recommendation":
           // FUTURE IMPLEMENTATION: Display recommendations
           // displayRecommendations(delta.data);
-          console.log('[DataStreamHandler] Recommendations:', delta.data);
+          logger.debug('[DataStreamHandler] Recommendations', delta.data);
           break;
 
         case "data-recommendationStatus":
           // FUTURE IMPLEMENTATION: Update recommendation status
           // showRecommendationStatus(delta.data.status, delta.data.count);
-          console.log('[DataStreamHandler] Recommendation status:', delta.data);
+          logger.debug('[DataStreamHandler] Recommendation status', delta.data);
           break;
 
         //////////////////////////////////
@@ -165,7 +172,7 @@ export function DataStreamHandler() {
         case "data-filterStatus":
           // FUTURE IMPLEMENTATION: Update filter status
           // showFilterStatus(delta.data.status, delta.data.resultsCount);
-          console.log('[DataStreamHandler] Filter status:', delta.data);
+          logger.debug('[DataStreamHandler] Filter status', delta.data);
           break;
 
         //////////////////////////////////
@@ -177,7 +184,7 @@ export function DataStreamHandler() {
           // FUTURE IMPLEMENTATION: Clear current UI state
           // clearProductList();
           // clearRecommendations();
-          console.log('[DataStreamHandler] Clear signal received');
+          logger.debug('[DataStreamHandler] Clear signal received');
           break;
 
         case "data-finish":
@@ -192,13 +199,12 @@ export function DataStreamHandler() {
             }
             return prev;
           });
-          console.log('[DataStreamHandler] Stream finished - artifact marked as complete');
           break;
 
         case "data-usage":
           // FUTURE IMPLEMENTATION: Track token usage (if needed for analytics)
           // trackTokenUsage(delta.data.promptTokens, delta.data.completionTokens);
-          console.log('[DataStreamHandler] Usage:', delta.data);
+          logger.debug('[DataStreamHandler] Usage', delta.data);
           break;
 
         //////////////////////////////////
@@ -208,11 +214,20 @@ export function DataStreamHandler() {
         
         case "data-artifactId":
           // Set artifact document ID
-          setArtifact((prev) => ({
-            ...prev,
-            documentId: delta.data,
-          }));
-          console.log('[DataStreamHandler] Artifact ID set:', delta.data);
+          setArtifact((prev) => {
+            const newDocumentId = delta.data;
+            logger.debug('[DataStreamHandler] Artifact ID received', {
+              previousDocumentId: prev.documentId,
+              newDocumentId,
+              currentStatus: prev.status,
+              currentContentLength: prev.content.length,
+            });
+            
+            return {
+              ...prev,
+              documentId: newDocumentId,
+            };
+          });
           break;
 
         case "data-artifactTitle":
@@ -221,7 +236,7 @@ export function DataStreamHandler() {
             ...prev,
             title: delta.data,
           }));
-          console.log('[DataStreamHandler] Artifact title set:', delta.data);
+          logger.debug('[DataStreamHandler] Artifact title set', { title: delta.data });
           break;
 
         case "data-artifactKind":
@@ -230,16 +245,29 @@ export function DataStreamHandler() {
             ...prev,
             kind: delta.data,
           }));
-          console.log('[DataStreamHandler] Artifact kind set:', delta.data);
+          logger.debug('[DataStreamHandler] Artifact kind set', { kind: delta.data });
           break;
 
         case "data-artifactStatus":
           // Update artifact status
-          setArtifact((prev) => ({
-            ...prev,
-            status: delta.data,
-          }));
-          console.log('[DataStreamHandler] Artifact status:', delta.data);
+          setArtifact((prev) => {
+            const newStatus = delta.data;
+            
+            logger.debug('[DataStreamHandler] Artifact status changed', {
+              previousStatus: prev.status,
+              newStatus,
+              documentId: prev.documentId,
+              contentLength: prev.content.length,
+              kind: prev.kind,
+              rowCount: prev.kind === 'sheet' ? prev.content.split('\n').length : null,
+              contentPreview: prev.content.substring(0, 100),
+            });
+            
+            return {
+              ...prev,
+              status: newStatus,
+            };
+          });
           break;
 
         case "data-textDelta":
@@ -274,6 +302,9 @@ export function DataStreamHandler() {
           setArtifact((prev) => {
             // streamObject sends full CSV each time, so we replace (not append)
             const newContent = delta.data;
+            const contentLength = newContent.length;
+            const rowCount = newContent.split('\n').length;
+            
             // Only set to 'streaming' if status is 'idle', preserve 'complete' status
             const newStatus = prev.status === 'idle' ? 'streaming' : 
                             prev.status === 'complete' ? 'complete' : 
@@ -293,6 +324,15 @@ export function DataStreamHandler() {
               newContent.length < 450 &&
               !prev.isVisible;
             
+            logger.debug('[DataStreamHandler] Sheet delta processed', {
+              contentLength,
+              rowCount,
+              previousStatus: prev.status,
+              newStatus,
+              previousContentLength: prev.content.length,
+              contentPreview: newContent.substring(0, 100),
+            });
+            
             return {
               ...prev,
               content: newContent,
@@ -301,15 +341,28 @@ export function DataStreamHandler() {
               isVisible: shouldShow ? true : prev.isVisible,
             };
           });
-          // Don't log every sheet delta (too verbose)
           break;
 
         case "data-artifactClear":
-          // Reset artifact to initial state
-          setArtifact({
-            ...initialArtifactData,
+          // Reset artifact to initial state, but preserve documentId, title, and kind if they were already set
+          // This prevents clearing the ID that was just set by data-artifactId
+          setArtifact((prev) => {
+            logger.debug('[DataStreamHandler] Artifact clear requested', {
+              previousDocumentId: prev.documentId,
+              previousTitle: prev.title,
+              previousKind: prev.kind,
+              previousStatus: prev.status,
+            });
+            
+            // Preserve documentId, title, and kind if they were already set (not 'init')
+            // Only clear content and status
+            return {
+              ...initialArtifactData,
+              documentId: prev.documentId !== 'init' ? prev.documentId : initialArtifactData.documentId,
+              title: prev.title || initialArtifactData.title,
+              kind: prev.kind || initialArtifactData.kind,
+            };
           });
-          console.log('[DataStreamHandler] Artifact cleared');
           break;
 
         // FUTURE IMPLEMENTATION: Other artifact types
@@ -320,7 +373,10 @@ export function DataStreamHandler() {
         default:
           // Unknown data type - log for debugging
           // This helps identify if new types are added but not handled
-          console.warn('[DataStreamHandler] Unknown data type:', (delta as any).type, delta);
+          logger.warn('[DataStreamHandler] Unknown data type', { 
+            type: (delta as any).type, 
+            delta 
+          });
       }
     }
   }, [dataStream, setDataStream, addProduct, updateProducts, addProducts, updateCart, addCartItem, removeCartItem, setArtifact]);

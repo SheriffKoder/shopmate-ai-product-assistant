@@ -143,12 +143,17 @@ export function TextArtifactContent() {
     }
   }, [activeDocument?.id, activeDocument?.createdAt, artifact.status]); // Only sync when document ID or createdAt changes (version navigation)
 
-  // Sync local state with artifact state during streaming
+  // Sync local state with artifact state during streaming and when status changes to complete
+  // This ensures localContent stays in sync with artifact.content as it streams
   useEffect(() => {
-    if (artifact.status === 'streaming') {
-      setLocalContent(artifact.content);
-      if (artifact.title) {
-        setLocalTitle(artifact.title);
+    if (artifact.status === 'streaming' || artifact.status === 'complete') {
+      // During streaming or when just completed, sync with artifact state
+      // Only sync if user is not actively editing
+      if (!isUserEditingRef.current) {
+        setLocalContent(artifact.content);
+        if (artifact.title) {
+          setLocalTitle(artifact.title);
+        }
       }
     }
   }, [artifact.content, artifact.title, artifact.status]);
@@ -166,7 +171,7 @@ export function TextArtifactContent() {
           const titleToSave = latestTitleRef.current;
           const contentToSave = latestContentRef.current;
           
-          console.log('[Text Artifact] Saving with values:', {
+          logger.debug('[Text Artifact] Saving with values', {
             titleLength: titleToSave.length,
             contentLength: contentToSave.length,
             title: titleToSave,
@@ -201,7 +206,7 @@ export function TextArtifactContent() {
             justSavedRef.current = false;
           }, 2000); // Wait 2 seconds for new version to be available
         } catch (err) {
-          console.error('[Text Artifact] Error saving version:', err);
+          logger.error('[Text Artifact] Error saving version', err);
           justSavedRef.current = false; // Reset flag on error
           // Error is already handled by save hook
         }
@@ -242,6 +247,20 @@ export function TextArtifactContent() {
   const isStreaming = artifact.status === 'streaming';
   const isAtLatest = currentVersion === null || currentVersion === latestDocument;
   const canEdit = !isStreaming && documentId !== null && isAtLatest;
+
+  // DEBUG: Log status changes and content state
+  useEffect(() => {
+    logger.debug('[TextArtifactContent] Status/Content update', {
+      status: artifact.status,
+      isStreaming,
+      canEdit,
+      documentId,
+      contentLength: artifact.content.length,
+      localContentLength: localContent.length,
+      hasFetchedDocument: !!latestDocument,
+      fetchedDocumentLength: latestDocument?.content?.length || 0,
+    });
+  }, [artifact.status, artifact.content, localContent, isStreaming, canEdit, documentId, latestDocument]);
 
   // Track if we're in edit mode (not preview mode) to disable undo/redo
   const [isInEditMode, setIsInEditMode] = useState(false);
