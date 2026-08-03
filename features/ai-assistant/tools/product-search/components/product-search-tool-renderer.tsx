@@ -8,8 +8,8 @@
 
 'use client';
 
-import { Product } from '@/features/ai-assistant/types/product';
-import { CartAction, CartState } from '@/features/ai-assistant/types/cart';
+import { Product } from '@/features/shop/model/product';
+import { CartAction, CartState } from '@/features/shop/model/cart';
 import { MarkdownText } from '../../../components/ui/markdown-text';
 import { ProductCard } from './product-card';
 
@@ -78,4 +78,3 @@ export const ProductSearchToolRenderer = ({
     </div>
   );
 };
-

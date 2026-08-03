@@ -8,8 +8,8 @@
 
 import { z } from 'zod';
 import type { UIMessage } from 'ai';
-import type { Product } from '../types/product';
-import type { CartState } from '../types/cart';
+import type { Product } from '@/features/shop/model/product';
+import type { CartState } from '@/features/shop/model/cart';
 
 /**
  * Schema for Product (matches Product interface)
@@ -152,4 +152,3 @@ export function safeValidateRequest(body: unknown):
 // - Visibility type validation (when chat visibility is added)
 // - Rate limiting request validation (when rate limiting is added)
 // - Stream resumption request validation (when stream resumption is added)
-

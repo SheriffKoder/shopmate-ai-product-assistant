@@ -9,7 +9,7 @@
 'use client';
 
 import { Suspense, useMemo, useState } from 'react';
-import { ShopProvider } from '@/features/ai-assistant/providers/shop-context';
+import { ShopProvider } from '@/features/shop/providers/shop-context';
 import { FullscreenProvider } from '@/features/ai-assistant/providers/fullscreen-context';
 import { ChatWrapper } from '@/features/ai-assistant/chat-wrapper';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
@@ -81,4 +81,3 @@ export const LayoutWrapper = ({ children }: LayoutWrapperProps) => {
     </ShopProvider>
   );
 };
-

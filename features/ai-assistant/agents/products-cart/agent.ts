@@ -10,7 +10,7 @@ import { smoothStream, streamText, UIMessage, convertToModelMessages, type UIMes
 import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { getSystemPrompt, getProductCatalogContext } from '@/features/ai-assistant/config/system-prompt';
 import { createProductSearchTool, createCartInfoTool } from '@/features/ai-assistant/tools';
-import { CartState } from '../../types/cart';
+import { CartState } from '@/features/shop/model/cart';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -120,4 +120,3 @@ export async function processProductAssistantRequest(
     sendReasoning: true, // receive as parts on the frontend.
   });
 }
-

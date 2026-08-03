@@ -9,9 +9,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Product } from '@/features/ai-assistant/types/product';
+import { Product } from '@/features/shop/model/product';
 import { Star, Trash2 } from 'lucide-react';
-import { CartAction, CartState } from '@/features/ai-assistant/types/cart';
+import { CartAction, CartState } from '@/features/shop/model/cart';
 import Image from 'next/image';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 
@@ -142,4 +142,3 @@ export const ProductCard = ({ product, dispatchCartAction, cart }: ProductCardPr
     </div>
   );
 };
-

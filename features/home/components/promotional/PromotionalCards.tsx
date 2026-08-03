@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import { getPromotionalCardConfigs } from '@/features/home/config/promotional-cards';
 import { PromotionalCard } from './PromotionalCard';
 
@@ -39,4 +39,3 @@ export const PromotionalCards = ({ onProductClick }: PromotionalCardsProps) => {
     </div>
   );
 };
-

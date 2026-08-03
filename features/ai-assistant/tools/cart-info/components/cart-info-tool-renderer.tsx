@@ -8,7 +8,7 @@
 
 'use client';
 
-import { CartItem, CartAction, CartState } from '@/features/ai-assistant/types/cart';
+import { CartItem, CartAction, CartState } from '@/features/shop/model/cart';
 import { MarkdownText } from '../../../components/ui/markdown-text';
 import { CartItemCard } from './CartItemCard';
 import { Button } from '@/components/ui/button';
@@ -158,4 +158,3 @@ export const CartInfoToolRenderer = ({
     </div>
   );
 };
-

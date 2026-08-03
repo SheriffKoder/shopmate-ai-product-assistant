@@ -11,9 +11,9 @@
 
 'use client';
 
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
-import type { CartState } from '../types/cart';
-import type { Product } from '../types/product';
+import { useShop } from '@/features/shop/providers/shop-context';
+import type { CartState } from '@/features/shop/model/cart';
+import type { Product } from '@/features/shop/model/product';
 
 /**
  * Hook for managing cart state updates from streamed data
@@ -85,4 +85,3 @@ export function useCartStream() {
     removeCartItem,
   };
 }
-

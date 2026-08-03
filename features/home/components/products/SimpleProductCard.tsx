@@ -10,7 +10,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import type { Product } from '@/features/ai-assistant/types/product';
+import type { Product } from '@/features/shop/model/product';
 
 interface SimpleProductCardProps {
   product: Product;
@@ -96,4 +96,3 @@ export const SimpleProductCard = ({ product, onClick, onProductClick }: SimplePr
     </div>
   );
 };
-

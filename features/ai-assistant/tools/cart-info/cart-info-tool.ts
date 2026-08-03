@@ -13,7 +13,7 @@
 
 import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
-import { CartState, CartItem } from '../../types/cart';
+import { CartState, CartItem } from '@/features/shop/model/cart';
 import { searchInTarget, searchInProduct } from '../../utils/search-utils';
 import { analyzeItemsWithAI } from '../../utils/ai-search-agent';
 
@@ -168,5 +168,4 @@ export const createCartInfoTool = (
     };
   },
 });
-
 

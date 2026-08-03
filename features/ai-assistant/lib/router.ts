@@ -7,8 +7,8 @@
  */
 
 import type { UIMessage, UIMessageStreamWriter } from 'ai';
-import type { Product } from '../types/product';
-import type { CartState } from '../types/cart';
+import type { Product } from '@/features/shop/model/product';
+import type { CartState } from '@/features/shop/model/cart';
 import type { ShopMateUIDataTypes } from '../types/stream';
 import { logger } from './logger';
 import { createError } from './errors';
@@ -146,4 +146,3 @@ async function routeToProductAgent(
 // - Stream resumption routing (when stream resumption is added)
 // - Rate limiting checks (when rate limiting is added)
 // - Authentication checks (when authentication is added)
-

@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import Image from 'next/image';
 import {
   Carousel,
@@ -19,7 +19,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import type { Product } from '@/features/ai-assistant/types/product';
+import type { Product } from '@/features/shop/model/product';
 
 interface BannerSlideProps {
   product: Product;
@@ -132,4 +132,3 @@ export const BannerSlider = ({ onProductClick }: BannerSliderProps) => {
     </div>
   );
 };
-

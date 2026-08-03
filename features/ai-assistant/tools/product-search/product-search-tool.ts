@@ -13,7 +13,7 @@
 
 import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
-import { Product } from '../../types/product';
+import { Product } from '@/features/shop/model/product';
 import { analyzeItemsWithAI } from '../../utils/ai-search-agent';
 
 // Schema for product output (matches Product interface)
@@ -152,5 +152,4 @@ export const createProductSearchTool = (
     };
   },
 });
-
 

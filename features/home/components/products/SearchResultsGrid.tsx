@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { ProductCard } from './ProductCard';
-import type { Product } from '@/features/ai-assistant/types/product';
+import type { Product } from '@/features/shop/model/product';
 
 interface SearchResultsGridProps {
   products: Product[];
@@ -87,4 +87,3 @@ export const SearchResultsGrid = ({ products, searchQuery, isCategoryFilter = fa
     </div>
   );
 };
-

@@ -10,7 +10,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import type { Product } from '@/features/ai-assistant/types/product';
+import type { Product } from '@/features/shop/model/product';
 
 interface CategoryImageCardProps {
   category: string;
@@ -74,4 +74,3 @@ export const CategoryImageCard = ({ category, products }: CategoryImageCardProps
     </div>
   );
 };
-

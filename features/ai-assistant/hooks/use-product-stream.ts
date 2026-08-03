@@ -11,8 +11,8 @@
 
 'use client';
 
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
-import type { Product } from '../types/product';
+import { useShop } from '@/features/shop/providers/shop-context';
+import type { Product } from '@/features/shop/model/product';
 
 /**
  * Hook for managing product state updates from streamed data
@@ -68,4 +68,3 @@ export function useProductStream() {
     addProducts,
   };
 }
-

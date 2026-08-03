@@ -6,7 +6,7 @@
  * Why: Centralizes category logic for reusability
  */
 
-import type { Product } from '@/features/ai-assistant/types/product';
+import type { Product } from '@/features/shop/model/product';
 
 /**
  * Get the first product image URL for a given category
@@ -24,4 +24,3 @@ export function getFirstProductImageByCategory(
 
   return product?.image_url || null;
 }
-

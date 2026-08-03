@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import { CartItemCard } from '@/features/ai-assistant/tools/cart-info/components/CartItemCard';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
@@ -121,4 +121,3 @@ export function CartPageContent() {
     </div>
   );
 }
-

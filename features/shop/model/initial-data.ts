@@ -1,0 +1,230 @@
+/**
+ * Initial Data Configuration
+ * 
+ * Purpose: Provides initial product catalog data
+ * Used in: app/page.tsx
+ * Why: Centralizes initial data configuration for easier maintenance and testing
+ */
+
+import type { Product } from '@/features/shop/model/product';
+
+/**
+ * Get initial product catalog with sample electronic products
+ * @returns Array of initial Product objects
+ */
+export function getInitialProducts(): Product[] {
+  return [
+    {
+      id: 'samsung-galaxy-s24-ultra',
+      name: 'Samsung Galaxy S24 Ultra',
+      category: 'smartphone',
+      rating: 4.8,
+      shortDescription: 'Flagship smartphone with advanced AI features and stunning display',
+      description: 'The Samsung Galaxy S24 Ultra is a premium smartphone featuring a 6.8-inch Dynamic AMOLED 2X display, Snapdragon 8 Gen 3 processor, and advanced AI capabilities. With a 200MP camera system, S Pen support, and all-day battery life, it\'s designed for power users and creative professionals.',
+      price: 1199.99,
+      reviewsCount: 2847,
+      features: [
+        '6.8-inch Dynamic AMOLED 2X Display (120Hz)',
+        'Snapdragon 8 Gen 3 Processor',
+        '200MP Main Camera with 10x Optical Zoom',
+        'S Pen Included',
+        '12GB RAM / 256GB Storage',
+        '5000mAh Battery with Fast Charging',
+        '5G Connectivity',
+        'IP68 Water Resistance'
+      ],
+      image_url: '/images/products/samsung-galaxy-s24-ultra-removebg-preview.png',
+      image_url_variations: null,
+      featured: false,
+      keywords: ['samsung', 'galaxy', 's24', 'ultra', 'smartphone', 'phone', 'android', 's pen', 'flagship'],
+      colors: ['black', 'titanium', 'gray'],
+    },
+    {
+      id: 'iphone-15-pro-max',
+      name: 'iPhone 15 Pro Max',
+      category: 'smartphone',
+      rating: 4.7,
+      shortDescription: 'Apple\'s most advanced iPhone with titanium design and A17 Pro chip',
+      description: 'The iPhone 15 Pro Max features a premium titanium design, the powerful A17 Pro chip, and an advanced camera system. With ProRes video recording, Action Button, and USB-C connectivity, it delivers exceptional performance for professionals and enthusiasts.',
+      price: 1199.00,
+      reviewsCount: 3124,
+      features: [
+        '6.7-inch Super Retina XDR Display',
+        'A17 Pro Chip with 6-core GPU',
+        '48MP Main Camera with ProRAW',
+        '5x Optical Zoom Telephoto',
+        'Titanium Design',
+        'Action Button',
+        'USB-C Port',
+        'Up to 29 hours Video Playback'
+      ],
+      image_url: '/images/products/iphone-15-pro-max-removebg-preview.png',
+      image_url_variations: null,
+      featured: false,
+      keywords: ['iphone', '15', 'pro', 'max', 'apple', 'smartphone', 'phone', 'titanium', 'a17', 'ios'],
+      colors: ['natural titanium', 'blue titanium', 'white titanium', 'black titanium', 'red'],
+    },
+    {
+      id: 'macbook-pro-16-m3',
+      name: 'MacBook Pro 16" M3 Max',
+      category: 'laptop',
+      rating: 4.9,
+      shortDescription: 'Professional laptop with M3 Max chip for creators and developers',
+      description: 'The MacBook Pro 16-inch with M3 Max chip delivers exceptional performance for professional workflows. Featuring a stunning Liquid Retina XDR display, up to 128GB unified memory, and all-day battery life, it\'s the ultimate tool for video editing, software development, and creative work.',
+      price: 3999.00,
+      reviewsCount: 892,
+      features: [
+        '16.2-inch Liquid Retina XDR Display',
+        'M3 Max Chip (14-core CPU, 30-core GPU)',
+        'Up to 128GB Unified Memory',
+        'Up to 8TB SSD Storage',
+        '22-hour Battery Life',
+        '1080p FaceTime HD Camera',
+        'Six-speaker Sound System',
+        'MagSafe 3 Charging'
+      ],
+      image_url: '/images/products/macbook-pro-16-m3-removebg-preview.png',
+      image_url_variations: [
+        '/images/products/macbook-pro-16-m3-1.jpg',
+        '/images/products/macbook-pro-16-m3-2.jpg',
+        '/images/products/macbook-pro-16-m3-3.jpg',
+      ],
+      featured: true,
+      keywords: ['macbook', 'pro', 'm3', 'max', 'laptop', 'mac', 'apple', 'computer', 'notebook', 'creative'],
+      colors: ['space gray', 'silver'],
+    },
+    {
+      id: 'dell-xps-15-9530',
+      name: 'Dell XPS 15 9530',
+      category: 'laptop',
+      rating: 4.6,
+      shortDescription: 'Premium Windows laptop with OLED display and powerful performance',
+      description: 'The Dell XPS 15 combines stunning design with powerful performance. Featuring an optional 3.5K OLED touch display, Intel Core i9 processor, and NVIDIA RTX graphics, it\'s perfect for content creation, gaming, and productivity.',
+      price: 2299.99,
+      reviewsCount: 1456,
+      features: [
+        '15.6-inch 3.5K OLED Touch Display',
+        'Intel Core i9-13900H Processor',
+        'NVIDIA RTX 4070 Graphics',
+        '32GB DDR5 RAM',
+        '1TB PCIe NVMe SSD',
+        '87Whr Battery',
+        'Thunderbolt 4 Ports',
+        'Aluminum and Carbon Fiber Design'
+      ],
+      image_url: '/images/products/dell-xps-15-9530-removebg-preview.png',
+      image_url_variations: [
+        '/images/products/dell-xps-15-9530-1.webp',
+        '/images/products/dell-xps-15-9530-2.jpg',
+        '/images/products/dell-xps-15-9530-3.jpg',
+      ],
+      featured: true,
+      keywords: ['dell', 'xps', 'laptop', 'windows', 'oled', 'gaming', 'computer', 'notebook', 'rtx'],
+      colors: ['platinum silver', 'graphite'],
+    },
+    {
+      id: 'ipad-pro-12.9-m2',
+      name: 'iPad Pro 12.9" M2',
+      category: 'tablet',
+      rating: 4.8,
+      shortDescription: 'Powerful tablet with M2 chip and Liquid Retina XDR display',
+      description: 'The iPad Pro 12.9-inch with M2 chip redefines what a tablet can do. With a stunning Liquid Retina XDR display, Apple Pencil support, and desktop-class performance, it\'s perfect for artists, designers, and professionals on the go.',
+      price: 1099.00,
+      reviewsCount: 2134,
+      features: [
+        '12.9-inch Liquid Retina XDR Display',
+        'M2 Chip with 8-core CPU',
+        'Apple Pencil (2nd gen) Compatible',
+        'Magic Keyboard Compatible',
+        '12MP Wide + 10MP Ultra Wide Cameras',
+        'Face ID',
+        'Up to 2TB Storage',
+        'Thunderbolt / USB 4 Port'
+      ],
+      image_url: '/images/products/ipad-pro-12.9-m2-removebg-preview.png',
+      image_url_variations: [
+        '/images/products/ipad-pro-12.9-m2-1.jpg',
+        '/images/products/ipad-pro-12.9-m2-2.jpg',
+        '/images/products/ipad-pro-12.9-m2-3.jpg',
+      ],
+      featured: true,
+      keywords: ['ipad', 'pro', 'm2', 'tablet', 'apple', 'pencil', 'creative', 'art', 'design'],
+      colors: ['space gray', 'silver'],
+    },
+    {
+      id: 'apple-watch-ultra-2',
+      name: 'Apple Watch Ultra 2',
+      category: 'smartwatch',
+      rating: 4.7,
+      shortDescription: 'Rugged smartwatch built for adventure and extreme sports',
+      description: 'The Apple Watch Ultra 2 is the most capable Apple Watch ever. With a titanium case, Action Button, dual-frequency GPS, and up to 36 hours of battery life, it\'s designed for athletes, adventurers, and outdoor enthusiasts.',
+      price: 799.00,
+      reviewsCount: 1876,
+      features: [
+        '49mm Titanium Case',
+        'Always-On Retina Display',
+        'Action Button',
+        'Dual-Frequency GPS',
+        '100m Water Resistance',
+        'Up to 36 Hours Battery Life',
+        'Advanced Health Sensors',
+        'Emergency SOS via Satellite'
+      ],
+      image_url: '/images/products/apple-watch-ultra-2-removebg-preview.png',
+      image_url_variations: null,
+      featured: false,
+      keywords: ['apple', 'watch', 'ultra', 'smartwatch', 'watch', 'fitness', 'health', 'gps', 'adventure'],
+      colors: ['titanium'],
+    },
+    {
+      id: 'sony-wh-1000xm5',
+      name: 'Sony WH-1000XM5',
+      category: 'headphones',
+      rating: 4.8,
+      shortDescription: 'Premium noise-canceling headphones with exceptional sound quality',
+      description: 'The Sony WH-1000XM5 headphones deliver industry-leading noise cancellation and exceptional sound quality. With 30-hour battery life, quick charge, and comfortable design, they\'re perfect for travel, work, and music lovers.',
+      price: 399.99,
+      reviewsCount: 3421,
+      features: [
+        'Industry-Leading Noise Cancellation',
+        '30mm Driver Units',
+        '30-Hour Battery Life',
+        '3-Minute Quick Charge (3 hours playback)',
+        'Touch Sensor Controls',
+        'Speak-to-Chat Technology',
+        'LDAC Support',
+        'Comfortable Over-Ear Design'
+      ],
+      image_url: '/images/products/sony-wh-1000xm5-removebg-preview.png',
+      image_url_variations: null,
+      featured: false,
+      keywords: ['sony', 'wh-1000xm5', 'headphones', 'noise canceling', 'wireless', 'audio', 'music', 'travel'],
+      colors: ['black', 'silver'],
+    },
+    {
+      id: 'airpods-pro-2',
+      name: 'AirPods Pro (2nd Generation)',
+      category: 'headphones',
+      rating: 4.6,
+      shortDescription: 'Premium wireless earbuds with active noise cancellation',
+      description: 'The AirPods Pro (2nd generation) feature advanced Active Noise Cancellation, personalized Spatial Audio, and up to 6 hours of listening time. With a new H2 chip and improved sound quality, they deliver an immersive audio experience.',
+      price: 249.00,
+      reviewsCount: 4523,
+      features: [
+        'Active Noise Cancellation',
+        'Adaptive Transparency Mode',
+        'Personalized Spatial Audio',
+        'H2 Chip',
+        'Up to 6 Hours Listening Time',
+        'MagSafe Charging Case',
+        'Sweat and Water Resistant',
+        'Touch Controls'
+      ],
+      image_url: '/images/products/airpods-pro-2-removebg-preview.png',
+      image_url_variations: null,
+      featured: false,
+      keywords: ['airpods', 'pro', 'apple', 'earbuds', 'headphones', 'wireless', 'noise cancellation', 'spatial audio'],
+      colors: ['white'],
+    },
+  ];
+}

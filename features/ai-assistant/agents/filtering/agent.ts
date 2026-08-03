@@ -12,7 +12,7 @@ import { smoothStream } from 'ai';
 import { getFilteringPrompt } from './prompt';
 import { getProductCatalogContext, getCartContext } from '@/features/ai-assistant/config/system-prompt';
 import { createProductSearchTool, createCartInfoTool } from '@/features/ai-assistant/tools';
-import { CartState } from '@/features/ai-assistant/types/cart';
+import { CartState } from '@/features/shop/model/cart';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -118,4 +118,3 @@ export async function processFilteringRequest(
     sendReasoning: true, // receive as parts on the frontend.
   });
 }
-

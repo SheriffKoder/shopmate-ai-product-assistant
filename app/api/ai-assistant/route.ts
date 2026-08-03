@@ -8,8 +8,8 @@
 
 import type { UIMessage } from 'ai';
 import { createUIMessageStream, JsonToSseTransformStream } from 'ai';
-import type { Product } from '@/features/ai-assistant/types/product';
-import type { CartState } from '@/features/ai-assistant/types/cart';
+import type { Product } from '@/features/shop/model/product';
+import type { CartState } from '@/features/shop/model/cart';
 import { maxDuration } from '@/features/ai-assistant/agents/products-cart/agent';
 import { classifyQuery } from '@/features/ai-assistant/agents';
 import { validateRequest } from '@/features/ai-assistant/lib/schemas';

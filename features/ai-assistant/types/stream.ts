@@ -11,8 +11,8 @@
  * - Enables real-time product cards, cart updates, and progress indicators
  */
 
-import type { Product } from './product';
-import type { CartState } from './cart';
+import type { Product } from '@/features/shop/model/product';
+import type { CartState } from '@/features/shop/model/cart';
 
 /**
  * ShopMate-specific custom UI data types
@@ -142,4 +142,3 @@ export type ShopMateUIDataTypes = {
   // Note: Future artifact types (not yet implemented):
   // codeDelta: string;            // Code content chunks
 };
-

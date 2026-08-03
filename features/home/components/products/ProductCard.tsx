@@ -11,7 +11,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import type { Product } from '@/features/ai-assistant/types/product';
+import type { Product } from '@/features/shop/model/product';
 
 interface ProductCardProps {
   product: Product;
@@ -130,4 +130,3 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
     </div>
   );
 };
-

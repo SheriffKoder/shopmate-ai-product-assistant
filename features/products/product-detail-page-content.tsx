@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import { ProductDetailPage } from '@/features/products/components/ProductDetailPage';
 import { useRouter } from 'next/navigation';
 
@@ -62,4 +62,3 @@ export function ProductDetailPageContent({ productId }: ProductDetailPageContent
     />
   );
 }
-

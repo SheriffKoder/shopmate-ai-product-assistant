@@ -12,7 +12,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Package, Plus, Minus, Trash2 } from 'lucide-react';
-import { CartAction } from '@/features/ai-assistant/types/cart';
+import { CartAction } from '@/features/shop/model/cart';
 
 interface CartItemCardProps {
   id: string;
@@ -137,4 +137,3 @@ export const CartItemCard = ({
     </div>
   );
 };
-

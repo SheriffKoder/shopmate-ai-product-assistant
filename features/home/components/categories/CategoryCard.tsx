@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import { getFirstProductImageByCategory } from '@/features/home/utils/category-utils';
 import Image from 'next/image';
 
@@ -58,4 +58,3 @@ export const CategoryCard = ({ category, onClick, isSelected = false, isLast = f
     </div>
   );
 };
-

@@ -12,7 +12,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { PromotionalCardConfig } from '@/features/home/config/promotional-cards';
-import type { Product } from '@/features/ai-assistant/types/product';
+import type { Product } from '@/features/shop/model/product';
 
 interface PromotionalCardProps {
   config: PromotionalCardConfig;
@@ -89,4 +89,3 @@ export const PromotionalCard = ({ config, product, onButtonClick }: PromotionalC
     </div>
   );
 };
-

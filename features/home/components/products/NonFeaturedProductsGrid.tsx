@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import { SimpleProductCard } from './SimpleProductCard';
 
 interface NonFeaturedProductsGridProps {
@@ -43,4 +43,3 @@ export const NonFeaturedProductsGrid = ({ onProductClick }: NonFeaturedProductsG
     </div>
   );
 };
-

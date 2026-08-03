@@ -10,8 +10,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { storage, STORAGE_KEYS, initStorage } from '@/lib/storage/session-storage';
-import { getInitialProducts } from '@/features/ai-assistant/config/initial-data';
-import type { Product } from '@/features/ai-assistant/types/product';
+import { getInitialProducts } from '@/features/shop/model/initial-data';
+import type { Product } from '@/features/shop/model/product';
 
 /**
  * GET /api/products
@@ -113,4 +113,3 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
-

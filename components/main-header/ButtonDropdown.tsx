@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LucideIcon } from 'lucide-react'
-import { CartAction } from '@/features/ai-assistant/types/cart'
+import { CartAction } from '@/features/shop/model/cart'
 import { CartItemCard } from '../../features/ai-assistant/tools/cart-info/components/CartItemCard'
 import { Button } from '@/components/ui/button'
 import { HeaderIconButton } from './HeaderIconButton'
@@ -141,4 +141,3 @@ const ButtonDropdown = ({ icon: Icon, items, badgeCount, className = "", headerT
 };
 
 export default ButtonDropdown;
-

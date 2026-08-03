@@ -1,29 +1,11 @@
 /**
- * Cart Type Definitions
- * 
- * Purpose: Defines the structure for shopping cart
- * Used in: Cart state management, product cards
- * Why: Centralizes cart data structure
+ * Cart Type Compatibility Export
+ *
+ * Purpose: Temporarily keeps old assistant imports working after cart types moved to the ShopMate domain.
+ * Used in: Files not yet migrated during the assistant refactor.
+ * Used for: Migration compatibility only.
+ *
+ * Cleanup: Remove in migration phase 08 after all imports use `features/shop/model/cart`.
  */
 
-import { Product } from './product';
-
-export interface CartItem {
-  productId: string;
-  product: Product;
-  quantity: number;
-}
-
-export interface CartState {
-  items: CartItem[];
-  totalItems: number;
-  totalPrice: number;
-}
-
-export type CartAction =
-  | { type: 'ADD_TO_CART'; payload: Product }
-  | { type: 'REMOVE_FROM_CART'; payload: string } // productId
-  | { type: 'INCREASE_QUANTITY'; payload: string } // productId
-  | { type: 'DECREASE_QUANTITY'; payload: string } // productId
-  | { type: 'SET_CART'; payload: CartState }; // Full cart state (for stream updates)
-
+export type { CartAction, CartItem, CartState } from '@/features/shop/model/cart';

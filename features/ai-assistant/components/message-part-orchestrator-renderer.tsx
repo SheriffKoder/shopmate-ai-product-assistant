@@ -15,7 +15,7 @@ import { CartInfoToolRenderer } from '../tools/cart-info/components/cart-info-to
 import { DefaultToolRenderer } from '../tools/default-tool-renderer';
 import { MarkdownText } from './ui/markdown-text';
 import { DiscussionCard } from './ui/discussion-card';
-import { CartState, CartAction } from '@/features/ai-assistant/types/cart';
+import { CartState, CartAction } from '@/features/shop/model/cart';
 import { DocumentPreview } from '@/features/ai-assistant/artifacts/components';
 
 interface MessagePartRendererProps {
@@ -182,4 +182,3 @@ export const MessagePartRenderer = ({
   console.warn('Unknown message part type:', part.type, part);
   return null;
 };
-

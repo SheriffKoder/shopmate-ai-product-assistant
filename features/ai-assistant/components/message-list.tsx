@@ -17,7 +17,7 @@ import {
 import { CopyIcon, RefreshCcwIcon } from 'lucide-react';
 import { ItemTypeCard } from './ui/item-type-card';
 import { MessagePartRenderer } from './message-part-orchestrator-renderer';
-import { CartState, CartAction } from '@/features/ai-assistant/types/cart';
+import { CartState, CartAction } from '@/features/shop/model/cart';
 
 interface MessageListProps {
   messages: any[];
@@ -154,4 +154,3 @@ export const MessageList = ({
     </>
   );
 };
-

@@ -13,7 +13,7 @@ import { useChatMessages } from './history-sidebar/hooks/use-chat-messages';
 import { EmptyState } from './components/ui/empty-state';
 import { MessageList } from './components/message-list';
 import { PromptInput } from './components/prompt-input';
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import { useToast } from '@/features/toast-success/use-toast';
 import { getErrorConfig, getErrorLogMessage } from '@/features/toast-success/error-config';
 import { useDataStream } from './data-stream/data-stream-provider';
@@ -145,8 +145,10 @@ const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContai
     clickedSuggestionCard,
   } = useChatSubmission({
     sendMessage,
-    products: products,
-    cart: cart,
+    buildRequestBody: () => ({
+      products,
+      cart,
+    }),
   });
 
   return (
@@ -221,4 +223,3 @@ const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContai
 };
 
 export default ChatContainer;
-

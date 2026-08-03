@@ -12,7 +12,7 @@ import { smoothStream } from 'ai';
 import { getRecommendationPrompt } from './prompt';
 import { getProductCatalogContext, getCartContext } from '@/features/ai-assistant/config/system-prompt';
 import { createProductSearchTool } from '@/features/ai-assistant/tools';
-import { CartState } from '@/features/ai-assistant/types/cart';
+import { CartState } from '@/features/shop/model/cart';
 import { createDocumentTool } from '@/features/ai-assistant/artifacts/text/tool/create-document-tool';
 import { createTextDocument } from '@/features/ai-assistant/artifacts/text/tool/server';
 import { createSheetDocument } from '@/features/ai-assistant/artifacts/sheet/server';
@@ -209,4 +209,3 @@ export async function processRecommendationRequest(
     sendReasoning: true, // receive as parts on the frontend.
   });
 }
-

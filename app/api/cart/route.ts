@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { storage, STORAGE_KEYS, initStorage } from '@/lib/storage/session-storage';
-import type { CartState } from '@/features/ai-assistant/types/cart';
+import type { CartState } from '@/features/shop/model/cart';
 
 /**
  * Initial empty cart state
@@ -136,4 +136,3 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-

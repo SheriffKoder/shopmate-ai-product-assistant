@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
+import { useShop } from '@/features/shop/providers/shop-context';
 import { searchInProduct } from '@/features/ai-assistant/utils/search-utils';
 import { ProductCard } from '@/features/home/components/products/ProductCard';
 
@@ -89,4 +89,3 @@ export const ProductsGrid = ({ category, searchQuery }: ProductsGridProps) => {
     </div>
   );
 };
-
