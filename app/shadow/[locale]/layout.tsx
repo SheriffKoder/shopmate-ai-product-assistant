@@ -10,6 +10,8 @@ import type { ReactNode } from 'react';
 
 import { getShadowLocaleDirection } from '@/shadow/shared/i18n/config';
 import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
+import { getShadowDictionary } from '@/shadow/shared/i18n/lib/get-dictionary';
+import { ShadowHeader } from '@/shadow/widgets/shadow-header/ui/shadow-header';
 
 type ShadowLocaleLayoutProps = {
   children: ReactNode;
@@ -29,9 +31,11 @@ export default async function ShadowLocaleLayout(props: ShadowLocaleLayoutProps)
   const { locale: rawLocale } = await params;
   const locale = assertShadowLocale(rawLocale);
   const direction = getShadowLocaleDirection(locale);
+  const dictionary = getShadowDictionary(locale);
 
   return (
     <section lang={locale} dir={direction} className="min-h-screen bg-background text-foreground">
+      <ShadowHeader locale={locale} dictionary={dictionary} />
       {children}
     </section>
   );
