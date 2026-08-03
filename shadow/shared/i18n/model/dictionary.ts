@@ -41,12 +41,8 @@ export type ShadowDictionary = {
     emptyState: string;
   };
   products: ShadowPageDictionary & {
-    allCategories: string;
-    categoryFilterLabel: string;
+    categoryNavLabel: string;
     emptyState: string;
-    filteredByCategory: string;
-    filteredByCategoryAndSearch: string;
-    filteredBySearch: string;
     gridTitle: string;
     resultCount: string;
   };

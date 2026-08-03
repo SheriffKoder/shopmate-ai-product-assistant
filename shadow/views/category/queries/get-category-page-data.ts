@@ -3,7 +3,7 @@
  *
  * Purpose: Loads data for one server-first category page.
  * Used in: shadow/views/category/index.tsx
- * Used for: Keeps category lookup and product filtering outside the route file.
+ * Used for: Keeps category lookup and category product selection outside the route file.
  */
 
 import 'server-only';

@@ -14,7 +14,6 @@ type ShadowProductsPageProps = {
   params: Promise<{
     locale: string;
   }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export const revalidate = SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS;
@@ -27,8 +26,7 @@ export const revalidate = SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS;
  */
 export default async function ShadowProductsPage(props: ShadowProductsPageProps) {
   const { locale: rawLocale } = await props.params;
-  const searchParams = await props.searchParams;
   const locale = assertShadowLocale(rawLocale);
 
-  return <ShadowProductsView locale={locale} searchParams={searchParams} />;
+  return <ShadowProductsView locale={locale} />;
 }
