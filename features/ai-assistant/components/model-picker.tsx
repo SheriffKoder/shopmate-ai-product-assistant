@@ -11,7 +11,7 @@
  *
  * Steps:
  * 1. Render nothing when only one model is configured.
- * 2. Display allowed model options in a Radix select.
+ * 2. Display allowed model options in a visible Radix select.
  * 3. Notify the parent hook when the user picks a model.
  */
 
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Bot } from 'lucide-react';
 import type { AssistantModelOption } from '../model/assistant-model-config';
 
 interface ModelPickerProps {
@@ -56,11 +57,12 @@ export function ModelPicker({
       <SelectTrigger
         aria-label="Assistant model"
         size="sm"
-        className="h-8 max-w-[9.5rem] border-transparent bg-muted/60 px-2 text-xs text-muted-foreground shadow-none hover:bg-muted focus-visible:ring-2"
+        className="h-9 min-w-[8.75rem] max-w-[10.5rem] shrink-0 border-[#d0d0d0] bg-white px-2 text-xs font-medium text-black shadow-sm hover:bg-[#f7f7f7] focus-visible:ring-2"
       >
+        <Bot className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
         <SelectValue placeholder="Model" />
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent align="end" className="z-[200] bg-white text-black">
         {modelOptions.map((modelOption) => (
           <SelectItem key={modelOption.id} value={modelOption.id}>
             {modelOption.label}

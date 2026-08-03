@@ -21,8 +21,8 @@
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 import type { CartAction, CartState } from '@/features/shop/model/cart';
 import type { CartMutationController } from '@/features/shop-assistant/model/cart-source';
-import { CartInfoToolRenderer } from './cart-info-tool-renderer';
-import { ProductSearchToolRenderer } from './product-search-tool-renderer';
+import { CartInfoToolRenderer } from '../tools/cart-info/cart-info-tool-renderer';
+import { ProductSearchToolRenderer } from '../tools/product-search/product-search-tool-renderer';
 
 export interface ShopAssistantToolRendererContext {
   /** Current cart state used by product and cart renderers. */
