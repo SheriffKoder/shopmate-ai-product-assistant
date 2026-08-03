@@ -21,6 +21,7 @@ import type { DataUIPart } from 'ai';
 import type { ShopMateUIDataTypes } from './types/stream';
 import { ArtifactPanel } from './artifacts/components/artifact-panel';
 import { useUpdateChatIdInUrl } from './history-sidebar/utils/chat-navigation';
+import { shopAssistantToolRenderers } from '@/features/shop-assistant/ui/tool-renderer-registry';
 
 interface ChatContainerProps {
   chatId: string; // Combined chatId (URL or fallback)
@@ -134,6 +135,16 @@ const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContai
   // Loading: No messages BUT chatId exists in URL (loading existing chat)
   const shouldShowEmptyState = messages.length === 0 && !urlChatId;
   const shouldShowLoading = messages.length === 0 && urlChatId && isLoadingMessages;
+
+  //////////////////////////////////
+  // ShopMate Tool Renderer Context: Adapter-owned context for product/cart tool UI
+  // Why: Keeps reusable message rendering generic while preserving cart interactions
+  //////////////////////////////////
+  const toolRendererContext = {
+    cart,
+    dispatchCartAction,
+  };
+
   //////////////////////////////////
   // Chat Submission Hook: Handles input state and message submission
   //////////////////////////////////
@@ -182,8 +193,8 @@ const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContai
                 sendMessage={sendMessage}
                 regenerate={regenerate}
                 status={status}
-                cart={cart}
-                dispatchCartAction={dispatchCartAction}
+                toolRenderers={shopAssistantToolRenderers}
+                toolRendererContext={toolRendererContext}
               />
             )}
 

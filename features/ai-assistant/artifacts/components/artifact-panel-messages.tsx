@@ -11,6 +11,7 @@
 import { useRef } from 'react';
 import { MessageList } from '@/features/ai-assistant/components/message-list';
 import { PromptInput } from '@/features/ai-assistant/components/prompt-input';
+import { shopAssistantToolRenderers } from '@/features/shop-assistant/ui/tool-renderer-registry';
 
 interface ArtifactMessagesProps {
   chatId: string;
@@ -41,6 +42,10 @@ export function ArtifactMessages({
   dispatchCartAction,
 }: ArtifactMessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const toolRendererContext = {
+    cart,
+    dispatchCartAction,
+  };
 
   return (
     <div
@@ -55,8 +60,8 @@ export function ArtifactMessages({
           sendMessage={sendMessage}
           regenerate={regenerate}
           status={status}
-          cart={cart}
-          dispatchCartAction={dispatchCartAction}
+          toolRenderers={shopAssistantToolRenderers}
+          toolRendererContext={toolRendererContext}
         />
       </div>
 
@@ -85,4 +90,3 @@ export function ArtifactMessages({
     </div>
   );
 }
-

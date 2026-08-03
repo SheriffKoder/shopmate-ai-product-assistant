@@ -10,8 +10,8 @@ import { streamText, UIMessage, convertToModelMessages, type UIMessageStreamWrit
 import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { smoothStream } from 'ai';
 import { getRecommendationPrompt } from './prompt';
-import { getProductCatalogContext, getCartContext } from '@/features/ai-assistant/config/system-prompt';
-import { createProductSearchTool } from '@/features/ai-assistant/tools';
+import { getProductCatalogContext, getCartContext } from '@/features/shop-assistant/server/system-prompt';
+import { createProductSearchTool } from '@/features/shop-assistant/tools';
 import { CartState } from '@/features/shop/model/cart';
 import { createDocumentTool } from '@/features/ai-assistant/artifacts/text/tool/create-document-tool';
 import { createTextDocument } from '@/features/ai-assistant/artifacts/text/tool/server';

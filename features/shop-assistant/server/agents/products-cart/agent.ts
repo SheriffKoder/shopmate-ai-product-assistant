@@ -1,63 +1,60 @@
 /**
- * Filtering Agent
+ * AI Assistant Agent
  * 
- * Purpose: Handles filtering queries (price, budget, features, availability, brands)
+ * Purpose: Handles AI assistant logic for electronic products promotion and Q&A
  * Used in: app/api/ai-assistant/route.ts
- * Why: Separates filtering logic from general product queries
+ * Why: Separates business logic from API route handling
  */
 
-import { streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
+import { smoothStream, streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
 import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
-import { smoothStream } from 'ai';
-import { getFilteringPrompt } from './prompt';
-import { getProductCatalogContext, getCartContext } from '@/features/ai-assistant/config/system-prompt';
-import { createProductSearchTool, createCartInfoTool } from '@/features/ai-assistant/tools';
+import { getSystemPrompt, getProductCatalogContext } from '@/features/shop-assistant/server/system-prompt';
+import { createProductSearchTool, createCartInfoTool } from '@/features/shop-assistant/tools';
 import { CartState } from '@/features/shop/model/cart';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-interface FilteringRequest {
+interface AgentRequest {
   messages: UIMessage[];
-  products?: any[];
-  cart?: any;
+  products?: any[]; // Array of Product objects
+  cart?: CartState; // Cart state
 }
 
 /**
- * Process filtering request
- * @param request - Request containing messages, products, and cart
+ * Process AI assistant request for product promotion and Q&A
+ * @param request - Request containing messages and product catalog
  * @param dataStream - Optional data stream writer for custom UI data types
- * @returns Streaming response with filtering output
+ * @returns Streaming response with AI assistant output
  */
-export async function processFilteringRequest(
-  request: FilteringRequest,
+export async function processProductAssistantRequest(
+  request: AgentRequest,
   dataStream?: UIMessageStreamWriter<any>
 ) {
-  const { messages, products = [], cart } = request;
+  const {
+    messages,
+    products = [],
+    cart,
+  } = request;
 
   // Get system prompt
-  const systemPrompt = getFilteringPrompt();
+  const systemPrompt = getSystemPrompt();
 
   // Get product catalog context
   const productCatalogContext = getProductCatalogContext(products);
-  
-  // Get cart context
-  const cartContext = getCartContext(cart);
 
-  // Add product catalog and cart data to the last user message by modifying the text content
+  // Add product catalog data to the last user message by modifying the text content
   const messagesWithProductData = messages.map((msg, index) => {
     if (index === messages.length - 1 && msg.role === 'user') {
-      // Add product catalog and cart context to the last user message
+      // Add product catalog context to the last user message
       const textParts = msg.parts?.filter(p => p.type === 'text') || [];
       const existingText = textParts.map(p => (p as any).text).join('');
-      // Combine contexts
-      const combinedContext = [productCatalogContext, cartContext].filter(Boolean).join('\n\n');
-      // Update the last text part with context data appended
+      // Update the last text part with product catalog data appended
       const updatedParts = msg.parts?.map((part, partIndex) => {
         if (part.type === 'text' && partIndex === textParts.length - 1) {
           return {
             ...part,
-            text: (part as any).text + '\n\n' + combinedContext,
+            text: (part as any).text + '\n\n' + productCatalogContext,
           };
         }
         return part;
@@ -69,6 +66,9 @@ export async function processFilteringRequest(
     }
     return msg;
   });
+
+  console.log('messagesWithProductData', messagesWithProductData);
+  console.log(messagesWithProductData);
 
   // Stream Text with AI model
   const result = streamText({
@@ -95,23 +95,25 @@ export async function processFilteringRequest(
       chunking: "word", // RegExp | "word" | "line" | ChunkDetector | undefined
     }),
 
-    // Tools - use productSearch to display products when found
-    // Pass dataStream to enable streaming custom data types
+    // Tools - Pass dataStream to enable streaming custom data types
     tools: {
       productSearch: createProductSearchTool(products, dataStream),
       ...(cart && { cartInfo: createCartInfoTool(cart, dataStream) }),
     },
+    // stopWhen: stepCountIs(20), // not do more than 20 tool calls to avoid infinite loops
   });
 
   //////////////////////////////////
   // Consume and Merge Stream: Process the stream and merge with dataStream
   // Why: Ensures the stream is processed and can be merged with custom data types
+  // How: consumeStream() processes the stream, then we return the UI message stream
   //////////////////////////////////
   result.consumeStream();
 
   //////////////////////////////////
   // Return Stream: Return UI message stream instead of Response
   // Why: Allows merging with dataStream in the API route
+  // How: toUIMessageStream() returns a stream that can be merged
   //////////////////////////////////
   return result.toUIMessageStream({
     sendSources: true, // receive as parts on the frontend.

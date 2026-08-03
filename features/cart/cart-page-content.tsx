@@ -9,7 +9,7 @@
 'use client';
 
 import { useShop } from '@/features/shop/providers/shop-context';
-import { CartItemCard } from '@/features/ai-assistant/tools/cart-info/components/CartItemCard';
+import { CartItemCard } from '@/features/shop-assistant/ui/cart-item-card';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';

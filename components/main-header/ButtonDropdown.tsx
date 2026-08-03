@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LucideIcon } from 'lucide-react'
 import { CartAction } from '@/features/shop/model/cart'
-import { CartItemCard } from '../../features/ai-assistant/tools/cart-info/components/CartItemCard'
+import { CartItemCard } from '../../features/shop-assistant/ui/cart-item-card'
 import { Button } from '@/components/ui/button'
 import { HeaderIconButton } from './HeaderIconButton'
 

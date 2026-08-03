@@ -3,7 +3,7 @@
  * 
  * Purpose: Renders the list of messages in the conversation
  * Used in: chat-container.tsx
- * Why: Separates message list rendering from main component
+ * Why: Separates message list rendering from main component and forwards adapter tool rendering.
  */
 
 'use client';
@@ -17,7 +17,7 @@ import {
 import { CopyIcon, RefreshCcwIcon } from 'lucide-react';
 import { ItemTypeCard } from './ui/item-type-card';
 import { MessagePartRenderer } from './message-part-orchestrator-renderer';
-import { CartState, CartAction } from '@/features/shop/model/cart';
+import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
 
 interface MessageListProps {
   messages: any[];
@@ -25,8 +25,8 @@ interface MessageListProps {
   sendMessage: (message: { text: string }, options?: { body: any }) => void;
   regenerate?: (options?: { messageId?: string }) => void;
   status?: 'idle' | 'streaming' | 'submitted' | 'error' | 'ready';
-  cart?: CartState;
-  dispatchCartAction?: (action: CartAction) => void;
+  toolRenderers?: AssistantToolRendererRegistry;
+  toolRendererContext?: unknown;
 }
 
 export const MessageList = ({
@@ -35,8 +35,8 @@ export const MessageList = ({
   sendMessage,
   regenerate,
   status,
-  cart,
-  dispatchCartAction,
+  toolRenderers,
+  toolRendererContext,
 }: MessageListProps) => {
   return (
     <>
@@ -100,8 +100,8 @@ export const MessageList = ({
                     status={status}
                     isLastPart={i === message.parts.length - 1}
                     isLastMessage={message.id === messages.at(-1)?.id}
-                    cart={cart}
-                    dispatchCartAction={dispatchCartAction}
+                    toolRenderers={toolRenderers}
+                    toolRendererContext={toolRendererContext}
                   />
                 );
               }
@@ -117,8 +117,8 @@ export const MessageList = ({
                   status={status}
                   isLastPart={i === message.parts.length - 1}
                   isLastMessage={message.id === messages.at(-1)?.id}
-                  cart={cart}
-                  dispatchCartAction={dispatchCartAction}
+                  toolRenderers={toolRenderers}
+                  toolRendererContext={toolRendererContext}
                 />
               );
             })}

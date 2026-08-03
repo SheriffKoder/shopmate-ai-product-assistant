@@ -43,7 +43,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 ## API Routes
 
-- `app/api/ai-assistant/route.ts`: thin Next.js adapter for the assistant server handler and default runtime.
+- `app/api/ai-assistant/route.ts`: thin Next.js adapter for the assistant server handler and injected ShopMate runtime.
 - `app/api/products/route.ts`: product data endpoint used by SWR hooks and shop state.
 - `app/api/cart/route.ts`: cart data/mutation endpoint used by SWR hooks and shop state.
 - `app/api/history/route.ts`: paginated chat history for the AI sidebar.
@@ -57,24 +57,27 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/products/`: products page and product detail page content, product grid/detail UI, and navigation helpers.
 - `features/cart/`: dedicated cart page content.
 - `features/checkout/`: checkout page content.
-- `features/ai-assistant/`: chat container/wrapper, prompt input, message rendering, data streaming, tool rendering, agents, artifacts, history sidebar, assistant providers/hooks/types, and assistant utilities. Product/cart ownership is being migrated out for assistant reusability.
+- `features/ai-assistant/`: reusable chat container/wrapper, prompt input, message rendering, data streaming, generic tool-renderer registration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Product/cart ownership is being migrated out for assistant reusability.
+- `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart tool factories, product/cart tool renderers, renderer registry, and adapter search helpers.
 - `features/shop/`: ShopMate product/cart model types, mock initial catalog data, shop provider, and product/cart state hooks used by the storefront and assistant integration.
 - `features/ai-filter/`: reusable natural-language URL filter assistant. Host pages pass catalog/config; the package handles prompt building, response sanitization, and URL patch application.
 - `features/toast-success/`: global toast primitives, hook, container, and error config.
 
 ## AI Assistant Internals
 
-- `features/ai-assistant/agents/index.ts` exports the agent router surface.
 - `features/ai-assistant/model/assistant-runtime.ts` defines the reusable runtime contract that business adapters implement.
+- `features/ai-assistant/model/tool-renderer-registry.ts` defines the generic client-side tool renderer registry contract.
 - `features/ai-assistant/schema/assistant-request-schema.ts` validates reusable assistant request fields while preserving business context.
 - `features/ai-assistant/server/handle-assistant-request.ts` owns assistant request parsing, chat persistence calls, stream creation, runtime invocation, and SSE response formatting.
 - `features/ai-assistant/server/assistant-chat-persistence.ts` isolates development user/chat/message persistence use-cases from the API route.
-- `features/ai-assistant/server/default-assistant-runtime.ts` is the transitional ShopMate runtime adapter used until business-specific routing moves out in the next migration phase.
-- `features/ai-assistant/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
-- `features/ai-assistant/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
-- `features/ai-assistant/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized agent implementations and prompts.
-- `features/ai-assistant/lib/router.ts` coordinates routing to the selected agent.
-- `features/ai-assistant/tools/product-search/` and `tools/cart-info/` define AI tool behavior and renderers.
+- `features/ai-assistant/server/default-assistant-runtime.ts`, `features/ai-assistant/agents`, `features/ai-assistant/lib/router.ts`, and product/cart tool paths are temporary compatibility exports for the staged migration.
+- `features/shop-assistant/server/shop-assistant-runtime.ts` implements the runtime injected into the reusable assistant handler.
+- `features/shop-assistant/server/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
+- `features/shop-assistant/server/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
+- `features/shop-assistant/server/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized ShopMate agent implementations and prompts.
+- `features/shop-assistant/server/router.ts` coordinates ShopMate routing to the selected agent.
+- `features/shop-assistant/tools/product-search/` and `tools/cart-info/` define ShopMate AI tool behavior.
+- `features/shop-assistant/ui/tool-renderer-registry.tsx` registers ShopMate product/cart tool renderers for the generic assistant message renderer.
 - `features/ai-assistant/artifacts/` contains text and sheet artifact support, version-history hooks, panel UI, and document tool result/call components.
 - `features/ai-assistant/history-sidebar/` contains chat history UI, SWR pagination, date grouping, navigation helpers, and deletion operation notes.
 

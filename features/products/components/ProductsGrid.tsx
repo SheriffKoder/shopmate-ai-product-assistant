@@ -9,7 +9,7 @@
 'use client';
 
 import { useShop } from '@/features/shop/providers/shop-context';
-import { searchInProduct } from '@/features/ai-assistant/utils/search-utils';
+import { searchInProduct } from '@/features/shop-assistant/lib/search-utils';
 import { ProductCard } from '@/features/home/components/products/ProductCard';
 
 interface ProductsGridProps {
