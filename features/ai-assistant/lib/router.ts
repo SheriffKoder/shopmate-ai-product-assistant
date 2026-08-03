@@ -27,7 +27,7 @@ import type { ProductClassification } from '../agents';
 /**
  * Agent request type - matches what agents expect
  */
-type AgentRequest = {
+export type AgentRequest = {
   messages: UIMessage[];
   products?: Product[];
   cart?: CartState;

@@ -43,7 +43,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 ## API Routes
 
-- `app/api/ai-assistant/route.ts`: validates chat requests, creates/loads Supabase user/chat records, saves messages, classifies queries, routes to agents, and streams AI output.
+- `app/api/ai-assistant/route.ts`: thin Next.js adapter for the assistant server handler and default runtime.
 - `app/api/products/route.ts`: product data endpoint used by SWR hooks and shop state.
 - `app/api/cart/route.ts`: cart data/mutation endpoint used by SWR hooks and shop state.
 - `app/api/history/route.ts`: paginated chat history for the AI sidebar.
@@ -65,6 +65,11 @@ Use this as the first repo read when you need orientation. It is intentionally c
 ## AI Assistant Internals
 
 - `features/ai-assistant/agents/index.ts` exports the agent router surface.
+- `features/ai-assistant/model/assistant-runtime.ts` defines the reusable runtime contract that business adapters implement.
+- `features/ai-assistant/schema/assistant-request-schema.ts` validates reusable assistant request fields while preserving business context.
+- `features/ai-assistant/server/handle-assistant-request.ts` owns assistant request parsing, chat persistence calls, stream creation, runtime invocation, and SSE response formatting.
+- `features/ai-assistant/server/assistant-chat-persistence.ts` isolates development user/chat/message persistence use-cases from the API route.
+- `features/ai-assistant/server/default-assistant-runtime.ts` is the transitional ShopMate runtime adapter used until business-specific routing moves out in the next migration phase.
 - `features/ai-assistant/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
 - `features/ai-assistant/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
 - `features/ai-assistant/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized agent implementations and prompts.
