@@ -1,0 +1,85 @@
+# ShopMate Project Map
+
+Use this as the first repo read when you need orientation. It is intentionally compact so agents can avoid repeatedly scanning raw source. Do not treat this as a replacement for checking the specific files you edit.
+
+## What This App Is
+
+- ShopMate is a Next.js 15 App Router e-commerce app for electronics, with a persistent AI shopping assistant.
+- Main user flows: home discovery, product browsing/search, product detail, cart management, checkout shell, AI-assisted product search/recommendations/cart answers, and chat/document history.
+- Primary stack: React 19, TypeScript, Tailwind CSS 4, Radix UI, SWR, Vercel AI SDK, Supabase.
+
+## Entry Points
+
+- `app/layout.tsx` is the root server layout; it loads global CSS, local font metadata, and wraps pages with `components/layout-wrapper.tsx`.
+- `components/layout-wrapper.tsx` is the app shell: `ShopProvider`, `FullscreenProvider`, `DataStreamProvider`, global toast container, `MainHeader`, page content, chat wrapper, footer, and stream handler.
+- `app/page.tsx` renders `features/home/index.tsx`.
+- `app/products/page.tsx` renders `features/products/products-page-content.tsx`.
+- `app/products/[id]/page.tsx` renders `features/products/product-detail-page-content.tsx`.
+- `app/cart/page.tsx` renders `features/cart/cart-page-content.tsx`.
+- `app/checkout/page.tsx` renders `features/checkout/checkout-page-content.tsx`.
+- `app/not-found.tsx` is the app-level 404 required by project guidelines.
+
+## API Routes
+
+- `app/api/ai-assistant/route.ts`: validates chat requests, creates/loads Supabase user/chat records, saves messages, classifies queries, routes to agents, and streams AI output.
+- `app/api/products/route.ts`: product data endpoint used by SWR hooks and shop state.
+- `app/api/cart/route.ts`: cart data/mutation endpoint used by SWR hooks and shop state.
+- `app/api/history/route.ts`: paginated chat history for the AI sidebar.
+- `app/api/chat/[chatId]/route.ts` and `app/api/chat/[chatId]/messages/route.ts`: chat/message retrieval and operations.
+- `app/api/document/route.ts`: artifact/document persistence endpoint.
+- `app/api/user/route.ts`: constant/development user endpoint.
+
+## Main Feature Areas
+
+- `features/home/`: home page orchestration, product/category sections, banner carousel, promotional card config, footer config, and category helpers.
+- `features/products/`: products page and product detail page content, product grid/detail UI, and navigation helpers.
+- `features/cart/`: dedicated cart page content.
+- `features/checkout/`: checkout page content.
+- `features/ai-assistant/`: chat container/wrapper, prompt input, message rendering, data streaming, tool rendering, agents, artifacts, history sidebar, providers, hooks, types, and assistant utilities.
+- `features/ai-filter/`: reusable natural-language URL filter assistant. Host pages pass catalog/config; the package handles prompt building, response sanitization, and URL patch application.
+- `features/toast-success/`: global toast primitives, hook, container, and error config.
+
+## AI Assistant Internals
+
+- `features/ai-assistant/agents/index.ts` exports the agent router surface.
+- `features/ai-assistant/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
+- `features/ai-assistant/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
+- `features/ai-assistant/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized agent implementations and prompts.
+- `features/ai-assistant/lib/router.ts` coordinates routing to the selected agent.
+- `features/ai-assistant/tools/product-search/` and `tools/cart-info/` define AI tool behavior and renderers.
+- `features/ai-assistant/artifacts/` contains text and sheet artifact support, version-history hooks, panel UI, and document tool result/call components.
+- `features/ai-assistant/history-sidebar/` contains chat history UI, SWR pagination, date grouping, navigation helpers, and deletion operation notes.
+
+## State And Data
+
+- `features/ai-assistant/providers/shop-context.tsx` is the central client state provider for products and cart; it wraps SWR hooks and exposes dispatch-style compatibility actions.
+- `features/ai-assistant/hooks/use-products-api-swr.ts` and `use-cart-api-swr.ts` bridge UI state to `/api/products` and `/api/cart`.
+- `lib/storage/session-storage.ts` is the development storage abstraction for products/cart/user data.
+- `lib/supabase/client.ts`, `types.ts`, `queries/chat-queries.ts`, and `queries/user-queries.ts` provide Supabase persistence for users, chats, messages, and documents.
+- `lib/supabase/migrations/` contains SQL migrations for documents, users, chats, and messages.
+- Product images and fonts live under `public/images/` and `public/fonts/`.
+
+## Shared UI And Utilities
+
+- `components/ui/` contains reusable Radix/Tailwind UI primitives.
+- `components/ai-elements/` contains reusable AI/chat display primitives.
+- `components/main-header/` contains the header, search bar, icon buttons, and dropdown pieces.
+- `components/mobile-nav.tsx`, `components/footer.tsx`, and `components/layout-wrapper.tsx` are app-shell UI.
+- `lib/utils.ts` and `lib/message-utils.ts` are shared utility files.
+- `app/globals.css` holds global styles and Tailwind setup.
+
+## Config And Instructions
+
+- `package.json`: scripts and dependencies. Current scripts are `dev`, `build`, `start`, and `lint`.
+- `next.config.ts`: Next.js config.
+- `tailwind.config.ts` and `postcss.config.mjs`: styling pipeline config.
+- `tsconfig.json`: TypeScript path aliases and compiler options.
+- `AGENTS.md`: required agent workflow instructions.
+- `.cursor/rules/project-structure.mdc`: responsibility-first folder rules and dependency direction.
+- `app/development/project-guidelines/project-guidelines.md`: project coding, documentation, architecture, accessibility, and commit conventions.
+
+## Scan Discipline
+
+- Avoid scanning `node_modules/`, `.next/`, `.git/`, `dist/`, `build/`, and coverage/cache folders unless the user explicitly asks.
+- Prefer `rg --files` or targeted `find` commands with excludes when locating files.
+- Start with this map, then read only the relevant entry point, feature README/docs, and files you will edit.

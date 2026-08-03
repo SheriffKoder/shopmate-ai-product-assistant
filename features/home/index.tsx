@@ -11,6 +11,8 @@
 import { HeaderCategories } from './components/categories/HeaderCategories';
 import { BannerSlider } from './components/banner/BannerSlider';
 import { PromotionalCards } from './components/promotional/PromotionalCards';
+import { ProductGrid } from './components/products/ProductGrid';
+import { NonFeaturedProductsGrid } from './components/products/NonFeaturedProductsGrid';
 
 export const Home = () => {
   return (
@@ -23,8 +25,8 @@ export const Home = () => {
           <BannerSlider />
         </div>
       </div>
-      {/* <ProductGrid /> */}
-      {/* <NonFeaturedProductsGrid /> */}
+      <ProductGrid />
+      <NonFeaturedProductsGrid />
       <PromotionalCards />
     </div>
   );

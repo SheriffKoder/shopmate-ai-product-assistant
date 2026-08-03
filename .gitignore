@@ -42,4 +42,5 @@ next-env.d.ts
 
 
 # development
-development
+app/development
+.cursor
