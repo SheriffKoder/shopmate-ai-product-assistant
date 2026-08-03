@@ -8,6 +8,9 @@
 
 import type { ReactNode } from 'react';
 
+import { getShadowLocaleDirection } from '@/shadow/shared/i18n/config';
+import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
+
 type ShadowLocaleLayoutProps = {
   children: ReactNode;
   params: Promise<{
@@ -23,8 +26,9 @@ type ShadowLocaleLayoutProps = {
  */
 export default async function ShadowLocaleLayout(props: ShadowLocaleLayoutProps) {
   const { children, params } = props;
-  const { locale } = await params;
-  const direction = locale === 'ar' ? 'rtl' : 'ltr';
+  const { locale: rawLocale } = await params;
+  const locale = assertShadowLocale(rawLocale);
+  const direction = getShadowLocaleDirection(locale);
 
   return (
     <section lang={locale} dir={direction} className="min-h-screen bg-background text-foreground">

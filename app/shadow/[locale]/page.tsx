@@ -7,6 +7,7 @@
  */
 
 import { ShadowHomeView } from '@/shadow/views/home';
+import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
 
 type ShadowHomePageProps = {
   params: Promise<{
@@ -21,7 +22,8 @@ type ShadowHomePageProps = {
  * @returns The server-first shadow home view.
  */
 export default async function ShadowHomePage(props: ShadowHomePageProps) {
-  const { locale } = await props.params;
+  const { locale: rawLocale } = await props.params;
+  const locale = assertShadowLocale(rawLocale);
 
   return <ShadowHomeView locale={locale} />;
 }

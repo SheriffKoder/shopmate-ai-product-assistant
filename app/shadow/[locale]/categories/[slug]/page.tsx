@@ -7,6 +7,7 @@
  */
 
 import { ShadowCategoryView } from '@/shadow/views/category';
+import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
 
 type ShadowCategoryPageProps = {
   params: Promise<{
@@ -22,7 +23,8 @@ type ShadowCategoryPageProps = {
  * @returns The server-first shadow category view.
  */
 export default async function ShadowCategoryPage(props: ShadowCategoryPageProps) {
-  const { locale, slug } = await props.params;
+  const { locale: rawLocale, slug } = await props.params;
+  const locale = assertShadowLocale(rawLocale);
 
   return <ShadowCategoryView locale={locale} slug={slug} />;
 }

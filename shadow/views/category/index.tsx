@@ -6,8 +6,11 @@
  * Used for: Holds the phase-0 category placeholder until catalog queries are added.
  */
 
+import type { ShadowLocale } from '@/shadow/shared/i18n/config';
+import { getShadowDictionary } from '@/shadow/shared/i18n/lib/get-dictionary';
+
 type ShadowCategoryViewProps = {
-  locale: string;
+  locale: ShadowLocale;
   slug: string;
 };
 
@@ -19,12 +22,16 @@ type ShadowCategoryViewProps = {
  */
 export function ShadowCategoryView(props: ShadowCategoryViewProps) {
   const { locale, slug } = props;
+  const dictionary = getShadowDictionary(locale);
 
   return (
     <main className="min-h-screen p-6">
-      <h1 className="text-3xl font-semibold">Shadow category</h1>
-      <p className="mt-2 text-muted-foreground">Locale: {locale}</p>
-      <p className="mt-1 text-muted-foreground">Slug: {slug}</p>
+      <p className="text-sm font-medium uppercase text-muted-foreground">
+        {dictionary.category.eyebrow}
+      </p>
+      <h1 className="mt-2 text-3xl font-semibold">{dictionary.category.title}</h1>
+      <p className="mt-2 max-w-2xl text-muted-foreground">{dictionary.category.description}</p>
+      <p className="mt-4 text-sm text-muted-foreground">Slug: {slug}</p>
     </main>
   );
 }

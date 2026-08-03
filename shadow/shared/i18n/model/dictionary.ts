@@ -1,0 +1,50 @@
+/**
+ * Shadow Dictionary Model
+ *
+ * Purpose: Defines the typed copy contract for shadow localized pages.
+ * Used in: shadow i18n dictionaries, server views, and shadow widgets.
+ * Used for: Keeps page and header copy out of JSX while preserving type safety.
+ */
+
+import type { ShadowLocale } from '@/shadow/shared/i18n/config';
+
+type ShadowNavigationDictionary = {
+  label: string;
+  home: string;
+  products: string;
+};
+
+type ShadowCommonDictionary = {
+  brandName: string;
+  home: string;
+  products: string;
+  language: string;
+  localeNames: Record<ShadowLocale, string>;
+};
+
+type ShadowPageDictionary = {
+  title: string;
+  eyebrow: string;
+  description: string;
+};
+
+export type ShadowDictionary = {
+  common: ShadowCommonDictionary;
+  header: {
+    navigation: ShadowNavigationDictionary;
+  };
+  home: ShadowPageDictionary;
+  products: ShadowPageDictionary & {
+    emptyState: string;
+  };
+  productDetail: ShadowPageDictionary & {
+    notFound: string;
+  };
+  category: ShadowPageDictionary & {
+    emptyState: string;
+  };
+  dev: ShadowPageDictionary & {
+    seedAction: string;
+    revalidateAction: string;
+  };
+};

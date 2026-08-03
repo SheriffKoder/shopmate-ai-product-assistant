@@ -7,6 +7,7 @@
  */
 
 import { ShadowProductsView } from '@/shadow/views/products';
+import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
 
 type ShadowProductsPageProps = {
   params: Promise<{
@@ -21,7 +22,8 @@ type ShadowProductsPageProps = {
  * @returns The server-first shadow products view.
  */
 export default async function ShadowProductsPage(props: ShadowProductsPageProps) {
-  const { locale } = await props.params;
+  const { locale: rawLocale } = await props.params;
+  const locale = assertShadowLocale(rawLocale);
 
   return <ShadowProductsView locale={locale} />;
 }
