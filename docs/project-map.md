@@ -19,6 +19,28 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `app/checkout/page.tsx` renders `features/checkout/checkout-page-content.tsx`.
 - `app/not-found.tsx` is the app-level 404 required by project guidelines.
 
+## Shadow Server-First Pages
+
+- `app/shadow/[locale]/layout.tsx`: localized shadow layout. It validates the locale, sets `dir`, loads dictionary copy, and mounts `shadow/widgets/shadow-header`.
+- `app/shadow/[locale]/page.tsx`: server-first home route with ISR; renders `shadow/views/home`.
+- `app/shadow/[locale]/products/page.tsx`: server-first products listing route with ISR; renders `shadow/views/products` without URL/server-side filtering.
+- `app/shadow/[locale]/products/[slug]/page.tsx`: server-first product detail route with ISR and static params; renders `shadow/views/product-detail`.
+- `app/shadow/[locale]/categories/[slug]/page.tsx`: server-first category route with ISR and static params; renders `shadow/views/category`.
+- `app/shadow/dev/page.tsx`: dynamic development/admin route; renders `shadow/views/dev` for env-driven dev user creation, initial catalog seeding, and on-demand revalidation.
+- Shadow pages are intentionally independent from the current app: do not import current `features/`, `components/`, or `lib/` into `app/shadow/**` or `shadow/**`.
+
+## Shadow Folder Responsibilities
+
+- `shadow/views/`: route composition. Each view loads dictionary copy, calls shadow queries, handles page-level outcomes such as `notFound()`, and passes ready data to UI.
+- `shadow/entities/category/` and `shadow/entities/product/`: catalog domain types, Zod row schemas, transforms, Supabase repositories, and cached read queries.
+- `shadow/widgets/`: reusable server UI sections such as the shadow header, home hero, category navigation, product card, and product grid.
+- `shadow/features/locale-switcher/`: the small client-only locale dropdown island and pure href builder.
+- `shadow/shared/i18n/`: EN/AR locale config, typed dictionaries, locale assertion, dictionary loading, and localized catalog text helpers.
+- `shadow/shared/config/`: shadow cache constants, environment validation, and `SHADOW_SUPABASE_TABLE_PREFIX`-driven table names.
+- `shadow/shared/supabase/server/create-shadow-service-client.ts`: server-only Supabase service client boundary for shadow reads and dev writes.
+- `shadow/development/initial-data/products.ts`: seed data consumed only by `/shadow/dev`.
+- `shadow/development/migrations/032_create_shadow_catalog.sql`: active shadow catalog migration for prefixed catalog tables. Other copied migration files in this folder are external compatibility history and should not be read unless the user explicitly asks.
+
 ## API Routes
 
 - `app/api/ai-assistant/route.ts`: validates chat requests, creates/loads Supabase user/chat records, saves messages, classifies queries, routes to agents, and streams AI output.
