@@ -2,7 +2,7 @@
  * Data Stream Provider
  * 
  * Purpose: Provides React Context for managing streaming data from AI responses
- * Used in: Layout wrapper, chat components
+ * Used in: AssistantRootProvider and chat components
  * Why: Allows components to access and update stream data without prop drilling
  * 
  * How it works:
@@ -131,4 +131,3 @@ export function useDataStream() {
   
   return context;
 }
-

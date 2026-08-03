@@ -1,32 +1,30 @@
 /**
  * Chat Wrapper Component
  * 
- * Purpose: Wraps the chat container with header and collapse/expand functionality
- * Used in: app/page.tsx
+ * Purpose: Wraps the reusable chat container with header, history, and layout controls
+ * Used in: ShopMate assistant integration and future assistant host integrations
+ * Why: Keeps assistant presentation separate from app layout and provider ownership
  */
 
 'use client';
 
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Maximize2, Minimize2, Menu, X, FileClock, FileXCorner } from 'lucide-react';
+import { ChevronDown, ChevronUp, Maximize2, Minimize2, FileClock, FileXCorner } from 'lucide-react';
 import ChatContainer from '@/features/ai-assistant/chat-container';
-import { ChatHeaderUserActions } from '@/features/ai-assistant/components/chat-header-user-actions';
 import { SidebarHistory } from '@/features/ai-assistant/history-sidebar/components';
 import { useSidebarRefresh } from '@/features/ai-assistant/history-sidebar/hooks/use-sidebar-refresh';
 import { useCurrentChatId } from '@/features/ai-assistant/history-sidebar/utils/chat-navigation';
-import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 
 interface ChatWrapperProps {
   chatId: string; // Fallback chatId if no searchParam
-  userType: string;
   isChatCollapsed: boolean;
   setIsChatCollapsed: (collapsed: boolean) => void;
   isFullScreen?: boolean;
 }
 
-export const ChatWrapper = ({ chatId: fallbackChatId, userType, isChatCollapsed, setIsChatCollapsed, isFullScreen = false }: ChatWrapperProps) => {
+export const ChatWrapper = ({ chatId: fallbackChatId, isChatCollapsed, setIsChatCollapsed, isFullScreen = false }: ChatWrapperProps) => {
   //////////////////////////////////
   // Sidebar Refresh: Hook to manage sidebar refresh trigger
   // Why: Automatically refresh sidebar when chat finishes
@@ -41,7 +39,7 @@ export const ChatWrapper = ({ chatId: fallbackChatId, userType, isChatCollapsed,
   const { isFullScreen: isFullScreenState, setIsFullScreen: setIsFullScreenState } = useFullscreen();
 
   // Initialize fullscreen state from prop if provided (only on mount)
-  useEffect(() => {
+  useEffect(function initializeFullscreenFromProp() {
     if (isFullScreen !== undefined) {
       setIsFullScreenState(isFullScreen);
     }
@@ -59,7 +57,7 @@ export const ChatWrapper = ({ chatId: fallbackChatId, userType, isChatCollapsed,
   // Effect: Auto-open sidebar when entering fullscreen, close when exiting
   // Why: Sidebar should be visible by default in fullscreen mode, hidden when not
   //////////////////////////////////
-  useEffect(() => {
+  useEffect(function syncSidebarWithFullscreen() {
     if (isFullScreenState) {
       setIsSidebarOpen(true);
     } else {
@@ -111,11 +109,8 @@ export const ChatWrapper = ({ chatId: fallbackChatId, userType, isChatCollapsed,
           <span className="text-white">AI Assistant</span>
         </div>
         
-        {/* User Action Buttons and Chevron */}
+        {/* Header Controls: User-facing history, fullscreen, and collapse controls */}
         <div className="flex flex-row items-center gap-2">
-          {/* User Action Buttons: Create/Load User */}
-          <ChatHeaderUserActions />
-
           {/* Burger Menu: Toggle Sidebar */}
           <button
             type="button"
@@ -196,7 +191,6 @@ export const ChatWrapper = ({ chatId: fallbackChatId, userType, isChatCollapsed,
           <ChatContainer 
             chatId={currentChatId} 
             urlChatId={urlChatId}
-            userType={userType} 
             onChatFinish={triggerRefresh} 
           />
         </div>
@@ -204,4 +198,3 @@ export const ChatWrapper = ({ chatId: fallbackChatId, userType, isChatCollapsed,
     </div>
   );
 };
-

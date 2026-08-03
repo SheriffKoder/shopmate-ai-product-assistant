@@ -1,3 +1,11 @@
+/**
+ * @file features/ai-assistant/chat-container.tsx
+ * Chat container: owns assistant conversation state, request submission, messages,
+ * prompt input, and artifact panel composition.
+ * Used in: features/ai-assistant/chat-wrapper.tsx.
+ * Used for: Keeping the reusable chat body separate from app shell and header chrome.
+ */
+
 'use client';
 
 import {
@@ -27,11 +35,10 @@ import { useAssistantModelSelection } from './hooks/use-assistant-model-selectio
 interface ChatContainerProps {
   chatId: string; // Combined chatId (URL or fallback)
   urlChatId: string | null; // URL chatId (null when cleared for new chat)
-  userType: string;
   onChatFinish?: () => void;
 }
 
-const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContainerProps) => {
+const ChatContainer = ({ chatId, urlChatId, onChatFinish }: ChatContainerProps) => {
   //////////////////////////////////
   // Shop Context: Provides products and cart state/operations
   // Why: Centralized state management, eliminates prop drilling

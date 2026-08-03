@@ -2,8 +2,8 @@
  * Data Stream Handler
  * 
  * Purpose: Processes streaming data parts and updates UI state accordingly
- * Used in: Layout wrapper (invisible component)
- * Why: Separates stream processing logic from UI components
+ * Used in: ShopMate assistant integration through AssistantRootProvider
+ * Why: Separates stream processing logic from visible chat components
  * 
  * How it works:
  * 1. Listens for changes to dataStream via useDataStream hook
@@ -13,7 +13,7 @@
  * 5. Handles all ShopMate-specific data types
  * 
  * This is an invisible component (returns null) that acts as a processor.
- * It should be placed in the layout wrapper alongside the DataStreamProvider.
+ * It should be injected into AssistantRootProvider by the host app integration.
  */
 
 "use client";
@@ -388,4 +388,3 @@ export function DataStreamHandler() {
   //////////////////////////////////
   return null;
 }
-
