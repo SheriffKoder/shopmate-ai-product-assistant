@@ -8,20 +8,26 @@
 
 import { SHADOW_DEFAULT_LOCALE } from '@/shadow/shared/i18n/config';
 import { getShadowDictionary } from '@/shadow/shared/i18n/lib/get-dictionary';
+import { getShadowDevActionResult } from '@/shadow/views/dev/lib/get-dev-action-result';
+import { ShadowDevPage } from '@/shadow/views/dev/ui/dev-page';
+
+type ShadowDevViewProps = {
+  searchParams: {
+    message?: string;
+    status?: string;
+  };
+};
 
 /**
- * Renders the shadow development placeholder.
+ * Renders the shadow development tooling page.
  *
- * @returns A server-rendered development tooling placeholder.
+ * @param props - Search params carrying the latest action result.
+ * @returns A server-rendered development tooling page.
  */
-export function ShadowDevView() {
+export function ShadowDevView(props: ShadowDevViewProps) {
+  const { searchParams } = props;
   const dictionary = getShadowDictionary(SHADOW_DEFAULT_LOCALE);
+  const actionResult = getShadowDevActionResult(searchParams);
 
-  return (
-    <main className="min-h-screen p-6">
-      <p className="text-sm font-medium uppercase text-muted-foreground">{dictionary.dev.eyebrow}</p>
-      <h1 className="mt-2 text-3xl font-semibold">{dictionary.dev.title}</h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">{dictionary.dev.description}</p>
-    </main>
-  );
+  return <ShadowDevPage actionResult={actionResult} dictionary={dictionary} />;
 }

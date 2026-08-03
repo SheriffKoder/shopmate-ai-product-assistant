@@ -64,7 +64,15 @@ export type ShadowDictionary = {
     resultCount: string;
   };
   dev: ShadowPageDictionary & {
+    actionsLabel: string;
+    authAction: string;
+    authDescription: string;
+    authTitle: string;
     seedAction: string;
+    seedDescription: string;
+    seedTitle: string;
     revalidateAction: string;
+    revalidateDescription: string;
+    revalidateTitle: string;
   };
 };
