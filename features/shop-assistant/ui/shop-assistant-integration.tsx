@@ -14,6 +14,7 @@ import { ChatWrapper } from '@/features/ai-assistant/chat-wrapper';
 import { DataStreamHandler } from '@/features/ai-assistant/data-stream/data-stream-handler';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { AssistantRootProvider } from '@/features/ai-assistant/providers/assistant-root-provider';
+import { shopAssistantToolRenderers } from './tool-renderer-registry';
 
 /**
  * Props for {@link ShopAssistantIntegration}.
@@ -50,6 +51,7 @@ export function ShopAssistantIntegration({
           chatId={chatId}
           isChatCollapsed={isChatCollapsed}
           setIsChatCollapsed={setIsChatCollapsed}
+          toolRenderers={shopAssistantToolRenderers}
         />
       </Suspense>
     </AssistantRootProvider>

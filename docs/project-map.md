@@ -57,7 +57,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/products/`: products page and product detail page content, product grid/detail UI, and navigation helpers.
 - `features/cart/`: dedicated cart page content.
 - `features/checkout/`: checkout page content.
-- `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Product/cart ownership is being migrated out for assistant reusability.
+- `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Business adapters inject runtimes and tool renderers from outside the core.
 - `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart data-source contracts, mock/DB-ready catalog sources, tool factories, product/cart tool renderers, renderer registry, UI integration shell, adapter search helpers, and runtime model consumption.
 - `features/shop/`: ShopMate product/cart model types, mock initial catalog data, shop provider, and product/cart state hooks used by the storefront and assistant integration.
 - `features/ai-filter/`: reusable natural-language URL filter assistant. Host pages pass catalog/config; the package handles prompt building, response sanitization, and URL patch application.
@@ -73,7 +73,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/ai-assistant/schema/assistant-request-schema.ts` validates reusable assistant request fields while preserving business context.
 - `features/ai-assistant/server/handle-assistant-request.ts` owns assistant request parsing, chat persistence calls, stream creation, runtime invocation, and SSE response formatting.
 - `features/ai-assistant/server/assistant-chat-persistence.ts` isolates development user/chat/message persistence use-cases from the API route.
-- `features/ai-assistant/server/default-assistant-runtime.ts`, `features/ai-assistant/agents`, `features/ai-assistant/lib/router.ts`, and product/cart tool paths are temporary compatibility exports for the staged migration.
+- Old assistant-core product/cart compatibility export paths were removed in cleanup phase 08; use `features/shop`, `features/shop-assistant`, or generic assistant contracts as the canonical owners.
 - `features/shop-assistant/server/shop-assistant-runtime.ts` implements the runtime injected into the reusable assistant handler and resolves selected request models once per stream.
 - `features/shop-assistant/ui/shop-assistant-integration.tsx` mounts the reusable assistant root with ShopMate stream handling and chat id wiring.
 - `features/shop-assistant/model/catalog-source.ts` and `model/cart-source.ts` define product/cart data contracts for assistant tools and renderers.
@@ -85,6 +85,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/shop-assistant/server/router.ts` coordinates ShopMate routing to the selected agent.
 - `features/shop-assistant/tools/product-search/` and `tools/cart-info/` define ShopMate AI tool behavior over adapter-owned catalog/cart sources.
 - `features/shop-assistant/ui/tool-renderer-registry.tsx` registers ShopMate product/cart tool renderers for the generic assistant message renderer.
+- Dependency rule: `features/shop-assistant` may import assistant contracts; `features/ai-assistant` must not import ShopMate adapter code; `app/api/ai-assistant/route.ts` imports only the reusable handler and current runtime composition.
 - `features/ai-assistant/artifacts/` contains text and sheet artifact support, version-history hooks, panel UI, and document tool result/call components.
 - `features/ai-assistant/history-sidebar/` contains chat history UI, SWR pagination, date grouping, navigation helpers, and deletion operation notes.
 

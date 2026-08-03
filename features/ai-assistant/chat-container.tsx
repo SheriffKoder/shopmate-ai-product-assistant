@@ -29,16 +29,17 @@ import type { DataUIPart } from 'ai';
 import type { ShopMateUIDataTypes } from './types/stream';
 import { ArtifactPanel } from './artifacts/components/artifact-panel';
 import { useUpdateChatIdInUrl } from './history-sidebar/utils/chat-navigation';
-import { shopAssistantToolRenderers } from '@/features/shop-assistant/ui/tool-renderer-registry';
 import { useAssistantModelSelection } from './hooks/use-assistant-model-selection';
+import type { AssistantToolRendererRegistry } from './model/tool-renderer-registry';
 
 interface ChatContainerProps {
   chatId: string; // Combined chatId (URL or fallback)
   urlChatId: string | null; // URL chatId (null when cleared for new chat)
   onChatFinish?: () => void;
+  toolRenderers?: AssistantToolRendererRegistry;
 }
 
-const ChatContainer = ({ chatId, urlChatId, onChatFinish }: ChatContainerProps) => {
+const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatContainerProps) => {
   //////////////////////////////////
   // Shop Context: Provides products and cart state/operations
   // Why: Centralized state management, eliminates prop drilling
@@ -219,7 +220,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish }: ChatContainerProps) 
                 sendMessage={sendMessage}
                 regenerate={regenerate}
                 status={status}
-                toolRenderers={shopAssistantToolRenderers}
+                toolRenderers={toolRenderers}
                 toolRendererContext={toolRendererContext}
               />
             )}
@@ -257,6 +258,8 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish }: ChatContainerProps) 
         regenerate={regenerate}
         cart={cart}
         dispatchCartAction={dispatchCartAction}
+        toolRenderers={toolRenderers}
+        toolRendererContext={toolRendererContext}
       />
     </>
   );

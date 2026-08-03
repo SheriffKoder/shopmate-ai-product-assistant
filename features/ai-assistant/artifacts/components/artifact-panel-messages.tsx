@@ -12,7 +12,7 @@ import { useRef } from 'react';
 import { MessageList } from '@/features/ai-assistant/components/message-list';
 import { PromptInput } from '@/features/ai-assistant/components/prompt-input';
 import { useAssistantModelSelection } from '@/features/ai-assistant/hooks/use-assistant-model-selection';
-import { shopAssistantToolRenderers } from '@/features/shop-assistant/ui/tool-renderer-registry';
+import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 
 interface ArtifactMessagesProps {
   chatId: string;
@@ -24,6 +24,8 @@ interface ArtifactMessagesProps {
   regenerate?: () => void;
   cart?: any;
   dispatchCartAction?: any;
+  toolRenderers?: AssistantToolRendererRegistry;
+  toolRendererContext?: unknown;
 }
 
 /**
@@ -41,9 +43,11 @@ export function ArtifactMessages({
   regenerate,
   cart,
   dispatchCartAction,
+  toolRenderers,
+  toolRendererContext,
 }: ArtifactMessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const toolRendererContext = {
+  const fallbackToolRendererContext = {
     cart,
     dispatchCartAction,
   };
@@ -62,8 +66,8 @@ export function ArtifactMessages({
           sendMessage={sendMessage}
           regenerate={regenerate}
           status={status}
-          toolRenderers={shopAssistantToolRenderers}
-          toolRendererContext={toolRendererContext}
+          toolRenderers={toolRenderers}
+          toolRendererContext={toolRendererContext ?? fallbackToolRendererContext}
         />
       </div>
 

@@ -22,6 +22,7 @@ import { TextArtifactContent } from '../text/components/text-artifact-content';
 import { SheetArtifactContent } from '../sheet/components/sheet-artifact-content';
 import { ArtifactCloseButton } from './artifact-close-button';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
+import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 
 interface ArtifactPanelProps {
   chatId: string;
@@ -33,6 +34,8 @@ interface ArtifactPanelProps {
   regenerate?: () => void;
   cart?: any;
   dispatchCartAction?: any;
+  toolRenderers?: AssistantToolRendererRegistry;
+  toolRendererContext?: unknown;
 }
 
 /**
@@ -54,6 +57,8 @@ export function ArtifactPanel({
   regenerate,
   cart,
   dispatchCartAction,
+  toolRenderers,
+  toolRendererContext,
 }: ArtifactPanelProps) {
   const { artifact, setArtifact } = useArtifact();
   const { isFullScreen } = useFullscreen();
@@ -111,6 +116,8 @@ export function ArtifactPanel({
             regenerate={regenerate}
             cart={cart}
             dispatchCartAction={dispatchCartAction}
+            toolRenderers={toolRenderers}
+            toolRendererContext={toolRendererContext}
           />
         </motion.div>
 
@@ -159,4 +166,3 @@ export function ArtifactPanel({
     </AnimatePresence>
   );
 }
-

@@ -15,6 +15,7 @@ import ChatContainer from '@/features/ai-assistant/chat-container';
 import { SidebarHistory } from '@/features/ai-assistant/history-sidebar/components';
 import { useSidebarRefresh } from '@/features/ai-assistant/history-sidebar/hooks/use-sidebar-refresh';
 import { useCurrentChatId } from '@/features/ai-assistant/history-sidebar/utils/chat-navigation';
+import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 
 interface ChatWrapperProps {
@@ -22,9 +23,16 @@ interface ChatWrapperProps {
   isChatCollapsed: boolean;
   setIsChatCollapsed: (collapsed: boolean) => void;
   isFullScreen?: boolean;
+  toolRenderers?: AssistantToolRendererRegistry;
 }
 
-export const ChatWrapper = ({ chatId: fallbackChatId, isChatCollapsed, setIsChatCollapsed, isFullScreen = false }: ChatWrapperProps) => {
+export const ChatWrapper = ({
+  chatId: fallbackChatId,
+  isChatCollapsed,
+  setIsChatCollapsed,
+  isFullScreen = false,
+  toolRenderers,
+}: ChatWrapperProps) => {
   //////////////////////////////////
   // Sidebar Refresh: Hook to manage sidebar refresh trigger
   // Why: Automatically refresh sidebar when chat finishes
@@ -192,6 +200,7 @@ export const ChatWrapper = ({ chatId: fallbackChatId, isChatCollapsed, setIsChat
             chatId={currentChatId} 
             urlChatId={urlChatId}
             onChatFinish={triggerRefresh} 
+            toolRenderers={toolRenderers}
           />
         </div>
       </div>
