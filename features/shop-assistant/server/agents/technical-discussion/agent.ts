@@ -7,13 +7,14 @@
  */
 
 import { smoothStream, streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
-import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
+import { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { getTechnicalDiscussionPrompt } from './prompt';
 import { createDocumentTool } from '@/features/ai-assistant/artifacts/text/tool/create-document-tool';
 import { createTextDocument } from '@/features/ai-assistant/artifacts/text/tool/server';
 import { createSheetDocument } from '@/features/ai-assistant/artifacts/sheet/server';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -21,6 +22,7 @@ export const maxDuration = 30;
 interface TechnicalDiscussionRequest {
   messages: UIMessage[];
   dataStream?: UIMessageStreamWriter<any>;
+  models: AssistantResolvedModels;
 }
 
 /**
@@ -31,7 +33,7 @@ interface TechnicalDiscussionRequest {
 export async function processTechnicalDiscussionRequest(
   request: TechnicalDiscussionRequest
 ) {
-  const { messages, dataStream } = request;
+  const { messages, dataStream, models } = request;
 
   // Get system prompt
   const systemPrompt = getTechnicalDiscussionPrompt();
@@ -42,8 +44,8 @@ export async function processTechnicalDiscussionRequest(
 
   // Stream Text with AI model
   const result = streamText({
-    // Model: Using OpenAI o3-mini
-    model: openai('o3-mini'),
+    // Model: selected by the reusable assistant model registry.
+    model: models.chat,
 
     // System Prompt:
     system: systemPrompt,
@@ -166,4 +168,3 @@ export async function processTechnicalDiscussionRequest(
     sendReasoning: true, // receive as parts on the frontend.
   });
 }
-

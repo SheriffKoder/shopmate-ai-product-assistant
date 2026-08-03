@@ -7,8 +7,9 @@
  */
 
 import { streamText } from 'ai';
-import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
+import { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { getNotRelatedPrompt } from './prompt';
+import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -17,7 +18,7 @@ export const maxDuration = 30;
  * Process not-related query request
  * @returns Streaming response with polite apology
  */
-export async function processNotRelatedRequest() {
+export async function processNotRelatedRequest(request: { models: AssistantResolvedModels }) {
   // Get system prompt
   const systemPrompt = getNotRelatedPrompt();
 
@@ -25,8 +26,8 @@ export async function processNotRelatedRequest() {
 
   // Stream Text with AI model - use messages format to ensure text is generated
   const result = streamText({
-    // Model: Using OpenAI o3-mini
-    model: openai('o3-mini'),
+    // Model: selected by the reusable assistant model registry.
+    model: request.models.chat,
 
     // System Prompt:
     system: systemPrompt,
@@ -60,4 +61,3 @@ export async function processNotRelatedRequest() {
     sendReasoning: true,
   });
 }
-

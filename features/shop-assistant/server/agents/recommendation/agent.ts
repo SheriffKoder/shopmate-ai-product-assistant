@@ -7,7 +7,7 @@
  */
 
 import { streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
-import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
+import { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { smoothStream } from 'ai';
 import { getRecommendationPrompt } from './prompt';
 import { getProductCatalogContext, getCartContext } from '@/features/shop-assistant/server/system-prompt';
@@ -18,6 +18,7 @@ import { createTextDocument } from '@/features/ai-assistant/artifacts/text/tool/
 import { createSheetDocument } from '@/features/ai-assistant/artifacts/sheet/server';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { logger } from '@/features/ai-assistant/lib/logger';
+import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -26,6 +27,7 @@ interface RecommendationRequest {
   messages: UIMessage[];
   products?: any[];
   cart?: any;
+  models: AssistantResolvedModels;
 }
 
 /**
@@ -38,7 +40,7 @@ export async function processRecommendationRequest(
   request: RecommendationRequest,
   dataStream?: UIMessageStreamWriter<any>
 ) {
-  const { messages, products = [], cart } = request;
+  const { messages, products = [], cart, models } = request;
 
   // Get system prompt
   const systemPrompt = getRecommendationPrompt();
@@ -81,8 +83,8 @@ export async function processRecommendationRequest(
 
   // Stream Text with AI model
   const result = streamText({
-    // Model: Using OpenAI o3-mini
-    model: openai('o3-mini'),
+    // Model: selected by the reusable assistant model registry.
+    model: models.chat,
 
     // System Prompt:
     system: systemPrompt,

@@ -6,8 +6,7 @@
  * Why: Determines the specific type of product query before processing
  */
 
-import { generateObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { generateObject, type LanguageModel } from 'ai';
 import { z } from 'zod';
 import { getProductClassifierPrompt } from './prompt';
 
@@ -15,6 +14,7 @@ export type ProductClassification = 'products' | 'recommendation' | 'filtering';
 
 interface ProductClassifierRequest {
   query: string;
+  model: LanguageModel;
 }
 
 // Schema for structured output
@@ -28,7 +28,7 @@ const productClassificationSchema = z.object({
  * @returns Classification result: 'products', 'recommendation', or 'filtering'
  */
 export async function classifyProductQuery(request: ProductClassifierRequest): Promise<ProductClassification> {
-  const { query } = request;
+  const { query, model } = request;
 
   // Get system prompt
   const systemPrompt = getProductClassifierPrompt();
@@ -36,7 +36,7 @@ export async function classifyProductQuery(request: ProductClassifierRequest): P
   try {
     // Generate classification using structured output for more reliable results
     const result = await generateObject({
-      model: openai('o3-mini'),
+      model,
       system: systemPrompt,
       messages: [
         {
@@ -56,4 +56,3 @@ export async function classifyProductQuery(request: ProductClassifierRequest): P
     return 'products';
   }
 }
-

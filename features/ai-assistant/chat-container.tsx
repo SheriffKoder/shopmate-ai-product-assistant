@@ -22,6 +22,7 @@ import type { ShopMateUIDataTypes } from './types/stream';
 import { ArtifactPanel } from './artifacts/components/artifact-panel';
 import { useUpdateChatIdInUrl } from './history-sidebar/utils/chat-navigation';
 import { shopAssistantToolRenderers } from '@/features/shop-assistant/ui/tool-renderer-registry';
+import { useAssistantModelSelection } from './hooks/use-assistant-model-selection';
 
 interface ChatContainerProps {
   chatId: string; // Combined chatId (URL or fallback)
@@ -49,6 +50,12 @@ const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContai
   // How: setDataStream adds each data part to the stream array
   //////////////////////////////////
   const { setDataStream } = useDataStream();
+
+  //////////////////////////////////
+  // Assistant Model Selection: Reusable model picker state included in every request
+  // Why: Keeps hard-coded model ids out of the assistant runtime while allowing user switching
+  //////////////////////////////////
+  const { selectedModelId, modelOptions, setSelectedModelId } = useAssistantModelSelection();
   
   //////////////////////////////////
   // Chat Hook: To send messages to the API and receive responses
@@ -156,6 +163,7 @@ const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContai
     clickedSuggestionCard,
   } = useChatSubmission({
     sendMessage,
+    selectedModelId,
     buildRequestBody: () => ({
       products,
       cart,
@@ -214,6 +222,9 @@ const ChatContainer = ({ chatId, urlChatId, userType, onChatFinish }: ChatContai
           setInput={setInput}
           handleSubmit={handleSubmit}
           status={status}
+          selectedModelId={selectedModelId}
+          modelOptions={modelOptions}
+          onModelChange={setSelectedModelId}
         />
       </div>
 

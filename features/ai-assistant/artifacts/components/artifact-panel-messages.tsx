@@ -11,6 +11,7 @@
 import { useRef } from 'react';
 import { MessageList } from '@/features/ai-assistant/components/message-list';
 import { PromptInput } from '@/features/ai-assistant/components/prompt-input';
+import { useAssistantModelSelection } from '@/features/ai-assistant/hooks/use-assistant-model-selection';
 import { shopAssistantToolRenderers } from '@/features/shop-assistant/ui/tool-renderer-registry';
 
 interface ArtifactMessagesProps {
@@ -46,6 +47,7 @@ export function ArtifactMessages({
     cart,
     dispatchCartAction,
   };
+  const { selectedModelId, modelOptions, setSelectedModelId } = useAssistantModelSelection();
 
   return (
     <div
@@ -78,6 +80,7 @@ export function ArtifactMessages({
                   body: {
                     products: [],
                     cart: cart,
+                    modelId: selectedModelId,
                   },
                 }
               );
@@ -85,6 +88,9 @@ export function ArtifactMessages({
             }
           }}
           status={status}
+          selectedModelId={selectedModelId}
+          modelOptions={modelOptions}
+          onModelChange={setSelectedModelId}
         />
       </div>
     </div>

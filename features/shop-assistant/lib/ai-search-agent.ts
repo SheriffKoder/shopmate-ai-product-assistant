@@ -7,8 +7,8 @@
  */
 
 import { generateObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import { z } from 'zod/v3';
+import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 /**
  * Generic item structure for AI analysis
@@ -69,8 +69,9 @@ export async function analyzeItemsWithAI<T extends SearchableItem>(
     }));
 
     // Use structured output to get ranked item IDs
+    const models = getAssistantModels();
     const result = await generateObject({
-      model: openai('gpt-4o-mini'),
+      model: models.search,
       system: `You are a ${itemType === 'products' ? 'product' : 'cart item'} search assistant. Analyze ${itemType} and rank them by relevance to the user's query. 
 
 CRITICAL RULES:
@@ -147,4 +148,3 @@ Return a JSON array of ${itemType === 'products' ? 'product' : 'item'} IDs ranke
     }
   }
 }
-

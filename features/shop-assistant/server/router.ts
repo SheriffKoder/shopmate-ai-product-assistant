@@ -19,6 +19,7 @@
 import type { UIMessage, UIMessageStreamWriter } from 'ai';
 import type { Product } from '@/features/shop/model/product';
 import type { CartState } from '@/features/shop/model/cart';
+import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { createError } from '@/features/ai-assistant/lib/errors';
 import {
@@ -39,6 +40,7 @@ export type AgentRequest = {
   messages: UIMessage[];
   products?: Product[];
   cart?: CartState;
+  models: AssistantResolvedModels;
 };
 
 /**
@@ -75,12 +77,13 @@ export async function routeToAgent(
         return await processTechnicalDiscussionRequest({
           messages: request.messages,
           dataStream,
+          models: request.models,
         });
 
       case 'notrelated':
         logger.info('Routing to not-related agent');
         // FUTURE IMPLEMENTATION: Update not-related agent to support dataStream
-        return await processNotRelatedRequest();
+        return await processNotRelatedRequest({ models: request.models });
 
       default:
         // Fallback to main agent for unknown classifications
@@ -114,6 +117,7 @@ async function routeToProductAgent(
     // Classify the product-related query into subcategories
     const productClassification = await classifyProductQuery({
       query: userQuery,
+      model: request.models.chat,
     });
 
     logger.classification('product', productClassification, userQuery);

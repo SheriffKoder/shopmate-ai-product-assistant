@@ -6,8 +6,7 @@
  * Why: Determines if queries are related to the shop context before processing
  */
 
-import { generateObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { generateObject, type LanguageModel } from 'ai';
 import { z } from 'zod';
 import { getQueryClassifierPrompt } from './prompt';
 
@@ -15,6 +14,7 @@ export type QueryClassification = 'related' | 'technical-discussion' | 'notrelat
 
 interface QueryClassifierRequest {
   query: string;
+  model: LanguageModel;
 }
 
 // Schema for structured output
@@ -28,7 +28,7 @@ const classificationSchema = z.object({
  * @returns Classification result: 'related', 'technical-discussion', or 'notrelated'
  */
 export async function classifyQuery(request: QueryClassifierRequest): Promise<QueryClassification> {
-  const { query } = request;
+  const { query, model } = request;
 
   // Get system prompt
   const systemPrompt = getQueryClassifierPrompt();
@@ -36,7 +36,7 @@ export async function classifyQuery(request: QueryClassifierRequest): Promise<Qu
   try {
     // Generate classification using structured output for more reliable results
     const result = await generateObject({
-      model: openai('o3-mini'),
+      model,
       system: systemPrompt,
       messages: [
         {
@@ -56,4 +56,3 @@ export async function classifyQuery(request: QueryClassifierRequest): Promise<Qu
     return 'related';
   }
 }
-

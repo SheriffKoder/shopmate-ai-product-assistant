@@ -19,12 +19,12 @@
  */
 
 import { streamObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
 import { supabaseAdmin } from '@/lib/supabase/client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 /**
  * Parameters for creating a sheet document
@@ -75,8 +75,9 @@ export async function createSheetDocument({
   // ✅ STREAMING PHASE: Stream content in real-time
   // Generate CSV content using AI with structured output
   logger.debug('[Sheet Artifact] Starting CSV generation stream...');
+  const models = getAssistantModels();
   const { fullStream } = streamObject({
-    model: openai('o3-mini'),
+    model: models.chat,
     system: `You are a helpful assistant that creates well-structured CSV data for spreadsheets.
 Generate CSV data based on the user's request. The CSV should be properly formatted with headers.
 Return only valid CSV data, no explanations or markdown formatting.
@@ -200,4 +201,3 @@ Use commas as delimiters and newlines for rows.`,
 
   return fullContent;
 }
-

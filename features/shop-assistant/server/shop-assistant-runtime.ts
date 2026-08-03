@@ -16,6 +16,7 @@
  */
 
 import type { AssistantRuntime } from '@/features/ai-assistant/model/assistant-runtime';
+import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
 import { classifyQuery } from './agents';
 import { routeToAgent, type AgentRequest } from './router';
 
@@ -24,15 +25,19 @@ import { routeToAgent, type AgentRequest } from './router';
  */
 export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
   async stream(request, dataStream) {
-    // 1. Keep current query classification behavior behind the runtime boundary.
-    const classification = await classifyQuery({ query: request.userQuery });
+    // 1. Resolve validated request models once so every agent shares the same runtime config.
+    const models = getAssistantModels(request.modelId);
 
-    // 2. Adapt generic business context back into the existing ShopMate agent request shape.
+    // 2. Keep current query classification behavior behind the runtime boundary.
+    const classification = await classifyQuery({ query: request.userQuery, model: models.chat });
+
+    // 3. Adapt generic business context back into the existing ShopMate agent request shape.
     return routeToAgent(
       classification,
       {
         messages: request.messages,
         ...request.businessContext,
+        models,
       } as AgentRequest,
       request.userQuery,
       dataStream

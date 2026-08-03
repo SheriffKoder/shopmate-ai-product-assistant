@@ -7,10 +7,11 @@
  */
 
 import { smoothStream, streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
-import { openai, OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
+import { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { getSystemPrompt, getProductCatalogContext } from '@/features/shop-assistant/server/system-prompt';
 import { createProductSearchTool, createCartInfoTool } from '@/features/shop-assistant/tools';
 import { CartState } from '@/features/shop/model/cart';
+import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -19,6 +20,7 @@ interface AgentRequest {
   messages: UIMessage[];
   products?: any[]; // Array of Product objects
   cart?: CartState; // Cart state
+  models: AssistantResolvedModels;
 }
 
 /**
@@ -35,6 +37,7 @@ export async function processProductAssistantRequest(
     messages,
     products = [],
     cart,
+    models,
   } = request;
 
   // Get system prompt
@@ -72,8 +75,8 @@ export async function processProductAssistantRequest(
 
   // Stream Text with AI model
   const result = streamText({
-    // Model: Using OpenAI o3-mini
-    model: openai('o3-mini'),
+    // Model: selected by the reusable assistant model registry.
+    model: models.chat,
 
     // System Prompt:
     system: systemPrompt,

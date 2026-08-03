@@ -13,6 +13,7 @@ type ChatRequestBody = Record<string, unknown>;
 interface UseChatSubmissionProps {
   sendMessage: (message: { text: string }, options?: { body: any }) => void;
   buildRequestBody?: () => ChatRequestBody;
+  selectedModelId?: string;
 }
 
 interface UseChatSubmissionReturn {
@@ -29,6 +30,7 @@ interface UseChatSubmissionReturn {
 export function useChatSubmission({
   sendMessage,
   buildRequestBody,
+  selectedModelId,
 }: UseChatSubmissionProps): UseChatSubmissionReturn {
   const [input, setInput] = useState('');
   const [clickedSuggestionCard, setClickedSuggestionCard] = useState<any>(null);
@@ -37,7 +39,14 @@ export function useChatSubmission({
    * Prepare message body with adapter-provided business context
    */
   const prepareMessageBody = () => {
-    return buildRequestBody ? buildRequestBody() : {};
+    // 1. Ask the adapter for business context that should travel with the request.
+    const businessBody = buildRequestBody ? buildRequestBody() : {};
+
+    // 2. Add reusable assistant model selection without coupling callers to ShopMate.
+    return {
+      ...businessBody,
+      ...(selectedModelId && { modelId: selectedModelId }),
+    };
   };
 
   /**

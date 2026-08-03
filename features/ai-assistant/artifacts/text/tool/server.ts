@@ -18,11 +18,11 @@
  */
 
 import { streamText, smoothStream } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import type { UIMessageStreamWriter } from 'ai';
 import { supabaseAdmin } from '@/lib/supabase/client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 /**
  * Parameters for creating a text document
@@ -71,8 +71,9 @@ export async function createTextDocument({
   // ✅ STREAMING PHASE: Stream content in real-time
   // Generate text content using AI
   logger.debug('[Text Artifact] Starting text generation stream...');
+  const models = getAssistantModels();
   const { fullStream } = streamText({
-    model: openai('o3-mini'), // Use artifact-specific model
+    model: models.chat, // Use configured assistant model for artifact content.
     system:
       'Write about the given topic. Markdown is supported. Use headings wherever appropriate. Be clear, concise, and well-structured.',
     experimental_transform: smoothStream({
@@ -189,4 +190,3 @@ export async function createTextDocument({
 
   return fullContent;
 }
-
