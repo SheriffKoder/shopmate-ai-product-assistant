@@ -47,7 +47,16 @@ export type ShadowDictionary = {
     resultCount: string;
   };
   productDetail: ShadowPageDictionary & {
+    backToProducts: string;
+    colorsTitle: string;
+    descriptionTitle: string;
+    featuresTitle: string;
+    noImage: string;
     notFound: string;
+    ratingLabel: string;
+    relatedEmptyState: string;
+    relatedTitle: string;
+    viewLabel: string;
   };
   category: ShadowPageDictionary & {
     emptyState: string;
