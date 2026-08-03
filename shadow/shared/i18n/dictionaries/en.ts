@@ -30,6 +30,11 @@ export const shadowEnDictionary = {
     title: 'Shadow home',
     eyebrow: 'Server-first catalog',
     description: 'A localized catalog page that will read products and categories from Supabase.',
+    heroAction: 'Browse products',
+    categoriesTitle: 'Shop by category',
+    featuredTitle: 'Featured products',
+    latestTitle: 'Latest arrivals',
+    emptyState: 'No catalog products are available yet.',
   },
   products: {
     title: 'Shadow products',

@@ -8,6 +8,9 @@
 
 import { ShadowHomeView } from '@/shadow/views/home';
 import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
+import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shadow/shared/config/cache';
+
+export const revalidate = SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS;
 
 type ShadowHomePageProps = {
   params: Promise<{

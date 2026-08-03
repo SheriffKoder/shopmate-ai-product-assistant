@@ -30,6 +30,11 @@ export const shadowArDictionary = {
     title: 'صفحة الظل الرئيسية',
     eyebrow: 'كتالوج من الخادم أولا',
     description: 'صفحة كتالوج مترجمة ستقرأ المنتجات والفئات من Supabase.',
+    heroAction: 'تصفح المنتجات',
+    categoriesTitle: 'تسوق حسب الفئة',
+    featuredTitle: 'منتجات مميزة',
+    latestTitle: 'وصل حديثا',
+    emptyState: 'لا توجد منتجات في الكتالوج بعد.',
   },
   products: {
     title: 'منتجات الظل',

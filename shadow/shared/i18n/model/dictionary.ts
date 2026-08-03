@@ -33,7 +33,13 @@ export type ShadowDictionary = {
   header: {
     navigation: ShadowNavigationDictionary;
   };
-  home: ShadowPageDictionary;
+  home: ShadowPageDictionary & {
+    heroAction: string;
+    categoriesTitle: string;
+    featuredTitle: string;
+    latestTitle: string;
+    emptyState: string;
+  };
   products: ShadowPageDictionary & {
     emptyState: string;
   };
