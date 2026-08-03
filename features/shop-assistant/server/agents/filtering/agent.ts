@@ -23,6 +23,9 @@ interface FilteringRequest {
   products?: any[];
   cart?: any;
   models: AssistantResolvedModels;
+  catalogSource: import('@/features/shop-assistant/model/catalog-source').CatalogSource;
+  cartSource?: import('@/features/shop-assistant/model/cart-source').CartSource;
+  userQuery: string;
 }
 
 /**
@@ -40,8 +43,13 @@ export async function processFilteringRequest(
   // Get system prompt
   const systemPrompt = getFilteringPrompt();
 
-  // Get product catalog context
-  const productCatalogContext = getProductCatalogContext(products);
+  // Get product catalog context from the catalog source.
+  // Why: Filtering agents should reason over candidate products, not the entire catalog.
+  const contextProducts = await request.catalogSource.getProductContext({
+    query: request.userQuery,
+    limit: 8,
+  });
+  const productCatalogContext = getProductCatalogContext(contextProducts.length > 0 ? contextProducts : products);
   
   // Get cart context
   const cartContext = getCartContext(cart);
@@ -100,8 +108,8 @@ export async function processFilteringRequest(
     // Tools - use productSearch to display products when found
     // Pass dataStream to enable streaming custom data types
     tools: {
-      productSearch: createProductSearchTool(products, dataStream),
-      ...(cart && { cartInfo: createCartInfoTool(cart, dataStream) }),
+      productSearch: createProductSearchTool(request.catalogSource, dataStream),
+      ...(request.cartSource && { cartInfo: createCartInfoTool(request.cartSource, dataStream) }),
     },
   });
 

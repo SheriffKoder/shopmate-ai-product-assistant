@@ -6,6 +6,9 @@
 - Electronics-specific query and product classification agents.
 - Product, filtering, recommendation, cart, technical-discussion, and not-related agent behavior.
 - ShopMate system prompts and product/cart catalog context builders.
+- Product/cart data-source contracts for assistant tools and renderer mutation boundaries.
+- Current mock/session catalog and cart source implementations.
+- Future DB catalog source boundary and structured filter mapping.
 - Product search and cart info AI tool factories.
 - Product/cart tool renderers, cards, and renderer registry.
 - ShopMate search/ranking helpers used by the adapter and current product UI.

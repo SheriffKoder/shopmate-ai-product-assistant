@@ -17,7 +17,11 @@
 
 import type { AssistantRuntime } from '@/features/ai-assistant/model/assistant-runtime';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import type { CartState } from '@/features/shop/model/cart';
+import type { Product } from '@/features/shop/model/product';
 import { classifyQuery } from './agents';
+import { createMockCartSource } from './mock-cart-source';
+import { createMockCatalogSource } from './mock-catalog-source';
 import { routeToAgent, type AgentRequest } from './router';
 
 /**
@@ -31,13 +35,22 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
     // 2. Keep current query classification behavior behind the runtime boundary.
     const classification = await classifyQuery({ query: request.userQuery, model: models.chat });
 
-    // 3. Adapt generic business context back into the existing ShopMate agent request shape.
+    // 3. Build adapter-owned data sources from the current request context.
+    const products = request.businessContext.products as Product[] | undefined;
+    const cart = request.businessContext.cart as CartState | undefined;
+    const catalogSource = createMockCatalogSource(products);
+    const cartSource = cart ? createMockCartSource(cart) : undefined;
+
+    // 4. Adapt generic business context back into the existing ShopMate agent request shape.
     return routeToAgent(
       classification,
       {
         messages: request.messages,
         ...request.businessContext,
         models,
+        catalogSource,
+        cartSource,
+        userQuery: request.userQuery,
       } as AgentRequest,
       request.userQuery,
       dataStream

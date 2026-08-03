@@ -157,6 +157,17 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish }: ChatContainerProps) 
   const toolRendererContext = {
     cart,
     dispatchCartAction,
+    cartMutations: {
+      increaseQuantity(productId: string) {
+        dispatchCartAction({ type: 'INCREASE_QUANTITY', payload: productId });
+      },
+      decreaseQuantity(productId: string) {
+        dispatchCartAction({ type: 'DECREASE_QUANTITY', payload: productId });
+      },
+      removeItem(productId: string) {
+        dispatchCartAction({ type: 'REMOVE_FROM_CART', payload: productId });
+      },
+    },
   };
 
   //////////////////////////////////

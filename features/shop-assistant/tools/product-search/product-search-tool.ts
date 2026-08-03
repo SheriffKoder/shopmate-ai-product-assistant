@@ -23,8 +23,8 @@
 
 import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
-import { Product } from '@/features/shop/model/product';
-import { analyzeItemsWithAI } from '../../lib/ai-search-agent';
+import type { Product } from '@/features/shop/model/product';
+import type { CatalogSearchSort, CatalogSource } from '@/features/shop-assistant/model/catalog-source';
 
 // Schema for product output (matches Product interface)
 const productSchema = z.object({
@@ -51,20 +51,42 @@ const productSearchOutputSchema = z.object({
 });
 
 export const createProductSearchTool = (
-  products: Product[] = [],
+  catalogSource: CatalogSource,
   dataStream?: UIMessageStreamWriter<any>
 ) => dynamicTool({
   description: 'MANDATORY: Use this tool whenever a user asks about products, wants to buy something, asks to see products, requests recommendations, or searches for specific items. This tool displays products in visual cards that users can see. Examples: "I want to buy an AirPod" → use this tool, "show me smartphones" → use this tool, "what are the best laptops?" → use this tool, "recommend products under $500" → use this tool, "show me tablets" → use this tool, "what products do you have?" → use this tool. DO NOT just describe products from memory - always use this tool to show actual products from the catalog. Filter and return products that match the user\'s query based on name, category, price range, rating, or features.',
   inputSchema: z.object({
     query: z.string().describe('The user\'s search query or request. Extract keywords like product type (smartphone, laptop, tablet, etc.), price range, rating requirements, or specific features. Examples: "smartphones", "laptops under $1000", "best rated products", "gaming laptops", "products with 5G"'),
+    category: z.string().optional().describe('Specific product category filter such as smartphone, laptop, tablet, smartwatch, or headphones.'),
+    minPrice: z.number().optional().describe('Minimum product price when the user asks for products above a budget floor.'),
+    maxPrice: z.number().optional().describe('Maximum product price when the user asks for products under or within a budget.'),
+    color: z.string().optional().describe('Requested product color, if any.'),
+    minRating: z.number().optional().describe('Minimum product rating from 0 to 5 when the user asks for highly rated products.'),
+    keywords: z.array(z.string()).optional().describe('Specific feature, brand, or use-case keywords extracted from the request.'),
     maxResults: z.number().optional().describe('Maximum number of products to return. Default is 10. Use smaller numbers (3-5) for "best" or "top" queries, and larger numbers (10-20) for general browsing.'),
-    sortBy: z.enum(['rating', 'price-low', 'price-high', 'reviews', 'name']).optional().describe('How to sort the results. Default is "rating" for best products, or "name" for alphabetical. Use "price-low" for budget options, "price-high" for premium, "reviews" for most reviewed.'),
+    sortBy: z.enum(['relevance', 'rating', 'price-low', 'price-high', 'reviews', 'name']).optional().describe('How to sort the results. Default is "relevance". Use "price-low" for budget options, "price-high" for premium, "reviews" for most reviewed.'),
   }),
   execute: async (input) => {
-    const { query, maxResults = 10, sortBy = 'rating' } = input as {
+    const {
+      query,
+      category,
+      minPrice,
+      maxPrice,
+      color,
+      minRating,
+      keywords,
+      maxResults = 10,
+      sortBy = 'relevance',
+    } = input as {
       query: string;
+      category?: string;
+      minPrice?: number;
+      maxPrice?: number;
+      color?: string;
+      minRating?: number;
+      keywords?: string[];
       maxResults?: number;
-      sortBy?: 'rating' | 'price-low' | 'price-high' | 'reviews' | 'name';
+      sortBy?: CatalogSearchSort;
     };
 
     //////////////////////////////////
@@ -77,39 +99,25 @@ export const createProductSearchTool = (
       transient: true, // UI-only, don't save to message history
     });
 
-    // Use AI to analyze and rank products by relevance to the query
+    // Search Catalog: Ask the adapter source for filtered products.
+    // Why: Keeps mock/session data and future DB filters outside the reusable assistant contract.
     let matchingProducts: Product[] = [];
     
     try {
-      // Analyze products with AI to rank by relevance
-      const rankedProducts = await analyzeItemsWithAI(query, products, 'products');
-      
-      // Apply additional sorting if specified (after AI relevance ranking)
-      if (sortBy !== 'rating') {
-        rankedProducts.sort((a, b) => {
-          switch (sortBy) {
-            case 'price-low':
-              return a.price - b.price;
-            case 'price-high':
-              return b.price - a.price;
-            case 'reviews':
-              return b.reviewsCount - a.reviewsCount;
-            case 'name':
-              return a.name.localeCompare(b.name);
-            default:
-              return 0; // Keep AI ranking
-          }
-        });
-      }
-      
-      // Limit results
-      matchingProducts = rankedProducts.slice(0, maxResults);
+      matchingProducts = await catalogSource.searchProducts({
+        query,
+        category,
+        minPrice,
+        maxPrice,
+        color,
+        minRating,
+        keywords,
+        limit: maxResults,
+        sortBy,
+      });
     } catch (error) {
-      console.error('Error in AI product search:', error);
-      // Fallback: return all products sorted by rating
-      matchingProducts = products
-        .sort((a, b) => b.rating - a.rating)
-        .slice(0, maxResults);
+      console.error('Error in catalog product search:', error);
+      matchingProducts = [];
     }
 
     //////////////////////////////////

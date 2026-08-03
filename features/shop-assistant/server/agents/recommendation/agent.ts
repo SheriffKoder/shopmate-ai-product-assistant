@@ -28,6 +28,9 @@ interface RecommendationRequest {
   products?: any[];
   cart?: any;
   models: AssistantResolvedModels;
+  catalogSource: import('@/features/shop-assistant/model/catalog-source').CatalogSource;
+  cartSource?: import('@/features/shop-assistant/model/cart-source').CartSource;
+  userQuery: string;
 }
 
 /**
@@ -45,8 +48,13 @@ export async function processRecommendationRequest(
   // Get system prompt
   const systemPrompt = getRecommendationPrompt();
 
-  // Get product catalog context
-  const productCatalogContext = getProductCatalogContext(products);
+  // Get product catalog context from the catalog source.
+  // Why: Recommendations should receive a filtered catalog slice now and a DB-filtered slice later.
+  const contextProducts = await request.catalogSource.getProductContext({
+    query: request.userQuery,
+    limit: 8,
+  });
+  const productCatalogContext = getProductCatalogContext(contextProducts.length > 0 ? contextProducts : products);
   
   // Get cart context
   const cartContext = getCartContext(cart);
@@ -111,7 +119,7 @@ export async function processRecommendationRequest(
     // Pass dataStream to enable streaming custom data types
     // Pass sharedDocumentId getter/setter so tool can use the agent's ID
     tools: {
-      productSearch: createProductSearchTool(products, dataStream),
+      productSearch: createProductSearchTool(request.catalogSource, dataStream),
       ...(dataStream && { 
         createDocument: createDocumentTool(
           dataStream, 

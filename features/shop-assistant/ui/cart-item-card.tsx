@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Package, Plus, Minus, Trash2 } from 'lucide-react';
 import { CartAction } from '@/features/shop/model/cart';
+import type { CartMutationController } from '@/features/shop-assistant/model/cart-source';
 
 interface CartItemCardProps {
   id: string;
@@ -24,6 +25,7 @@ interface CartItemCardProps {
   image?: string;
   productId?: string;
   dispatchCartAction?: (action: CartAction) => void;
+  cartMutations?: CartMutationController;
 }
 
 export const CartItemCard = ({
@@ -36,12 +38,55 @@ export const CartItemCard = ({
   image,
   productId,
   dispatchCartAction,
+  cartMutations,
 }: CartItemCardProps) => {
   const router = useRouter();
 
   const handleCardClick = () => {
     if (productId) {
       router.push(`/products/${productId}`);
+    }
+  };
+
+  /**
+   * Removes the current item through the adapter mutation contract.
+   */
+  const handleRemoveItem = () => {
+    if (cartMutations && productId) {
+      cartMutations.removeItem(productId);
+      return;
+    }
+
+    if (dispatchCartAction && productId) {
+      dispatchCartAction({ type: 'REMOVE_FROM_CART', payload: productId });
+    }
+  };
+
+  /**
+   * Decreases the current item quantity through the adapter mutation contract.
+   */
+  const handleDecreaseQuantity = () => {
+    if (cartMutations && productId) {
+      cartMutations.decreaseQuantity(productId);
+      return;
+    }
+
+    if (dispatchCartAction && productId) {
+      dispatchCartAction({ type: 'DECREASE_QUANTITY', payload: productId });
+    }
+  };
+
+  /**
+   * Increases the current item quantity through the adapter mutation contract.
+   */
+  const handleIncreaseQuantity = () => {
+    if (cartMutations && productId) {
+      cartMutations.increaseQuantity(productId);
+      return;
+    }
+
+    if (dispatchCartAction && productId) {
+      dispatchCartAction({ type: 'INCREASE_QUANTITY', payload: productId });
     }
   };
 
@@ -93,13 +138,13 @@ export const CartItemCard = ({
       </div>
       
       {/* Quantity Controls */}
-      {dispatchCartAction && productId && (
+      {(cartMutations || dispatchCartAction) && productId && (
         <div className="flex items-center gap-2 mt-3 w-fit ml-auto">
           {/* Remove Button (Trash Icon) */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              dispatchCartAction({ type: 'REMOVE_FROM_CART', payload: productId });
+              handleRemoveItem();
             }}
             className="cursor-pointer p-1.5 rounded hover:bg-white/20 transition-colors w-fit disabled:opacity-50 disabled:cursor-not-allowed"
             title="Remove from cart"
@@ -112,7 +157,7 @@ export const CartItemCard = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                dispatchCartAction({ type: 'DECREASE_QUANTITY', payload: productId });
+                handleDecreaseQuantity();
               }}
               disabled={!quantity || quantity <= 1}
               className="cursor-pointer p-1.5 rounded hover:bg-white/20 transition-colors w-fit disabled:opacity-50 disabled:cursor-not-allowed"
@@ -124,7 +169,7 @@ export const CartItemCard = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                dispatchCartAction({ type: 'INCREASE_QUANTITY', payload: productId });
+                handleIncreaseQuantity();
               }}
               className="cursor-pointer p-1.5 rounded hover:bg-white/20 transition-colors w-fit"
               title="Increase quantity"

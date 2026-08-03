@@ -21,6 +21,9 @@ interface AgentRequest {
   products?: any[]; // Array of Product objects
   cart?: CartState; // Cart state
   models: AssistantResolvedModels;
+  catalogSource: import('@/features/shop-assistant/model/catalog-source').CatalogSource;
+  cartSource?: import('@/features/shop-assistant/model/cart-source').CartSource;
+  userQuery: string;
 }
 
 /**
@@ -43,8 +46,13 @@ export async function processProductAssistantRequest(
   // Get system prompt
   const systemPrompt = getSystemPrompt();
 
-  // Get product catalog context
-  const productCatalogContext = getProductCatalogContext(products);
+  // Get product catalog context from the catalog source.
+  // Why: Future DB filters can return a small context set instead of dumping the whole catalog into the model.
+  const contextProducts = await request.catalogSource.getProductContext({
+    query: request.userQuery,
+    limit: 8,
+  });
+  const productCatalogContext = getProductCatalogContext(contextProducts.length > 0 ? contextProducts : products);
 
   // Add product catalog data to the last user message by modifying the text content
   const messagesWithProductData = messages.map((msg, index) => {
@@ -100,8 +108,8 @@ export async function processProductAssistantRequest(
 
     // Tools - Pass dataStream to enable streaming custom data types
     tools: {
-      productSearch: createProductSearchTool(products, dataStream),
-      ...(cart && { cartInfo: createCartInfoTool(cart, dataStream) }),
+      productSearch: createProductSearchTool(request.catalogSource, dataStream),
+      ...(request.cartSource && { cartInfo: createCartInfoTool(request.cartSource, dataStream) }),
     },
     // stopWhen: stepCountIs(20), // not do more than 20 tool calls to avoid infinite loops
   });

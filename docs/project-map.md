@@ -58,7 +58,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/cart/`: dedicated cart page content.
 - `features/checkout/`: checkout page content.
 - `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Product/cart ownership is being migrated out for assistant reusability.
-- `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart tool factories, product/cart tool renderers, renderer registry, UI integration shell, adapter search helpers, and runtime model consumption.
+- `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart data-source contracts, mock/DB-ready catalog sources, tool factories, product/cart tool renderers, renderer registry, UI integration shell, adapter search helpers, and runtime model consumption.
 - `features/shop/`: ShopMate product/cart model types, mock initial catalog data, shop provider, and product/cart state hooks used by the storefront and assistant integration.
 - `features/ai-filter/`: reusable natural-language URL filter assistant. Host pages pass catalog/config; the package handles prompt building, response sanitization, and URL patch application.
 - `features/toast-success/`: global toast primitives, hook, container, and error config.
@@ -76,11 +76,14 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/ai-assistant/server/default-assistant-runtime.ts`, `features/ai-assistant/agents`, `features/ai-assistant/lib/router.ts`, and product/cart tool paths are temporary compatibility exports for the staged migration.
 - `features/shop-assistant/server/shop-assistant-runtime.ts` implements the runtime injected into the reusable assistant handler and resolves selected request models once per stream.
 - `features/shop-assistant/ui/shop-assistant-integration.tsx` mounts the reusable assistant root with ShopMate stream handling and chat id wiring.
+- `features/shop-assistant/model/catalog-source.ts` and `model/cart-source.ts` define product/cart data contracts for assistant tools and renderers.
+- `features/shop-assistant/server/mock-catalog-source.ts` adapts request/mock products to the catalog contract with deterministic filters before AI ranking.
+- `features/shop-assistant/server/db-catalog-source.ts` documents the future Supabase/Postgres filter implementation boundary.
 - `features/shop-assistant/server/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
 - `features/shop-assistant/server/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
 - `features/shop-assistant/server/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized ShopMate agent implementations and prompts.
 - `features/shop-assistant/server/router.ts` coordinates ShopMate routing to the selected agent.
-- `features/shop-assistant/tools/product-search/` and `tools/cart-info/` define ShopMate AI tool behavior.
+- `features/shop-assistant/tools/product-search/` and `tools/cart-info/` define ShopMate AI tool behavior over adapter-owned catalog/cart sources.
 - `features/shop-assistant/ui/tool-renderer-registry.tsx` registers ShopMate product/cart tool renderers for the generic assistant message renderer.
 - `features/ai-assistant/artifacts/` contains text and sheet artifact support, version-history hooks, panel UI, and document tool result/call components.
 - `features/ai-assistant/history-sidebar/` contains chat history UI, SWR pagination, date grouping, navigation helpers, and deletion operation notes.

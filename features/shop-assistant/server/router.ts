@@ -20,6 +20,8 @@ import type { UIMessage, UIMessageStreamWriter } from 'ai';
 import type { Product } from '@/features/shop/model/product';
 import type { CartState } from '@/features/shop/model/cart';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import type { CatalogSource } from '@/features/shop-assistant/model/catalog-source';
+import type { CartSource } from '@/features/shop-assistant/model/cart-source';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { createError } from '@/features/ai-assistant/lib/errors';
 import {
@@ -41,6 +43,9 @@ export type AgentRequest = {
   products?: Product[];
   cart?: CartState;
   models: AssistantResolvedModels;
+  catalogSource: CatalogSource;
+  cartSource?: CartSource;
+  userQuery: string;
 };
 
 /**

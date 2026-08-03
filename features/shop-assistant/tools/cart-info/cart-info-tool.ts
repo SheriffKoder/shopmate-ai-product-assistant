@@ -24,7 +24,8 @@
 
 import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
-import { CartState, CartItem } from '@/features/shop/model/cart';
+import { CartItem } from '@/features/shop/model/cart';
+import type { CartSource } from '@/features/shop-assistant/model/cart-source';
 import { searchInTarget, searchInProduct } from '../../lib/search-utils';
 import { analyzeItemsWithAI } from '../../lib/ai-search-agent';
 
@@ -64,7 +65,7 @@ const cartInfoOutputSchema = z.object({
 });
 
 export const createCartInfoTool = (
-  cart: CartState,
+  cartSource: CartSource,
   dataStream?: UIMessageStreamWriter<any>
 ) => dynamicTool({
   description: 'MANDATORY: Use this tool when users ask about their shopping cart, want to see cart items, want to modify cart items, or ask questions about items in their cart. Examples: "show me my cart" → use this tool, "what\'s in my cart?" → use this tool, "show me the iPhone in my cart" → use this tool with specific product, "remove item from cart" → use this tool, "how much is my cart?" → use this tool. CRITICAL: When users ask to modify, change, update, adjust, or remove items (e.g., "can I modify the iPhone?", "change quantity", "update item"), you MUST use this tool immediately to display the item with controls. Do NOT ask for clarification first - show the item so they can use the controls. DO NOT use this tool for general product questions - use productSearch instead. This tool is specifically for cart-related queries.',
@@ -77,6 +78,7 @@ export const createCartInfoTool = (
     };
 
     const queryLower = query.toLowerCase().trim();
+    const cart = await cartSource.getCart();
 
     // Determine if query is for all items or specific product
     const isAllQuery = queryLower === 'all' || 

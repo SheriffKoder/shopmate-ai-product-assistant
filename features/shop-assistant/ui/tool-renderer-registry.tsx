@@ -20,6 +20,7 @@
 
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 import type { CartAction, CartState } from '@/features/shop/model/cart';
+import type { CartMutationController } from '@/features/shop-assistant/model/cart-source';
 import { CartInfoToolRenderer } from './cart-info-tool-renderer';
 import { ProductSearchToolRenderer } from './product-search-tool-renderer';
 
@@ -28,6 +29,8 @@ export interface ShopAssistantToolRendererContext {
   cart?: CartState;
   /** Cart dispatcher used by adapter-owned product/cart controls. */
   dispatchCartAction?: (action: CartAction) => void;
+  /** Named cart mutations used by cart-specific renderers. */
+  cartMutations?: CartMutationController;
 }
 
 export const shopAssistantToolRenderers: AssistantToolRendererRegistry<ShopAssistantToolRendererContext> = {
@@ -47,6 +50,7 @@ export const shopAssistantToolRenderers: AssistantToolRendererRegistry<ShopAssis
       partIndex={partIndex}
       dispatchCartAction={context?.dispatchCartAction}
       cart={context?.cart}
+      cartMutations={context?.cartMutations}
     />
   ),
 };
