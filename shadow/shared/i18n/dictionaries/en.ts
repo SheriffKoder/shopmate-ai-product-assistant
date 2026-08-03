@@ -40,7 +40,14 @@ export const shadowEnDictionary = {
     title: 'Shadow products',
     eyebrow: 'Catalog listing',
     description: 'A server-rendered product listing for the shadow migration.',
+    allCategories: 'All categories',
+    categoryFilterLabel: 'Product categories',
     emptyState: 'No products are available yet.',
+    filteredByCategory: 'Products in {category}',
+    filteredByCategoryAndSearch: 'Products in {category} matching "{search}"',
+    filteredBySearch: 'Search results for "{search}"',
+    gridTitle: 'Products',
+    resultCount: '{count} products found',
   },
   productDetail: {
     title: 'Shadow product',
@@ -53,6 +60,8 @@ export const shadowEnDictionary = {
     eyebrow: 'Category listing',
     description: 'A server-rendered category page for the shadow migration.',
     emptyState: 'No products are available in this category yet.',
+    gridTitle: 'Category products',
+    resultCount: '{count} products found',
   },
   dev: {
     title: 'Shadow dev tools',

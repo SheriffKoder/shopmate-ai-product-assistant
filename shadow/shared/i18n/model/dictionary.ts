@@ -41,13 +41,22 @@ export type ShadowDictionary = {
     emptyState: string;
   };
   products: ShadowPageDictionary & {
+    allCategories: string;
+    categoryFilterLabel: string;
     emptyState: string;
+    filteredByCategory: string;
+    filteredByCategoryAndSearch: string;
+    filteredBySearch: string;
+    gridTitle: string;
+    resultCount: string;
   };
   productDetail: ShadowPageDictionary & {
     notFound: string;
   };
   category: ShadowPageDictionary & {
     emptyState: string;
+    gridTitle: string;
+    resultCount: string;
   };
   dev: ShadowPageDictionary & {
     seedAction: string;

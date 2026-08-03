@@ -40,7 +40,14 @@ export const shadowArDictionary = {
     title: 'منتجات الظل',
     eyebrow: 'قائمة الكتالوج',
     description: 'قائمة منتجات يتم عرضها من الخادم لمسار الهجرة الجديد.',
+    allCategories: 'كل الفئات',
+    categoryFilterLabel: 'فئات المنتجات',
     emptyState: 'لا توجد منتجات متاحة بعد.',
+    filteredByCategory: 'منتجات في {category}',
+    filteredByCategoryAndSearch: 'منتجات في {category} تطابق "{search}"',
+    filteredBySearch: 'نتائج البحث عن "{search}"',
+    gridTitle: 'المنتجات',
+    resultCount: 'تم العثور على {count} منتج',
   },
   productDetail: {
     title: 'منتج الظل',
@@ -53,6 +60,8 @@ export const shadowArDictionary = {
     eyebrow: 'قائمة الفئة',
     description: 'صفحة فئة يتم عرضها من الخادم لمسار الهجرة الجديد.',
     emptyState: 'لا توجد منتجات متاحة في هذه الفئة بعد.',
+    gridTitle: 'منتجات الفئة',
+    resultCount: 'تم العثور على {count} منتج',
   },
   dev: {
     title: 'أدوات تطوير الظل',

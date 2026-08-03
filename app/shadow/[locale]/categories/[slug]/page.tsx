@@ -7,6 +7,9 @@
  */
 
 import { ShadowCategoryView } from '@/shadow/views/category';
+import { getShadowCategoryStaticParams } from '@/shadow/entities/category/queries/category-queries';
+import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shadow/shared/config/cache';
+import { SHADOW_LOCALES } from '@/shadow/shared/i18n/config';
 import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
 
 type ShadowCategoryPageProps = {
@@ -15,6 +18,26 @@ type ShadowCategoryPageProps = {
     slug: string;
   }>;
 };
+
+export const revalidate = SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS;
+
+/**
+ * Prebuilds known shadow category pages for every supported locale.
+ *
+ * @returns Locale/category slug combinations for static generation.
+ */
+export async function generateStaticParams() {
+  const categoryParams = await getShadowCategoryStaticParams();
+
+  return SHADOW_LOCALES.flatMap(function mapLocale(locale) {
+    return categoryParams.map(function mapCategory(category) {
+      return {
+        locale,
+        slug: category.slug,
+      };
+    });
+  });
+}
 
 /**
  * Renders one shadow category page.

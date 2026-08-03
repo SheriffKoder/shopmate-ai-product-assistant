@@ -3,33 +3,29 @@
  *
  * Purpose: Server-first composition surface for the shadow products route.
  * Used in: app/shadow/[locale]/products/page.tsx
- * Used for: Holds the phase-0 products placeholder until catalog queries are added.
+ * Used for: Loads localized copy and server-filtered catalog data for product listings.
  */
 
 import type { ShadowLocale } from '@/shadow/shared/i18n/config';
 import { getShadowDictionary } from '@/shadow/shared/i18n/lib/get-dictionary';
+import { getShadowProductsPageData } from '@/shadow/views/products/queries/get-products-page-data';
+import { ShadowProductsPage } from '@/shadow/views/products/ui/products-page';
 
 type ShadowProductsViewProps = {
   locale: ShadowLocale;
+  searchParams: Record<string, string | string[] | undefined>;
 };
 
 /**
- * Renders the shadow products listing placeholder.
+ * Renders the shadow products listing view.
  *
- * @param props - Active locale for localized copy and future catalog queries.
- * @returns A server-rendered products placeholder.
+ * @param props - Active locale and URL filters for server-side catalog queries.
+ * @returns A server-rendered products page.
  */
-export function ShadowProductsView(props: ShadowProductsViewProps) {
-  const { locale } = props;
+export async function ShadowProductsView(props: ShadowProductsViewProps) {
+  const { locale, searchParams } = props;
   const dictionary = getShadowDictionary(locale);
+  const data = await getShadowProductsPageData(locale, searchParams);
 
-  return (
-    <main className="min-h-screen p-6">
-      <p className="text-sm font-medium uppercase text-muted-foreground">
-        {dictionary.products.eyebrow}
-      </p>
-      <h1 className="mt-2 text-3xl font-semibold">{dictionary.products.title}</h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">{dictionary.products.description}</p>
-    </main>
-  );
+  return <ShadowProductsPage data={data} dictionary={dictionary} locale={locale} />;
 }

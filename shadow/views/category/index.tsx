@@ -3,11 +3,14 @@
  *
  * Purpose: Server-first composition surface for one shadow category route.
  * Used in: app/shadow/[locale]/categories/[slug]/page.tsx
- * Used for: Holds the phase-0 category placeholder until catalog queries are added.
+ * Used for: Loads localized copy and DB-backed products for one category.
  */
 
+import { notFound } from 'next/navigation';
 import type { ShadowLocale } from '@/shadow/shared/i18n/config';
 import { getShadowDictionary } from '@/shadow/shared/i18n/lib/get-dictionary';
+import { getShadowCategoryPageData } from '@/shadow/views/category/queries/get-category-page-data';
+import { ShadowCategoryPage } from '@/shadow/views/category/ui/category-page';
 
 type ShadowCategoryViewProps = {
   locale: ShadowLocale;
@@ -15,23 +18,19 @@ type ShadowCategoryViewProps = {
 };
 
 /**
- * Renders the shadow category placeholder.
+ * Renders one shadow category view.
  *
- * @param props - Active locale and category slug for future catalog queries.
- * @returns A server-rendered category placeholder.
+ * @param props - Active locale and category slug for catalog queries.
+ * @returns A server-rendered category page.
  */
-export function ShadowCategoryView(props: ShadowCategoryViewProps) {
+export async function ShadowCategoryView(props: ShadowCategoryViewProps) {
   const { locale, slug } = props;
   const dictionary = getShadowDictionary(locale);
+  const data = await getShadowCategoryPageData(slug);
 
-  return (
-    <main className="min-h-screen p-6">
-      <p className="text-sm font-medium uppercase text-muted-foreground">
-        {dictionary.category.eyebrow}
-      </p>
-      <h1 className="mt-2 text-3xl font-semibold">{dictionary.category.title}</h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">{dictionary.category.description}</p>
-      <p className="mt-4 text-sm text-muted-foreground">Slug: {slug}</p>
-    </main>
-  );
+  if (!data.category) {
+    notFound();
+  }
+
+  return <ShadowCategoryPage data={data} dictionary={dictionary} locale={locale} />;
 }
