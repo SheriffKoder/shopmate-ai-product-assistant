@@ -18,6 +18,8 @@ interface HeaderIconButtonProps {
   className?: string;
   tooltip?: string;
   isActive?: boolean;
+  activeClassName?: string;
+  inactiveClassName?: string;
 }
 
 export const HeaderIconButton = ({
@@ -27,6 +29,8 @@ export const HeaderIconButton = ({
   className = '',
   tooltip,
   isActive = false,
+  activeClassName = 'bg-black/10 text-primary',
+  inactiveClassName = 'bg-black/10 text-black/90',
 }: HeaderIconButtonProps) => {
   return (
     <button
@@ -34,7 +38,7 @@ export const HeaderIconButton = ({
       title={tooltip}
       className={`h-full px-3 py-2 rounded-sm cursor-pointer
       transition-all duration-300 text-md relative ${className}
-      ${isActive ? 'bg-black/10 text-primary' : 'bg-black/10 text-black/90'}`}
+      ${isActive ? activeClassName : inactiveClassName}`}
     >
       <Icon className="w-5 h-5 stroke-2" />
       {badgeCount !== undefined && badgeCount > 0 && (
@@ -45,4 +49,3 @@ export const HeaderIconButton = ({
     </button>
   );
 };
-

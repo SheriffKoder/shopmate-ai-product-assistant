@@ -648,4 +648,3 @@ export async function deleteChatById({ id }: { id: string }): Promise<boolean> {
     return false;
   }
 }
-

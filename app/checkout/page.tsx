@@ -7,7 +7,7 @@
  */
 
 import { Suspense } from 'react';
-import { CheckoutPageContent } from '@/features/checkout/checkout-page-content';
+import { CheckoutPageContent } from '@/views/checkout/checkout-page-content';
 
 export default function CheckoutPage() {
   return (

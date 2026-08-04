@@ -2,7 +2,7 @@
  * Fullscreen Context Provider
  * 
  * Purpose: Centralizes fullscreen state management for chat wrapper
- * Used in: layout-wrapper.tsx (wraps ChatWrapper)
+ * Used in: AssistantRootProvider (wraps ChatWrapper and artifact UI)
  * Why: Allows artifact panel and other components to check fullscreen state
  * 
  * Provides:
@@ -56,4 +56,3 @@ export function useFullscreen() {
   }
   return context;
 }
-

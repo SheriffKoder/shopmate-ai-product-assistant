@@ -7,7 +7,7 @@
  */
 
 import { Suspense } from 'react';
-import { ProductDetailPageContent } from '@/features/products/product-detail-page-content';
+import { ProductDetailPageContent } from '@/views/products/product-detail-page-content';
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;

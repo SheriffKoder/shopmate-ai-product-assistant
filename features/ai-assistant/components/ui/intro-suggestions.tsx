@@ -8,21 +8,22 @@
 
 'use client';
 
-import { introSuggestions, SuggestionSet } from '../../config/intro-suggestions';
+import { introSuggestions as defaultIntroSuggestions, SuggestionSet } from '../../config/intro-suggestions';
 import { ItemTypeCard } from './item-type-card';
 
 interface IntroSuggestionsProps {
   onSuggestionClick: (prompt: string, card: any) => void; // Callback when a suggestion card is clicked (now includes card data)
+  suggestions?: SuggestionSet[];
 }
 
-export const IntroSuggestions = ({ onSuggestionClick }: IntroSuggestionsProps) => {
+export const IntroSuggestions = ({ onSuggestionClick, suggestions = defaultIntroSuggestions }: IntroSuggestionsProps) => {
   const handleCardClick = (card: any) => {
     onSuggestionClick(card.header, card);
   };
 
   return (
     <div className="w-full space-y-6">
-      {introSuggestions.map((set: SuggestionSet, setIndex: number) => (
+      {suggestions.map((set: SuggestionSet, setIndex: number) => (
         <div key={setIndex} className="space-y-3">
           {/* Set Header */}
           <h3 className="text-sm font-semibold text-black/70 uppercase tracking-wide">
@@ -45,4 +46,3 @@ export const IntroSuggestions = ({ onSuggestionClick }: IntroSuggestionsProps) =
     </div>
   );
 };
-

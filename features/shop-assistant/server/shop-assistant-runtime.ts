@@ -1,0 +1,70 @@
+/**
+ * @file features/shop-assistant/server/shop-assistant-runtime.ts
+ * Shop Assistant Runtime
+ *
+ * Purpose: Adapts the current ShopMate agent router to the reusable assistant runtime contract.
+ * Used in: app/api/ai-assistant/route.ts.
+ * Used for: Keeping ShopMate classification, routing, and product/cart context outside the assistant core.
+ *
+ * Function Index:
+ * shopAssistantRuntime: Runtime implementation for ShopMate.
+ *
+ * Steps:
+ * 1. Classify the user query with the existing query classifier.
+ * 2. Rebuild the current agent request from generic business context.
+ * 3. Delegate to the ShopMate router inside this adapter package.
+ */
+
+import type { AssistantRuntime } from '@/features/ai-assistant/model/assistant-runtime';
+import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import { classifyQuery } from './agents';
+import { createMockShopApiClient } from './mock-shop-api-client';
+import { createCatalogSourceFromShopApi, createCartSourceFromShopApi } from './shop-api-sources';
+import { getInitialProducts } from '@/features/catalog/model/initial-data';
+import { routeToAgent, type AgentRequest } from './router';
+import { writeAssistantStep } from './assistant-step';
+
+/**
+ * Runtime that preserves current ShopMate assistant behavior behind the adapter contract.
+ */
+export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
+  async stream(request, dataStream) {
+    writeAssistantStep(dataStream, {
+      id: 'query-classification',
+      label: 'Classifying',
+      summary: 'Understanding the type of request.',
+      status: 'loading',
+    });
+    // 1. Resolve validated request models once so every agent shares the same runtime config.
+    const models = getAssistantModels(request.modelId);
+
+    // 2. Keep current query classification behavior behind the runtime boundary.
+    const classification = await classifyQuery({ query: request.userQuery, model: models.chat });
+    writeAssistantStep(dataStream, {
+      id: 'query-classification',
+      label: 'Classifying',
+      summary: 'Understanding the type of request.',
+      status: 'done',
+    });
+
+    // 3. Build the temporary API implementation at the server boundary.
+    // The runtime no longer accepts catalog/cart state from the assistant request.
+    const shopApi = createMockShopApiClient(getInitialProducts());
+    const catalogSource = createCatalogSourceFromShopApi(shopApi);
+    const cartSource = createCartSourceFromShopApi(shopApi);
+
+    // 4. Adapt generic business context back into the existing ShopMate agent request shape.
+    return routeToAgent(
+      classification,
+      {
+        messages: request.messages,
+        models,
+        catalogSource,
+        cartSource,
+        userQuery: request.userQuery,
+      } as AgentRequest,
+      request.userQuery,
+      dataStream
+    );
+  },
+};

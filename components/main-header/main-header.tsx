@@ -10,25 +10,22 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Home, User } from 'lucide-react';
-import ButtonDropdown from './ButtonDropdown';
+import { MessageCircle, ShoppingCart, User } from 'lucide-react';
+import ButtonDropdown from '@/features/cart/ui/cart-dropdown';
 import { HeaderIconButton } from './HeaderIconButton';
 import { HeaderSearchBar } from './HeaderSearchBar';
-import { useShop } from '@/features/ai-assistant/providers/shop-context';
-import { navigateToProductSearch } from '@/features/products/utils/navigation-utils';
+import { useCart } from '@/features/cart/hooks/use-cart';
+import { navigateToProductSearch } from '@/views/products/utils/navigation-utils';
+import { useAssistantShell } from '@/features/ai-assistant/providers/assistant-shell-context';
 
-interface MainHeaderProps {
-  onChatToggle?: () => void;
-  isChatOpen?: boolean;
-}
-
-export const MainHeader = ({ onChatToggle, isChatOpen = false }: MainHeaderProps) => {
+export const MainHeader = () => {
   const router = useRouter();
+  const { isOpen: isAssistantOpen, toggleAssistant } = useAssistantShell();
   
   // Shop Context: Provides cart state and operations
   // Why: Centralized state management, eliminates prop drilling
   //////////////////////////////////
-  const { cart, dispatchCartAction } = useShop();
+  const { cart, removeItem, decreaseQuantity, increaseQuantity } = useCart();
 
   const handleSearch = (query: string) => {
     navigateToProductSearch(router, query);
@@ -73,6 +70,15 @@ export const MainHeader = ({ onChatToggle, isChatOpen = false }: MainHeaderProps
           }}
         />
 
+        <HeaderIconButton
+          icon={MessageCircle}
+          tooltip={isAssistantOpen ? 'Close AI Assistant' : 'Open AI Assistant'}
+          onClick={toggleAssistant}
+          isActive={isAssistantOpen}
+          inactiveClassName="bg-black text-primary"
+          activeClassName="bg-primary text-black"
+        />
+
         {/* Shopping Cart */}
         <ButtonDropdown 
           icon={ShoppingCart} 
@@ -81,24 +87,12 @@ export const MainHeader = ({ onChatToggle, isChatOpen = false }: MainHeaderProps
           className=""
           headerTitle="Shopping Cart"
           tooltip="Shopping Cart"
-          dispatchCartAction={dispatchCartAction}
+          removeItem={removeItem}
+          decreaseQuantity={decreaseQuantity}
+          increaseQuantity={increaseQuantity}
         />
-
-        {/* ShopMate AI Chat Toggle Button */}
-        <button
-          onClick={onChatToggle}
-          className={`cursor-pointer hidden md:flex flex-row items-center gap-2 px-4 py-2 rounded-sm font-semibold transition-colors ${
-            isChatOpen 
-              ? 'bg-primary text-white hover:bg-primary/90' 
-              : 'bg-gray-100 text-black hover:bg-gray-200'
-          }`}
-        >
-          <Image src="/images/icon.png" alt="ShopMate AI" width={20} height={20} />
-          <span>ShopMate AI</span>
-        </button>
 
       </div>
     </div>
   );
 };
-
