@@ -13,7 +13,7 @@ import { Reasoning, ReasoningTrigger, ReasoningContent } from '@/components/ai-e
 import { DefaultToolRenderer } from '../tools/default-tool-renderer';
 import { MarkdownText } from './ui/markdown-text';
 import { DiscussionCard } from './ui/discussion-card';
-import { DocumentPreview } from '@/features/ai-assistant/artifacts/components';
+import { DocumentPreview } from '@/features/ai-assistant/components/artifacts/components';
 import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
 
 interface MessagePartRendererProps {

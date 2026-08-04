@@ -13,51 +13,46 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
+import { useEffect, type ReactNode } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { Loader } from '@/components/ai-elements/loader';
 import { useChatSubmission } from './hooks/use-chat-submission';
-import { useChatMessages } from './history-sidebar/hooks/use-chat-messages';
+import { useChatMessages } from './components/history-sidebar/hooks/use-chat-messages';
 import { EmptyState } from './components/ui/empty-state';
 import { MessageList } from './components/message-list';
 import { PromptInput } from './components/prompt-input';
-import { useShop } from '@/features/shop/providers/shop-context';
-import { useToast } from '@/features/toast-success/use-toast';
-import { getErrorConfig, getErrorLogMessage } from '@/features/toast-success/error-config';
 import { useDataStream } from './data-stream/data-stream-provider';
 import type { DataUIPart } from 'ai';
-import type { ShopMateUIDataTypes } from './types/stream';
-import { ArtifactPanel } from './artifacts/components/artifact-panel';
-import { useUpdateChatIdInUrl } from './history-sidebar/utils/chat-navigation';
+import type { AssistantUIDataTypes } from './types/stream';
+import type { SuggestionSet } from './config/intro-suggestions';
+import { ArtifactPanel } from './components/artifacts/components/artifact-panel';
+import { useUpdateChatIdInUrl } from './components/history-sidebar/utils/chat-navigation';
 import { useAssistantModelSelection } from './hooks/use-assistant-model-selection';
 import type { AssistantToolRendererRegistry } from './model/tool-renderer-registry';
+import { assistantApiEndpoints } from './model/api-endpoints';
 
 interface ChatContainerProps {
   chatId: string; // Combined chatId (URL or fallback)
   urlChatId: string | null; // URL chatId (null when cleared for new chat)
   onChatFinish?: () => void;
   toolRenderers?: AssistantToolRendererRegistry;
+  endpoint?: string;
+  onError?: (error: unknown) => void;
+  buildRequestBody?: () => Record<string, unknown>;
+  toolRendererContext?: unknown;
+  emptyState?: ReactNode;
+  suggestions?: SuggestionSet[];
 }
 
-const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatContainerProps) => {
-  //////////////////////////////////
-  // Shop Context: Provides products and cart state/operations
-  // Why: Centralized state management, eliminates prop drilling
-  //////////////////////////////////
-  const { products, cart, dispatchCartAction } = useShop();
-  
-  //////////////////////////////////
-  // Toast Hook: For user-friendly error notifications
-  // Why: Provides consistent error messaging to users
-  //////////////////////////////////
-  const { showError, showWarning, showInfo } = useToast();
+const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoint = assistantApiEndpoints.assistant, onError, buildRequestBody, toolRendererContext, emptyState, suggestions }: ChatContainerProps) => {
   
   //////////////////////////////////
   // Data Stream Access: For accumulating streaming data parts
   // Why: Need to store data parts from AI stream for processing by DataStreamHandler
   // How: setDataStream adds each data part to the stream array
   //////////////////////////////////
-  const { setDataStream } = useDataStream();
+  const { setDataStream, assistantSteps, setAssistantSteps } = useDataStream();
 
   //////////////////////////////////
   // Assistant Model Selection: Reusable model picker state included in every request
@@ -73,7 +68,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
   const { messages, setMessages, sendMessage, status, regenerate } = useChat({
     id: chatId,
     transport: new DefaultChatTransport({
-      api: '/api/ai-assistant',
+      api: endpoint,
     }),
     //////////////////////////////////
     // onData Callback: Accumulate streaming data parts
@@ -86,19 +81,13 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
     // Each data part is accumulated for processing by DataStreamHandler
     //////////////////////////////////
     onData: (dataPart) => {
-      // Type assertion: onData receives generic data parts, but we know they're ShopMate types
-      const typedDataPart = dataPart as DataUIPart<ShopMateUIDataTypes>;
+      // The host may narrow these generic parts in its injected stream handler.
+      const typedDataPart = dataPart as DataUIPart<AssistantUIDataTypes>;
       setDataStream((ds) => (ds ? [...ds, typedDataPart] : [typedDataPart]));
     },
     onError: (error) => {
       // Handle errors gracefully with user-friendly messages
-      console.error('[ChatContainer] Chat error:', getErrorLogMessage(error));
-      
-      // Get error configuration from centralized config
-      const errorConfig = getErrorConfig(error);
-      
-      // Show error toast to user
-      showError(errorConfig.message, errorConfig.title, errorConfig.duration);
+      onError?.(error);
     },
     //////////////////////////////////
     // onFinish Callback: Trigger sidebar refresh and update URL
@@ -123,6 +112,26 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
       }
     },
   });
+
+  useEffect(function synchronizeProgressLifecycle() {
+    if (status === 'submitted') {
+      // Every submission owns a fresh progress sequence.
+      setAssistantSteps([]);
+      return;
+    }
+
+    if (status === 'error') {
+      // Preserve completed work while making an interrupted active step honest.
+      setAssistantSteps((steps) => steps.map((step) => (
+        step.status === 'loading' ? { ...step, status: 'error' } : step
+      )));
+    }
+  }, [setAssistantSteps, status]);
+
+  useEffect(function clearProgressWhenChatChanges() {
+    // Switching history sessions must not display the previous request's progress.
+    setAssistantSteps([]);
+  }, [chatId, setAssistantSteps]);
 
   //////////////////////////////////
   // Load Messages from Database: When chatId changes
@@ -152,25 +161,8 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
   const shouldShowLoading = messages.length === 0 && urlChatId && isLoadingMessages;
 
   //////////////////////////////////
-  // ShopMate Tool Renderer Context: Adapter-owned context for product/cart tool UI
-  // Why: Keeps reusable message rendering generic while preserving cart interactions
+  // Tool renderer context is intentionally owned by the host adapter.
   //////////////////////////////////
-  const toolRendererContext = {
-    cart,
-    dispatchCartAction,
-    cartMutations: {
-      increaseQuantity(productId: string) {
-        dispatchCartAction({ type: 'INCREASE_QUANTITY', payload: productId });
-      },
-      decreaseQuantity(productId: string) {
-        dispatchCartAction({ type: 'DECREASE_QUANTITY', payload: productId });
-      },
-      removeItem(productId: string) {
-        dispatchCartAction({ type: 'REMOVE_FROM_CART', payload: productId });
-      },
-    },
-  };
-
   //////////////////////////////////
   // Chat Submission Hook: Handles input state and message submission
   //////////////////////////////////
@@ -183,10 +175,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
   } = useChatSubmission({
     sendMessage,
     selectedModelId,
-    buildRequestBody: () => ({
-      products,
-      cart,
-    }),
+    buildRequestBody,
   });
 
   return (
@@ -199,7 +188,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
             
             {/* Empty State: Show when no messages and no chatId (new chat) */}
             {shouldShowEmptyState && (
-              <EmptyState onSuggestionClick={handleSuggestionClick} />
+              <EmptyState onSuggestionClick={handleSuggestionClick} content={emptyState} suggestions={suggestions} />
             )}
 
             {/* Loading State: Show when chatId exists but messages are loading */}
@@ -222,6 +211,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
                 status={status}
                 toolRenderers={toolRenderers}
                 toolRendererContext={toolRendererContext}
+                assistantSteps={assistantSteps}
               />
             )}
 
@@ -256,8 +246,6 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers }: ChatC
         setInput={setInput}
         sendMessage={sendMessage}
         regenerate={regenerate}
-        cart={cart}
-        dispatchCartAction={dispatchCartAction}
         toolRenderers={toolRenderers}
         toolRendererContext={toolRendererContext}
       />

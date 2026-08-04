@@ -21,14 +21,10 @@
 
 import { createUIMessageStream, JsonToSseTransformStream } from 'ai';
 import type { AssistantRuntime } from '../model/assistant-runtime';
+import type { AssistantPersistence } from '../model/assistant-persistence';
 import { handleApiError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { extractUserQuery, generateUUID } from '../lib/utils';
-import {
-  loadOrCreateAssistantChat,
-  saveAssistantMessages,
-  saveLatestUserMessage,
-} from './assistant-chat-persistence';
 import { parseAssistantRequest } from './parse-assistant-request';
 
 /**
@@ -41,20 +37,21 @@ import { parseAssistantRequest } from './parse-assistant-request';
  */
 export async function handleAssistantRequest<TBusinessContext = Record<string, unknown>>(
   req: Request,
-  runtime: AssistantRuntime<TBusinessContext>
+  runtime: AssistantRuntime<TBusinessContext>,
+  persistence: AssistantPersistence
 ): Promise<Response> {
   try {
     // 1. Parse reusable assistant fields and collect app-owned request context.
     const parsedRequest = await parseAssistantRequest<TBusinessContext>(req);
 
     // 2. Resolve chat persistence before streaming so history has a stable parent row.
-    const chat = await loadOrCreateAssistantChat({
+    const chat = await persistence.loadOrCreateChat({
       chatId: parsedRequest.chatId,
       messages: parsedRequest.messages,
     });
 
     // 3. Persist the latest user message without blocking the runtime boundary with database details.
-    await saveLatestUserMessage({
+    await persistence.saveLatestUserMessage({
       chatId: chat.chatId,
       messages: parsedRequest.messages,
     });
@@ -92,7 +89,7 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
         // 9. Persist assistant messages after streaming so response delivery stays responsive.
-        await saveAssistantMessages({
+        await persistence.saveAssistantMessages({
           chatId: chat.chatId,
           messages,
         });

@@ -9,8 +9,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { DataStreamProvider } from '@/features/ai-assistant/data-stream/data-stream-provider';
-import { FullscreenProvider } from '@/features/ai-assistant/providers/fullscreen-context';
+import { DataStreamProvider } from '../data-stream/data-stream-provider';
+import { FullscreenProvider } from './fullscreen-context';
+import { AssistantShellProvider } from './assistant-shell-context';
 
 /**
  * Props for {@link AssistantRootProvider}.
@@ -37,11 +38,13 @@ export function AssistantRootProvider({
   streamHandler = null,
 }: AssistantRootProviderProps) {
   return (
-    <FullscreenProvider>
-      <DataStreamProvider>
+    <AssistantShellProvider>
+      <FullscreenProvider>
+        <DataStreamProvider>
         {children}
         {streamHandler}
-      </DataStreamProvider>
-    </FullscreenProvider>
+        </DataStreamProvider>
+      </FullscreenProvider>
+    </AssistantShellProvider>
   );
 }

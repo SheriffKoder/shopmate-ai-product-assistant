@@ -11,7 +11,7 @@
  * 
  * Represents the type of artifact document
  */
-export type DocumentKind = 'text' | 'code' | 'sheet';
+export type DocumentKind = 'text' | 'code' | 'sheet' | 'chart';
 
 /**
  * Document (Select)
@@ -354,4 +354,3 @@ export interface MessageFilters {
   /** Filter by date range (end) */
   createdAtTo?: string;
 }
-

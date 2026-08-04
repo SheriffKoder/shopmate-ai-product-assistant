@@ -18,6 +18,8 @@ import { CopyIcon, RefreshCcwIcon } from 'lucide-react';
 import { ItemTypeCard } from './ui/item-type-card';
 import { MessagePartRenderer } from './message-part-orchestrator-renderer';
 import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
+import type { AssistantStepEvent } from '../model/assistant-events';
+import { ThinkingSteps } from './thinking-steps/thinking-steps';
 
 interface MessageListProps {
   messages: any[];
@@ -27,6 +29,7 @@ interface MessageListProps {
   status?: 'idle' | 'streaming' | 'submitted' | 'error' | 'ready';
   toolRenderers?: AssistantToolRendererRegistry;
   toolRendererContext?: unknown;
+  assistantSteps?: AssistantStepEvent[];
 }
 
 export const MessageList = ({
@@ -37,6 +40,7 @@ export const MessageList = ({
   status,
   toolRenderers,
   toolRendererContext,
+  assistantSteps = [],
 }: MessageListProps) => {
   return (
     <>
@@ -66,6 +70,9 @@ export const MessageList = ({
                 : '!bg-[#dbdbdb] !text-black rounded-lg px-4 py-3 !ml-auto text-right w-fit' // User message background color
             }
           >
+            {message.role === 'assistant' && message.id === messages.at(-1)?.id && (
+              <ThinkingSteps steps={assistantSteps} />
+            )}
             {message.parts.map((part: any, i: number) => {
               // Filter out internal AI SDK parts that shouldn't be displayed
               // These include: step-finish, text-delta

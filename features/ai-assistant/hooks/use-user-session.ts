@@ -22,7 +22,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { User } from '@/lib/supabase/types';
+interface AssistantUser {
+  id: string;
+  email?: string;
+  name?: string;
+}
+
+type User = AssistantUser;
+import { assistantApiEndpoints } from '../model/api-endpoints';
 
 /**
  * LocalStorage key for storing user data
@@ -72,7 +79,7 @@ export function useUserSession() {
   // Why: Need to track current user in component
   // How: useState hook with User type or null
   //////////////////////////////////
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AssistantUser | null>(null);
   
   //////////////////////////////////
   // Loading State: Whether user is being loaded
@@ -265,7 +272,7 @@ export function useUserSession() {
       // Why: Create user in database
       // How: Fetch API endpoint with constant=true parameter
       //////////////////////////////////
-      const response = await fetch('/api/user?constant=true');
+      const response = await fetch(`${assistantApiEndpoints.user}?constant=true`);
       
       //////////////////////////////////
       // Parse Response: Extract JSON data
@@ -344,7 +351,7 @@ export function useUserSession() {
       // Why: Load user from database
       // How: Fetch API endpoint with constant=true parameter
       //////////////////////////////////
-      const response = await fetch('/api/user?constant=true');
+      const response = await fetch(`${assistantApiEndpoints.user}?constant=true`);
       
       //////////////////////////////////
       // Parse Response: Extract JSON data
@@ -429,4 +436,3 @@ export function useUserSession() {
     clearUser,
   };
 }
-

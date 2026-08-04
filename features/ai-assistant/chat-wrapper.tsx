@@ -8,31 +8,37 @@
 
 'use client';
 
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Maximize2, Minimize2, FileClock, FileXCorner } from 'lucide-react';
 import ChatContainer from '@/features/ai-assistant/chat-container';
-import { SidebarHistory } from '@/features/ai-assistant/history-sidebar/components';
-import { useSidebarRefresh } from '@/features/ai-assistant/history-sidebar/hooks/use-sidebar-refresh';
-import { useCurrentChatId } from '@/features/ai-assistant/history-sidebar/utils/chat-navigation';
+import { SidebarHistory } from '@/features/ai-assistant/components/history-sidebar/components';
+import { useSidebarRefresh } from '@/features/ai-assistant/components/history-sidebar/hooks/use-sidebar-refresh';
+import { useCurrentChatId } from '@/features/ai-assistant/components/history-sidebar/utils/chat-navigation';
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
+import type { SuggestionSet } from './config/intro-suggestions';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
+import { AssistantShellHeader } from './components/shell/assistant-shell-header';
+import { AssistantShellContent } from './components/shell/assistant-shell-content';
+import { useAssistantShell } from './providers/assistant-shell-context';
 
 interface ChatWrapperProps {
   chatId: string; // Fallback chatId if no searchParam
-  isChatCollapsed: boolean;
-  setIsChatCollapsed: (collapsed: boolean) => void;
   isFullScreen?: boolean;
   toolRenderers?: AssistantToolRendererRegistry;
+  endpoint?: string;
+  suggestions?: SuggestionSet[];
+  toolRendererContext?: unknown;
 }
 
 export const ChatWrapper = ({
   chatId: fallbackChatId,
-  isChatCollapsed,
-  setIsChatCollapsed,
   isFullScreen = false,
   toolRenderers,
+  endpoint,
+  suggestions,
+  toolRendererContext,
 }: ChatWrapperProps) => {
+  const [isChatCollapsed, setIsChatCollapsed] = useState(true);
+  const { isOpen } = useAssistantShell();
   //////////////////////////////////
   // Sidebar Refresh: Hook to manage sidebar refresh trigger
   // Why: Automatically refresh sidebar when chat finishes
@@ -73,6 +79,10 @@ export const ChatWrapper = ({
     }
   }, [isFullScreenState]);
 
+  useEffect(function syncAssistantOpenState() {
+    setIsChatCollapsed(!isOpen);
+  }, [isOpen]);
+
   //////////////////////////////////
   // Current Chat ID: Get from URL search params or use fallback
   // Why: Chat ID should come from URL to support navigation
@@ -93,117 +103,30 @@ export const ChatWrapper = ({
         boxShadow: '0 0 10px 0 rgba(255, 255, 255, 0.1)',
       }}
     >
-      <div
-        onClick={() => {
-          if (!isFullScreenState) {
-            setIsChatCollapsed(!isChatCollapsed);
-          }
-        }}
-        className={`p-4 font-semibold flex flex-row items-center justify-between gap-2 transition-colors
-          ${isFullScreenState ? 'cursor-default' : 'cursor-pointer'}
-          ${isChatCollapsed ? 'bg-gradient-to-r from-primary to-secondary' : 'bg-gradient-to-r from-black to-black'}`}
-        role="button"
-        tabIndex={0}
-        aria-label={isChatCollapsed ? 'Expand chat' : 'Collapse chat'}
-        onKeyDown={(e) => {
-          if (!isFullScreenState && (e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault();
-            setIsChatCollapsed(!isChatCollapsed);
-          }
-        }}
+      <AssistantShellHeader
+        isCollapsed={isChatCollapsed}
+        isSidebarOpen={isSidebarOpen}
+        isFullScreen={isFullScreenState}
+        onToggleCollapsed={function toggleCollapsed() { setIsChatCollapsed((current) => !current); }}
+        onToggleSidebar={function toggleSidebar() { setIsSidebarOpen((current) => !current); }}
+        onToggleFullscreen={function toggleFullscreen() { setIsFullScreenState((current) => !current); }}
+      />
+      <AssistantShellContent
+        isVisible={!isChatCollapsed || isFullScreenState}
+        isSidebarOpen={isSidebarOpen}
+        isFullScreen={isFullScreenState}
+        sidebar={<SidebarHistory refreshTrigger={refreshTrigger} triggerRefresh={triggerRefresh} />}
       >
-        <div className="flex flex-row items-center gap-2">
-          <Image src="/images/icon.png" alt="Liora AI Assistant" width={24} height={24} />
-          <span className="text-white">AI Assistant</span>
-        </div>
-        
-        {/* Header Controls: User-facing history, fullscreen, and collapse controls */}
-        <div className="flex flex-row items-center gap-2">
-          {/* Burger Menu: Toggle Sidebar */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsSidebarOpen((prev) => !prev);
-            }}
-            className="p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
-            aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-            title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-          >
-            {isSidebarOpen ? (
-              <FileXCorner className="w-5 h-5 text-white" />
-            ) : (
-              <FileClock className="w-5 h-5 text-white" />
-            )}
-          </button>
-
-          {/* Fullscreen Toggle */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsFullScreenState((prev) => !prev);
-            }}
-            className="p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
-            aria-label={isFullScreenState ? 'Exit compact mode' : 'Enter full screen'}
-            title={isFullScreenState ? 'Exit compact mode' : 'Enter full screen'}
-          >
-            {isFullScreenState ? (
-              <Minimize2 className="w-5 h-5 text-white" />
-            ) : (
-              <Maximize2 className="w-5 h-5 text-white" />
-            )}
-          </button>
-          
-          {/* Chevron: Collapse/Expand - Hidden in fullscreen */}
-          {!isFullScreenState && (
-            <div className="p-1">
-              {isChatCollapsed ? (
-                <ChevronUp className="w-5 h-5 text-white" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-white" />
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      {/* Content Area: Sidebar and ChatContainer */}
-      <div 
-        className={`flex-1 w-full min-h-0 overflow-hidden transition-opacity duration-300 bg-[#FFFFFF] relative ${
-          isChatCollapsed && !isFullScreenState ? 'hidden' : 'flex'
-        }`}
-      >
-        {/* Sidebar: Absolute positioned on left, toggleable */}
-        <div 
-          className={`
-            absolute left-0 top-0 h-full w-64
-            border-r border-gray-200 dark:border-gray-800 
-            bg-gray-50 dark:bg-gray-900 
-            overflow-y-auto z-20
-            transition-transform duration-300 ease-in-out
-            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            
-          `}
-        >
-          <SidebarHistory refreshTrigger={refreshTrigger} triggerRefresh={triggerRefresh} />
-        </div>
-        
-        {/* ChatContainer: Flexible, with padding when sidebar is open in fullscreen */}
-        <div 
-          className={`
-            flex-1 min-w-0 overflow-hidden bg-[#FFFFFF] flex flex-col
-            transition-all duration-300 ease-in-out
-            ${isSidebarOpen && isFullScreenState ? 'pl-64' : ''}
-          `}
-        >
-          <ChatContainer 
+        <ChatContainer
             chatId={currentChatId} 
             urlChatId={urlChatId}
             onChatFinish={triggerRefresh} 
             toolRenderers={toolRenderers}
+            endpoint={endpoint}
+            suggestions={suggestions}
+            toolRendererContext={toolRendererContext}
           />
-        </div>
-      </div>
+      </AssistantShellContent>
     </div>
   );
 };

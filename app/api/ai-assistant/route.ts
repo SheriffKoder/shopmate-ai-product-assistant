@@ -17,6 +17,7 @@
 
 import { handleAssistantRequest } from '@/features/ai-assistant/server/handle-assistant-request';
 import { shopAssistantRuntime } from '@/features/shop-assistant/server/shop-assistant-runtime';
+import { assistantChatPersistence } from '@/app/infrastructure/assistant/supabase/assistant-persistence';
 
 // Allow streaming responses up to 30 seconds.
 export const maxDuration = 30;
@@ -29,5 +30,5 @@ export const maxDuration = 30;
  */
 export async function POST(req: Request): Promise<Response> {
   // 1. Keep the route as an adapter and let the assistant feature own the request lifecycle.
-  return handleAssistantRequest(req, shopAssistantRuntime);
+  return handleAssistantRequest(req, shopAssistantRuntime, assistantChatPersistence);
 }

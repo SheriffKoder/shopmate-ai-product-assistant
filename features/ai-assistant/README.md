@@ -1,34 +1,79 @@
 # AI Assistant
 
-Reusable assistant feature shell for chat UI, message rendering, data streaming, model selection, history, artifacts, and server request handling.
+The reusable assistant feature. It owns chat transport, streaming, message and artifact presentation, history UI, persistence contracts, and assistant state needed to render a conversation.
 
-## Owns
+It does not own products, carts, business rules, agents, business prompts, or a database provider.
 
-- Generic chat wrapper/container UI and prompt input.
-- Assistant provider shell, fullscreen state, data-stream context, and stream utilities.
-- Generic message rendering and adapter-injected tool renderer registry contracts.
-- Model picker/configuration and the OpenAI provider boundary.
-- Request parsing, validation, persistence orchestration, and runtime invocation for `/api/ai-assistant`.
-- Artifact UI and document creation/persistence helpers.
-- Chat history sidebar UI and message loading helpers.
+## Operating modes
 
-## Does Not Own
+### Default mode
 
-- ShopMate product/cart prompts, tools, renderers, or agent routing.
-- Product catalog data sources, cart mutation logic, or storefront state.
-- Business-specific runtime selection. Host routes inject an `AssistantRuntime`.
+Use the assistant as a normal context-aware chat. Inject a generic runtime, or omit business runtime and tool renderers when the host only needs conversation UI.
 
-## Dependency Rules
+```tsx
+<AssistantRootProvider streamHandler={<DataStreamHandler />}> 
+  <ChatWrapper endpoint="/api/ai-assistant" />
+</AssistantRootProvider>
+```
 
-- `features/ai-assistant` may expose contracts that adapters import.
-- `features/ai-assistant` must not import `features/shop-assistant`.
-- Business adapters may import assistant contracts, generic UI slots, and server handlers.
-- App routes should stay thin: import the reusable handler and inject the current adapter runtime.
+The assistant still renders messages, handles streaming, supports history when a history client is supplied, and remains usable without agents or tools.
 
-## Porting Checklist
+### Business mode
 
-1. Copy `features/ai-assistant` into the target app.
-2. Create a business adapter feature that implements `AssistantRuntime`.
-3. Register adapter-owned tool renderers with the generic message renderer.
-4. Mount the assistant root provider and chat wrapper from an app-level integration component.
-5. Point the route adapter at the new runtime.
+An application adapter injects the business runtime, tool renderer registry, current user, suggestions, persistence, and optional command callbacks.
+
+```text
+application route
+  → generic assistant request handler
+    → injected business runtime
+      → business agents and tools
+```
+
+The business adapter owns what the assistant can do. The generic assistant only knows the contracts in `model/`.
+
+## File structure
+
+```text
+features/ai-assistant/
+├── client/                 # Browser HTTP clients, such as history operations.
+├── components/             # Chat presentation grouped by UI responsibility.
+│   ├── artifacts/          # Text, sheet, chart, and artifact panel UI.
+│   ├── history-sidebar/    # Chat history navigation and deletion UI.
+│   ├── shell/              # Assistant header and layout composition.
+│   ├── message-list.tsx    # Message list orchestration.
+│   └── prompt-input.tsx     # Prompt entry and model selection UI.
+├── config/                 # Generic defaults such as intro suggestions.
+├── data-stream/            # Stream provider and generic stream event bridge.
+├── hooks/                  # Assistant-only interaction hooks.
+├── integration/            # Factories for composing generic assistant config.
+├── lib/                    # Pure assistant utilities, logging, and errors.
+├── model/                  # Contracts: runtime, persistence, events, documents, endpoints.
+├── providers/              # React providers for stream and fullscreen state.
+├── server/                 # Request parsing and assistant stream orchestration.
+├── test/                   # In-memory adapters and assistant contract tests.
+├── tools/                  # Fallback renderer behavior for unknown tools.
+├── chat-container.tsx      # Transport-facing chat UI composition.
+└── chat-wrapper.tsx        # Assistant shell and session composition.
+```
+
+## Import direction
+
+```text
+application/views
+  → features/ai-assistant integration
+    → ai-assistant model contracts
+      → shared types/utilities
+```
+
+`features/ai-assistant` must never import `features/shop-assistant`, catalog/cart entities, or a concrete Supabase/Prisma/Drizzle client. Database adapters belong under application infrastructure and are injected at the route boundary.
+
+## Adding the assistant to a new project
+
+1. Copy this feature and its generic UI dependencies.
+2. Implement `AssistantRuntime` for the project, or use the default runtime for normal chat.
+3. Implement `AssistantPersistence` only if chat history must be stored.
+4. Implement `AssistantHistoryClient` if the history sidebar is enabled.
+5. Configure the assistant endpoint and persistence routes in `model/api-endpoints.ts`.
+6. Mount `AssistantRootProvider` and `ChatWrapper` from the application shell.
+7. Add business behavior as a separate adapter feature; do not add business imports to this folder.
+
