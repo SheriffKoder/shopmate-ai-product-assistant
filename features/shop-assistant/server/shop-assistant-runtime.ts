@@ -17,36 +17,47 @@
 
 import type { AssistantRuntime } from '@/features/ai-assistant/model/assistant-runtime';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
-import type { CartState } from '@/features/shop/model/cart';
-import type { Product } from '@/features/shop/model/product';
 import { classifyQuery } from './agents';
-import { createMockCartSource } from './mock-cart-source';
-import { createMockCatalogSource } from './mock-catalog-source';
+import { createMockShopApiClient } from './mock-shop-api-client';
+import { createCatalogSourceFromShopApi, createCartSourceFromShopApi } from './shop-api-sources';
+import { getInitialProducts } from '@/features/catalog/model/initial-data';
 import { routeToAgent, type AgentRequest } from './router';
+import { writeAssistantStep } from './assistant-step';
 
 /**
  * Runtime that preserves current ShopMate assistant behavior behind the adapter contract.
  */
 export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
   async stream(request, dataStream) {
+    writeAssistantStep(dataStream, {
+      id: 'query-classification',
+      label: 'Classifying',
+      summary: 'Understanding the type of request.',
+      status: 'loading',
+    });
     // 1. Resolve validated request models once so every agent shares the same runtime config.
     const models = getAssistantModels(request.modelId);
 
     // 2. Keep current query classification behavior behind the runtime boundary.
     const classification = await classifyQuery({ query: request.userQuery, model: models.chat });
+    writeAssistantStep(dataStream, {
+      id: 'query-classification',
+      label: 'Classifying',
+      summary: 'Understanding the type of request.',
+      status: 'done',
+    });
 
-    // 3. Build adapter-owned data sources from the current request context.
-    const products = request.businessContext.products as Product[] | undefined;
-    const cart = request.businessContext.cart as CartState | undefined;
-    const catalogSource = createMockCatalogSource(products);
-    const cartSource = cart ? createMockCartSource(cart) : undefined;
+    // 3. Build the temporary API implementation at the server boundary.
+    // The runtime no longer accepts catalog/cart state from the assistant request.
+    const shopApi = createMockShopApiClient(getInitialProducts());
+    const catalogSource = createCatalogSourceFromShopApi(shopApi);
+    const cartSource = createCartSourceFromShopApi(shopApi);
 
     // 4. Adapt generic business context back into the existing ShopMate agent request shape.
     return routeToAgent(
       classification,
       {
         messages: request.messages,
-        ...request.businessContext,
         models,
         catalogSource,
         cartSource,

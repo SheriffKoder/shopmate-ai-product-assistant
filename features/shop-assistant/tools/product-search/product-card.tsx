@@ -9,19 +9,20 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Product } from '@/features/shop/model/product';
+import { Product } from '@/features/catalog/model/product';
 import { Star, Trash2 } from 'lucide-react';
-import { CartAction, CartState } from '@/features/shop/model/cart';
+import { CartState } from '@/features/cart/model/cart';
 import Image from 'next/image';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
+import type { ShopAssistantCommand } from '../../model/shop-assistant-command-handler';
 
 interface ProductCardProps {
   product: Product;
-  dispatchCartAction?: (action: CartAction) => void;
   cart?: CartState;
+  onCommand?: (command: ShopAssistantCommand) => void | Promise<void>;
 }
 
-export const ProductCard = ({ product, dispatchCartAction, cart }: ProductCardProps) => {
+export const ProductCard = ({ product, cart, onCommand }: ProductCardProps) => {
   const router = useRouter();
   // Check if product is in cart
   const isInCart = cart?.items.some((item) => item.productId === product.id) || false;
@@ -86,7 +87,7 @@ export const ProductCard = ({ product, dispatchCartAction, cart }: ProductCardPr
       )}
 
       {/* Cart Action Buttons */}
-      {dispatchCartAction && (
+      {onCommand && (
         <div className="mt-auto flex gap-2">
 
           {/* Price */}
@@ -98,11 +99,8 @@ export const ProductCard = ({ product, dispatchCartAction, cart }: ProductCardPr
           <button
             onClick={(e) => {
               e.stopPropagation(); // Prevent card onClick from firing
-              if (!isInCart) {
-                dispatchCartAction({
-                  type: 'ADD_TO_CART',
-                  payload: product,
-                });
+              if (!isInCart && onCommand) {
+                void onCommand({ type: 'cart.add-item', payload: { product, quantity: 1 } });
               }
             }}
             disabled={isInCart}
@@ -119,11 +117,8 @@ export const ProductCard = ({ product, dispatchCartAction, cart }: ProductCardPr
           <button
             onClick={(e) => {
               e.stopPropagation(); // Prevent card onClick from firing
-              if (isInCart) {
-                dispatchCartAction({
-                  type: 'REMOVE_FROM_CART',
-                  payload: product.id,
-                });
+              if (isInCart && onCommand) {
+                void onCommand({ type: 'cart.remove-item', payload: { productId: product.id } });
               }
             }}
             disabled={!isInCart}

@@ -8,28 +8,26 @@
 
 'use client';
 
-import { CartItem, CartAction, CartState } from '@/features/shop/model/cart';
-import type { CartMutationController } from '@/features/shop-assistant/model/cart-source';
+import { CartItem, CartState } from '@/features/cart/model/cart';
 import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-text';
 import { CartItemCard } from './cart-item-card';
 import { Button } from '@/components/ui/button';
+import type { ShopAssistantCommand } from '../../model/shop-assistant-command-handler';
 
 interface CartInfoToolRendererProps {
   toolPart: any;
   messageId: string;
   partIndex: number;
-  dispatchCartAction?: (action: CartAction) => void;
-  cartMutations?: CartMutationController;
   cart?: CartState;
+  onCommand?: (command: ShopAssistantCommand) => void | Promise<void>;
 }
 
 export const CartInfoToolRenderer = ({
   toolPart,
   messageId,
   partIndex,
-  dispatchCartAction,
-  cartMutations,
   cart,
+  onCommand,
 }: CartInfoToolRendererProps) => {
   if (toolPart.state !== 'output-available' || !toolPart.output) {
     return null;
@@ -117,8 +115,7 @@ export const CartInfoToolRenderer = ({
               quantity={item.quantity}
               image={item.product.image_url || undefined}
               productId={item.productId}
-              dispatchCartAction={dispatchCartAction}
-              cartMutations={cartMutations}
+              onCommand={onCommand}
             />
           ))}
         </div>

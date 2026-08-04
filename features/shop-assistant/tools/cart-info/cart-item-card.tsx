@@ -12,8 +12,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Package, Plus, Minus, Trash2 } from 'lucide-react';
-import { CartAction } from '@/features/shop/model/cart';
-import type { CartMutationController } from '@/features/shop-assistant/model/cart-source';
+import type { ShopAssistantCommand } from '../../model/shop-assistant-command-handler';
 
 interface CartItemCardProps {
   id: string;
@@ -24,8 +23,7 @@ interface CartItemCardProps {
   quantity?: number;
   image?: string;
   productId?: string;
-  dispatchCartAction?: (action: CartAction) => void;
-  cartMutations?: CartMutationController;
+  onCommand?: (command: ShopAssistantCommand) => void | Promise<void>;
 }
 
 export const CartItemCard = ({
@@ -37,8 +35,7 @@ export const CartItemCard = ({
   quantity,
   image,
   productId,
-  dispatchCartAction,
-  cartMutations,
+  onCommand,
 }: CartItemCardProps) => {
   const router = useRouter();
 
@@ -52,42 +49,30 @@ export const CartItemCard = ({
    * Removes the current item through the adapter mutation contract.
    */
   const handleRemoveItem = () => {
-    if (cartMutations && productId) {
-      cartMutations.removeItem(productId);
-      return;
+    if (onCommand && productId) {
+      void onCommand({ type: 'cart.remove-item', payload: { productId } });
     }
 
-    if (dispatchCartAction && productId) {
-      dispatchCartAction({ type: 'REMOVE_FROM_CART', payload: productId });
-    }
   };
 
   /**
    * Decreases the current item quantity through the adapter mutation contract.
    */
   const handleDecreaseQuantity = () => {
-    if (cartMutations && productId) {
-      cartMutations.decreaseQuantity(productId);
-      return;
+    if (onCommand && productId) {
+      void onCommand({ type: 'cart.apply-action', payload: { type: 'DECREASE_QUANTITY', payload: productId } });
     }
 
-    if (dispatchCartAction && productId) {
-      dispatchCartAction({ type: 'DECREASE_QUANTITY', payload: productId });
-    }
   };
 
   /**
    * Increases the current item quantity through the adapter mutation contract.
    */
   const handleIncreaseQuantity = () => {
-    if (cartMutations && productId) {
-      cartMutations.increaseQuantity(productId);
-      return;
+    if (onCommand && productId) {
+      void onCommand({ type: 'cart.apply-action', payload: { type: 'INCREASE_QUANTITY', payload: productId } });
     }
 
-    if (dispatchCartAction && productId) {
-      dispatchCartAction({ type: 'INCREASE_QUANTITY', payload: productId });
-    }
   };
 
   return (
@@ -138,7 +123,7 @@ export const CartItemCard = ({
       </div>
       
       {/* Quantity Controls */}
-      {(cartMutations || dispatchCartAction) && productId && (
+      {onCommand && productId && (
         <div className="flex items-center gap-2 mt-3 w-fit ml-auto">
           {/* Remove Button (Trash Icon) */}
           <button

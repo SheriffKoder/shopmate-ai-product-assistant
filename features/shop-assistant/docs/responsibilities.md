@@ -7,8 +7,7 @@
 - Product, filtering, recommendation, cart, technical-discussion, and not-related agent behavior.
 - ShopMate system prompts and product/cart catalog context builders.
 - Product/cart data-source contracts for assistant tools and renderer mutation boundaries.
-- Current mock/session catalog and cart source implementations.
-- Future DB catalog source boundary and structured filter mapping.
+- Current mock Shop API and focused catalog/cart source adapters.
 - Product search and cart info AI tool factories.
 - Product/cart tool renderers, cards, and renderer registry.
 - ShopMate search/ranking helpers used by the adapter and current product UI.
@@ -23,6 +22,6 @@
 ## Dependency Direction
 
 - `features/shop-assistant` may import generic contracts and primitives from `features/ai-assistant`.
-- `features/shop-assistant` may import product/cart models from `features/shop`.
+- `features/shop-assistant` may import product/cart models from `features/catalog` and `features/cart`.
 - `features/ai-assistant` should not import ShopMate agents, tools, product/cart renderers, or product/cart types.
 - App integration points can inject `features/shop-assistant` runtime and renderer registry into the assistant core.

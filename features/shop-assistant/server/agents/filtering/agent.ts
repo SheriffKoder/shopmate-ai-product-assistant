@@ -12,7 +12,7 @@ import { smoothStream } from 'ai';
 import { getFilteringPrompt } from './prompt';
 import { getProductCatalogContext, getCartContext } from '@/features/shop-assistant/server/system-prompt';
 import { createProductSearchTool, createCartInfoTool } from '@/features/shop-assistant/tools';
-import { CartState } from '@/features/shop/model/cart';
+import { CartState } from '@/features/cart/model/cart';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 // Allow streaming responses up to 30 seconds

@@ -10,7 +10,7 @@ import { smoothStream, streamText, UIMessage, convertToModelMessages, type UIMes
 import { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { getSystemPrompt, getProductCatalogContext } from '@/features/shop-assistant/server/system-prompt';
 import { createProductSearchTool, createCartInfoTool } from '@/features/shop-assistant/tools';
-import { CartState } from '@/features/shop/model/cart';
+import { CartState } from '@/features/cart/model/cart';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 
 // Allow streaming responses up to 30 seconds

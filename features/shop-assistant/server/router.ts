@@ -17,8 +17,8 @@
  */
 
 import type { UIMessage, UIMessageStreamWriter } from 'ai';
-import type { Product } from '@/features/shop/model/product';
-import type { CartState } from '@/features/shop/model/cart';
+import type { Product } from '@/features/catalog/model/product';
+import type { CartState } from '@/features/cart/model/cart';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 import type { CatalogSource } from '@/features/shop-assistant/model/catalog-source';
 import type { CartSource } from '@/features/shop-assistant/model/cart-source';
@@ -31,9 +31,11 @@ import {
   processNotRelatedRequest,
   processRecommendationRequest,
   processFilteringRequest,
+  processPriceTrendRequest,
 } from './agents';
 import { processProductAssistantRequest } from './agents/products-cart/agent';
 import type { QueryClassification } from './agents';
+import { writeAssistantStep } from './assistant-step';
 
 /**
  * Agent request type - matches what agents expect
@@ -73,12 +75,28 @@ export async function routeToAgent(
   try {
     logger.classification('query', classification, userQuery);
 
+    if (/price|pricing|cost|trend|historical|past years|price history/i.test(userQuery)) {
+      logger.info('Routing to price trend agent');
+      return await processPriceTrendRequest({
+        messages: request.messages,
+        userQuery,
+        models: request.models,
+        catalogSource: request.catalogSource,
+      }, dataStream);
+    }
+
     switch (classification) {
       case 'related':
         return await routeToProductAgent(request, userQuery, dataStream);
 
       case 'technical-discussion':
         logger.info('Routing to technical discussion agent');
+        writeAssistantStep(dataStream, {
+          id: 'technical-discussion',
+          label: 'Technical discussion',
+          summary: 'Preparing a clear comparison and explanation.',
+          status: 'done',
+        });
         return await processTechnicalDiscussionRequest({
           messages: request.messages,
           dataStream,
@@ -87,6 +105,12 @@ export async function routeToAgent(
 
       case 'notrelated':
         logger.info('Routing to not-related agent');
+        writeAssistantStep(dataStream, {
+          id: 'fallback-response',
+          label: 'Preparing response',
+          summary: 'Creating a helpful response for this request.',
+          status: 'done',
+        });
         // FUTURE IMPLEMENTATION: Update not-related agent to support dataStream
         return await processNotRelatedRequest({ models: request.models });
 
@@ -120,12 +144,24 @@ async function routeToProductAgent(
 ): Promise<any> {
   try {
     // Classify the product-related query into subcategories
+    writeAssistantStep(dataStream, {
+      id: 'product-classification',
+      label: 'Product classifying',
+      summary: 'Identifying the relevant product intent.',
+      status: 'loading',
+    });
     const productClassification = await classifyProductQuery({
       query: userQuery,
       model: request.models.chat,
     });
 
     logger.classification('product', productClassification, userQuery);
+    writeAssistantStep(dataStream, {
+      id: 'product-classification',
+      label: 'Product classifying',
+      summary: 'Identifying the relevant product intent.',
+      status: 'done',
+    });
 
     switch (productClassification) {
       case 'products':
@@ -134,7 +170,20 @@ async function routeToProductAgent(
 
       case 'recommendation':
         logger.info('Routing to recommendation agent');
-        return await processRecommendationRequest(request, dataStream);
+        writeAssistantStep(dataStream, {
+          id: 'recommendation',
+          label: 'Recommendation',
+          summary: 'Comparing suitable products.',
+          status: 'loading',
+        });
+        const recommendationStream = await processRecommendationRequest(request, dataStream);
+        writeAssistantStep(dataStream, {
+          id: 'recommendation',
+          label: 'Recommendation',
+          summary: 'Comparing suitable products.',
+          status: 'done',
+        });
+        return recommendationStream;
 
       case 'filtering':
         logger.info('Routing to filtering agent');

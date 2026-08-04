@@ -23,7 +23,7 @@
 
 import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
-import type { Product } from '@/features/shop/model/product';
+import type { Product } from '@/features/catalog/model/product';
 import type { CatalogSearchSort, CatalogSource } from '@/features/shop-assistant/model/catalog-source';
 
 // Schema for product output (matches Product interface)

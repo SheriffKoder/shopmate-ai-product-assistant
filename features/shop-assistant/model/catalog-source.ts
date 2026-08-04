@@ -5,7 +5,7 @@
  * Used for: Keeping assistant search callers independent from mock/session data or future DB filters.
  */
 
-import type { Product } from '@/features/shop/model/product';
+import type { Product } from '@/features/catalog/model/product';
 
 /**
  * Sort modes supported by assistant catalog searches.

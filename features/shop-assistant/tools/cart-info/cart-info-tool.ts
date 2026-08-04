@@ -24,7 +24,7 @@
 
 import { dynamicTool, type UIMessageStreamWriter } from 'ai';
 import { z } from 'zod/v3';
-import { CartItem } from '@/features/shop/model/cart';
+import { CartItem } from '@/features/cart/model/cart';
 import type { CartSource } from '@/features/shop-assistant/model/cart-source';
 import { searchInTarget, searchInProduct } from '../../lib/search-utils';
 import { analyzeItemsWithAI } from '../../lib/ai-search-agent';

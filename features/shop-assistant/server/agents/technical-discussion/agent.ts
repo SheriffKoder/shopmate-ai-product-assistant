@@ -9,9 +9,9 @@
 import { smoothStream, streamText, UIMessage, convertToModelMessages, type UIMessageStreamWriter } from 'ai';
 import { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { getTechnicalDiscussionPrompt } from './prompt';
-import { createDocumentTool } from '@/features/ai-assistant/artifacts/text/tool/create-document-tool';
-import { createTextDocument } from '@/features/ai-assistant/artifacts/text/tool/server';
-import { createSheetDocument } from '@/features/ai-assistant/artifacts/sheet/server';
+import { createDocumentTool } from '@/features/ai-assistant/components/artifacts/text/tool/create-document-tool';
+import { createTextDocument } from '@/features/ai-assistant/components/artifacts/text/tool/server';
+import { createSheetDocument } from '@/features/ai-assistant/components/artifacts/sheet/server';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';

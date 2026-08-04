@@ -5,7 +5,7 @@
  * Used for: Keeping cart state/action details inside the ShopMate adapter rather than assistant core.
  */
 
-import type { CartItem, CartState } from '@/features/shop/model/cart';
+import type { CartItem, CartState } from '@/features/cart/model/cart';
 
 /**
  * Cart read abstraction used by server-side assistant tools.
@@ -21,6 +21,7 @@ export interface CartSource {
  * Adapter-owned UI mutation callbacks for cart renderers.
  */
 export interface CartMutationController {
+  addItem(product: import('@/features/catalog/model/product').Product, quantity?: number): void | Promise<void>;
   /** Increase a cart item's quantity. */
   increaseQuantity(productId: string): void;
   /** Decrease a cart item's quantity. */

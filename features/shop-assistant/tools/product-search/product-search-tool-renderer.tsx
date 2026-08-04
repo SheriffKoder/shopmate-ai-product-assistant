@@ -8,25 +8,26 @@
 
 'use client';
 
-import { Product } from '@/features/shop/model/product';
-import { CartAction, CartState } from '@/features/shop/model/cart';
+import { Product } from '@/features/catalog/model/product';
+import { CartState } from '@/features/cart/model/cart';
 import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-text';
 import { ProductCard } from './product-card';
+import type { ShopAssistantCommand } from '../../model/shop-assistant-command-handler';
 
 interface ProductSearchToolRendererProps {
   toolPart: any;
   messageId: string;
   partIndex: number;
-  dispatchCartAction?: (action: CartAction) => void;
   cart?: CartState;
+  onCommand?: (command: ShopAssistantCommand) => void | Promise<void>;
 }
 
 export const ProductSearchToolRenderer = ({
   toolPart,
   messageId,
   partIndex,
-  dispatchCartAction,
   cart,
+  onCommand,
 }: ProductSearchToolRendererProps) => {
   if (toolPart.state !== 'output-available' || !toolPart.output) {
     return null;
@@ -62,8 +63,8 @@ export const ProductSearchToolRenderer = ({
             <ProductCard
               key={product.id}
               product={product}
-              dispatchCartAction={dispatchCartAction}
               cart={cart}
+              onCommand={onCommand}
             />
           ))}
         </div>

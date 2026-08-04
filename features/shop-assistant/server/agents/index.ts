@@ -16,4 +16,4 @@ export { processTechnicalDiscussionRequest } from './technical-discussion/agent'
 export { processNotRelatedRequest } from './not-related/agent';
 export { processRecommendationRequest } from './recommendation/agent';
 export { processFilteringRequest } from './filtering/agent';
-
+export { processPriceTrendRequest } from './price-trend/agent';
