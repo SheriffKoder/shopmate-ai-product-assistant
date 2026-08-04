@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { getFooterConfig } from '@/features/home/config/footer'
+import { getFooterConfig } from '@/views/home/config/footer'
 import Image from 'next/image'
 
 const Footer = () => {
