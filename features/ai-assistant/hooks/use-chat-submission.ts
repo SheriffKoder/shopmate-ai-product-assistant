@@ -7,12 +7,13 @@
  */
 
 import { useState } from 'react';
-import { CartState } from '../types/cart';
+
+type ChatRequestBody = Record<string, unknown>;
 
 interface UseChatSubmissionProps {
   sendMessage: (message: { text: string }, options?: { body: any }) => void;
-  products: any[]; // Array of Product objects
-  cart?: CartState; // Cart state
+  buildRequestBody?: () => ChatRequestBody;
+  selectedModelId?: string;
 }
 
 interface UseChatSubmissionReturn {
@@ -28,19 +29,23 @@ interface UseChatSubmissionReturn {
  */
 export function useChatSubmission({
   sendMessage,
-  products,
-  cart,
+  buildRequestBody,
+  selectedModelId,
 }: UseChatSubmissionProps): UseChatSubmissionReturn {
   const [input, setInput] = useState('');
   const [clickedSuggestionCard, setClickedSuggestionCard] = useState<any>(null);
 
   /**
-   * Prepare message body with product catalog and cart
+   * Prepare message body with adapter-provided business context
    */
   const prepareMessageBody = () => {
+    // 1. Ask the adapter for business context that should travel with the request.
+    const businessBody = buildRequestBody ? buildRequestBody() : {};
+
+    // 2. Add reusable assistant model selection without coupling callers to ShopMate.
     return {
-      products, // Send product catalog to the API
-      cart, // Send cart state to the API
+      ...businessBody,
+      ...(selectedModelId && { modelId: selectedModelId }),
     };
   };
 
@@ -91,4 +96,3 @@ export function useChatSubmission({
     clickedSuggestionCard,
   };
 }
-

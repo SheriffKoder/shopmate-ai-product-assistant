@@ -7,7 +7,7 @@
  */
 
 import { Suspense } from 'react';
-import { CartPageContent } from '@/features/cart/cart-page-content';
+import { CartPageContent } from '@/views/cart/cart-page-content';
 
 export default function CartPage() {
   return (

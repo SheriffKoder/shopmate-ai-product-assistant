@@ -41,9 +41,9 @@ export type Surface =
 export type ErrorCode = `${ErrorType}:${Surface}`;
 
 /**
- * Custom error class for ShopMate AI Assistant
+ * Custom error class for Assistant
  */
-export class ShopMateError extends Error {
+export class AssistantError extends Error {
   type: ErrorType;
   surface: Surface;
   statusCode: number;
@@ -59,7 +59,7 @@ export class ShopMateError extends Error {
     this.cause = cause;
     this.message = getMessageByErrorCode(errorCode);
     this.statusCode = getStatusCodeByType(this.type);
-    this.name = 'ShopMateError';
+    this.name = 'AssistantError';
   }
 
   /**
@@ -160,18 +160,18 @@ function getStatusCodeByType(type: ErrorType): number {
  * Handle errors in API routes
  * Converts various error types to appropriate HTTP responses
  * 
- * @param error - The error that occurred (can be ShopMateError, ZodError, or unknown)
+ * @param error - The error that occurred (can be AssistantError, ZodError, or unknown)
  * @returns HTTP Response with error information
  */
 export function handleApiError(error: unknown): Response {
   // Handle our custom errors
-  if (error instanceof ShopMateError) {
+  if (error instanceof AssistantError) {
     return error.toResponse();
   }
 
   // Handle Zod validation errors
   if (error instanceof z.ZodError) {
-    return new ShopMateError(
+    return new AssistantError(
       "bad_request:api",
       error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
     ).toResponse();
@@ -180,21 +180,21 @@ export function handleApiError(error: unknown): Response {
   // Handle standard Error objects
   if (error instanceof Error) {
     // Log unexpected errors for debugging
-    console.error('[ShopMateError] Unexpected error:', {
+    console.error('[AssistantError] Unexpected error:', {
       message: error.message,
       stack: error.stack,
     });
 
-    return new ShopMateError(
+    return new AssistantError(
       "server_error:api",
       process.env.NODE_ENV === 'development' ? error.message : undefined
     ).toResponse();
   }
 
   // Handle unknown error types
-  console.error('[ShopMateError] Unknown error type:', error);
+  console.error('[AssistantError] Unknown error type:', error);
 
-  return new ShopMateError(
+  return new AssistantError(
     "server_error:api",
     "An unexpected error occurred"
   ).toResponse();
@@ -205,22 +205,22 @@ export function handleApiError(error: unknown): Response {
  */
 export const createError = {
   badRequest: (surface: Surface, cause?: string) =>
-    new ShopMateError(`bad_request:${surface}`, cause),
+    new AssistantError(`bad_request:${surface}`, cause),
   
   serverError: (surface: Surface, cause?: string) =>
-    new ShopMateError(`server_error:${surface}`, cause),
+    new AssistantError(`server_error:${surface}`, cause),
   
   offline: (surface: Surface, cause?: string) =>
-    new ShopMateError(`offline:${surface}`, cause),
+    new AssistantError(`offline:${surface}`, cause),
 
   // FUTURE IMPLEMENTATION: Add more helpers when features are implemented
   // unauthorized: (surface: Surface, cause?: string) =>
-  //   new ShopMateError(`unauthorized:${surface}`, cause),
+  //   new AssistantError(`unauthorized:${surface}`, cause),
   // forbidden: (surface: Surface, cause?: string) =>
-  //   new ShopMateError(`forbidden:${surface}`, cause),
+  //   new AssistantError(`forbidden:${surface}`, cause),
   // notFound: (surface: Surface, cause?: string) =>
-  //   new ShopMateError(`not_found:${surface}`, cause),
+  //   new AssistantError(`not_found:${surface}`, cause),
   // rateLimit: (surface: Surface, cause?: string) =>
-  //   new ShopMateError(`rate_limit:${surface}`, cause),
+  //   new AssistantError(`rate_limit:${surface}`, cause),
 };
 

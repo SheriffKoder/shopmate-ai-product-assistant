@@ -10,24 +10,27 @@
 
 import { ConversationEmptyState } from '@/components/ai-elements/conversation';
 import { IntroSuggestions } from './intro-suggestions';
+import type { SuggestionSet } from '../../config/intro-suggestions';
+import type { ReactNode } from 'react';
 
 interface EmptyStateProps {
   onSuggestionClick: (prompt: string, card: any) => void;
+  content?: ReactNode;
+  suggestions?: SuggestionSet[];
 }
 
-export const EmptyState = ({ onSuggestionClick }: EmptyStateProps) => {
+export const EmptyState = ({ onSuggestionClick, content, suggestions }: EmptyStateProps) => {
   return (
     <ConversationEmptyState>
       <div className="w-full space-y-4">
-        <div className="text-center">
-          <p className="text-lg font-semibold mb-2 text-black">Product Assistant</p>
-          <p className="text-sm text-black/70">
-            Hi! I'm your AI assistant. I can help you find the best products for your needs
-          </p>
-        </div>
-        <IntroSuggestions onSuggestionClick={onSuggestionClick} />
+        {content ?? (
+          <div className="text-center">
+            <p className="text-lg font-semibold mb-2 text-black">AI Assistant</p>
+            <p className="text-sm text-black/70">How can I help?</p>
+          </div>
+        )}
+        <IntroSuggestions onSuggestionClick={onSuggestionClick} suggestions={suggestions} />
       </div>
     </ConversationEmptyState>
   );
 };
-

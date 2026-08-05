@@ -11,7 +11,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 ## Entry Points
 
 - `app/layout.tsx` is the root server layout; it loads global CSS, local font metadata, and wraps pages with `components/layout-wrapper.tsx`.
-- `components/layout-wrapper.tsx` is the app shell: `ShopProvider`, `FullscreenProvider`, `DataStreamProvider`, global toast container, `MainHeader`, page content, chat wrapper, footer, and stream handler.
+- `components/layout-wrapper.tsx` is the app shell: `features/shop` `ShopProvider`, global toast container, `MainHeader`, page content, one `features/shop-assistant` integration mount, and footer.
 - `app/page.tsx` renders `features/home/index.tsx`.
 - `app/products/page.tsx` renders `features/products/products-page-content.tsx`.
 - `app/products/[id]/page.tsx` renders `features/products/product-detail-page-content.tsx`.
@@ -43,7 +43,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 ## API Routes
 
-- `app/api/ai-assistant/route.ts`: validates chat requests, creates/loads Supabase user/chat records, saves messages, classifies queries, routes to agents, and streams AI output.
+- `app/api/ai-assistant/route.ts`: thin Next.js adapter for the assistant server handler and injected ShopMate runtime.
 - `app/api/products/route.ts`: product data endpoint used by SWR hooks and shop state.
 - `app/api/cart/route.ts`: cart data/mutation endpoint used by SWR hooks and shop state.
 - `app/api/history/route.ts`: paginated chat history for the AI sidebar.
@@ -57,25 +57,42 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/products/`: products page and product detail page content, product grid/detail UI, and navigation helpers.
 - `features/cart/`: dedicated cart page content.
 - `features/checkout/`: checkout page content.
-- `features/ai-assistant/`: chat container/wrapper, prompt input, message rendering, data streaming, tool rendering, agents, artifacts, history sidebar, providers, hooks, types, and assistant utilities.
+- `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Business adapters inject runtimes and tool renderers from outside the core.
+- `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart data-source contracts, mock/DB-ready catalog sources, tool factories, product/cart tool renderers, renderer registry, UI integration shell, adapter search helpers, and runtime model consumption.
+- `features/shop/`: ShopMate product/cart model types, mock initial catalog data, shop provider, and product/cart state hooks used by the storefront and assistant integration.
 - `features/ai-filter/`: reusable natural-language URL filter assistant. Host pages pass catalog/config; the package handles prompt building, response sanitization, and URL patch application.
 - `features/toast-success/`: global toast primitives, hook, container, and error config.
 
 ## AI Assistant Internals
 
-- `features/ai-assistant/agents/index.ts` exports the agent router surface.
-- `features/ai-assistant/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
-- `features/ai-assistant/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
-- `features/ai-assistant/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized agent implementations and prompts.
-- `features/ai-assistant/lib/router.ts` coordinates routing to the selected agent.
-- `features/ai-assistant/tools/product-search/` and `tools/cart-info/` define AI tool behavior and renderers.
+- `features/ai-assistant/model/assistant-runtime.ts` defines the reusable runtime contract that business adapters implement.
+- `features/ai-assistant/model/assistant-model-config.ts` defines env-driven default, search, and allowed assistant model ids.
+- `features/ai-assistant/model/tool-renderer-registry.ts` defines the generic client-side tool renderer registry contract.
+- `features/ai-assistant/providers/assistant-root-provider.tsx` composes fullscreen and data-stream providers behind one reusable assistant root.
+- `features/ai-assistant/server/assistant-model-provider.ts` resolves configured model ids into provider model instances behind one OpenAI-specific boundary.
+- `features/ai-assistant/schema/assistant-request-schema.ts` validates reusable assistant request fields while preserving business context.
+- `features/ai-assistant/server/handle-assistant-request.ts` owns assistant request parsing, chat persistence calls, stream creation, runtime invocation, and SSE response formatting.
+- `features/ai-assistant/server/assistant-chat-persistence.ts` isolates development user/chat/message persistence use-cases from the API route.
+- Old assistant-core product/cart compatibility export paths were removed in cleanup phase 08; use `features/shop`, `features/shop-assistant`, or generic assistant contracts as the canonical owners.
+- `features/shop-assistant/server/shop-assistant-runtime.ts` implements the runtime injected into the reusable assistant handler and resolves selected request models once per stream.
+- `features/shop-assistant/ui/shop-assistant-integration.tsx` mounts the reusable assistant root with ShopMate stream handling and chat id wiring.
+- `features/shop-assistant/model/catalog-source.ts` and `model/cart-source.ts` define product/cart data contracts for assistant tools and renderers.
+- `features/shop-assistant/server/mock-catalog-source.ts` adapts request/mock products to the catalog contract with deterministic filters before AI ranking.
+- `features/shop-assistant/server/db-catalog-source.ts` documents the future Supabase/Postgres filter implementation boundary.
+- `features/shop-assistant/server/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
+- `features/shop-assistant/server/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
+- `features/shop-assistant/server/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized ShopMate agent implementations and prompts.
+- `features/shop-assistant/server/router.ts` coordinates ShopMate routing to the selected agent.
+- `features/shop-assistant/tools/product-search/` and `tools/cart-info/` define ShopMate AI tool behavior over adapter-owned catalog/cart sources.
+- `features/shop-assistant/ui/tool-renderer-registry.tsx` registers ShopMate product/cart tool renderers for the generic assistant message renderer.
+- Dependency rule: `features/shop-assistant` may import assistant contracts; `features/ai-assistant` must not import ShopMate adapter code; `app/api/ai-assistant/route.ts` imports only the reusable handler and current runtime composition.
 - `features/ai-assistant/artifacts/` contains text and sheet artifact support, version-history hooks, panel UI, and document tool result/call components.
 - `features/ai-assistant/history-sidebar/` contains chat history UI, SWR pagination, date grouping, navigation helpers, and deletion operation notes.
 
 ## State And Data
 
-- `features/ai-assistant/providers/shop-context.tsx` is the central client state provider for products and cart; it wraps SWR hooks and exposes dispatch-style compatibility actions.
-- `features/ai-assistant/hooks/use-products-api-swr.ts` and `use-cart-api-swr.ts` bridge UI state to `/api/products` and `/api/cart`.
+- `features/shop/providers/shop-context.tsx` is the central client state provider for products and cart; it wraps SWR hooks and exposes dispatch-style compatibility actions.
+- `features/shop/hooks/use-products-api-swr.ts` and `use-cart-api-swr.ts` bridge UI state to `/api/products` and `/api/cart`.
 - `lib/storage/session-storage.ts` is the development storage abstraction for products/cart/user data.
 - `lib/supabase/client.ts`, `types.ts`, `queries/chat-queries.ts`, and `queries/user-queries.ts` provide Supabase persistence for users, chats, messages, and documents.
 - `lib/supabase/migrations/` contains SQL migrations for documents, users, chats, and messages.

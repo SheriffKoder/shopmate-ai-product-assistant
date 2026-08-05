@@ -10,12 +10,17 @@
 
 import { Input } from '@/components/ui/input';
 import { ChevronRightIcon, Loader2 } from 'lucide-react';
+import { ModelPicker } from './model-picker';
+import type { AssistantModelOption } from '../model/assistant-model-config';
 
 interface PromptInputProps {
   input: string;
   setInput: (value: string) => void;
   handleSubmit: () => void;
   status: 'idle' | 'streaming' | 'submitted' | 'error' | 'ready';
+  selectedModelId: string;
+  modelOptions: AssistantModelOption[];
+  onModelChange: (modelId: string) => void;
 }
 
 export const PromptInput = ({
@@ -23,6 +28,9 @@ export const PromptInput = ({
   setInput,
   handleSubmit,
   status,
+  selectedModelId,
+  modelOptions,
+  onModelChange,
 }: PromptInputProps) => {
   return (
     <div className="flex items-center gap-1 border-2 m-2 rounded-lg p-1 border-[#dbdbdb] flex-shrink-0">
@@ -41,6 +49,14 @@ export const PromptInput = ({
         className="flex-1 border-none bg-white/10 focus:bg-white/15 focus-visible:ring-[0px] transition-all duration-300 text-black"
       />
 
+      {/* Model Picker: lets the user switch configured assistant models for the next request */}
+      <ModelPicker
+        selectedModelId={selectedModelId}
+        modelOptions={modelOptions}
+        onModelChange={onModelChange}
+        disabled={status === 'streaming' || status === 'submitted'}
+      />
+
       {/* Submit Button: To submit the user's message */}
       <button
         onClick={handleSubmit}
@@ -57,4 +73,3 @@ export const PromptInput = ({
     </div>
   );
 };
-

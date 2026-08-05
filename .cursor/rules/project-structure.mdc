@@ -1,0 +1,83 @@
+---
+description: Responsibility-first project structure — layer vs subarea splits, folder vocabulary, dependency direction
+alwaysApply: true
+---
+
+# Project Structure — Responsibility-First
+
+Apply automatically when creating or moving files — don't wait to be asked.
+
+## 1. The one decision rule
+
+> **Split by layer by default. Split by subarea only if that subtree has zero shared dependents.**
+
+- **Layer split** = group by *what kind of thing* (schema, cache, server...). Use when more than one consumer touches the same logic.
+- **Subarea split** = group by *feature slice* (calendar, home...). Only when fully self-contained — nothing else imports its internals.
+
+If another part of the unit calls into a folder → not self-contained → keep in layer folders, disambiguate with filename prefix (`get-calendar-notes-response.ts`), not a top-level folder.
+
+## 2. Standard layer vocabulary
+
+Use these names only — never invent synonyms (`helpers/` → `lib/`, `actions/` → `server/`):
+
+| Folder | Contains |
+|---|---|
+| `model/` | Types + domain logic (pure) |
+| `ui/` | Components |
+| `hooks/` | React hooks |
+| `lib/` | Pure helpers, no I/O |
+| `server/` | Server use-cases / actions |
+| `client/` | Client-side fetchers |
+| `repository/` | Data access (DB/API CRUD) |
+| `schema/` | Validation (Zod etc.) |
+| `queries/` | Read use-cases |
+| `mutations/` | Write use-cases |
+| `cache/` | Pure cache-update helpers |
+| `transform/` | Pure reshaping (raw → domain) |
+| `errors/` | Custom error types |
+| `providers/` | Context providers |
+| `services/` | External service wrappers |
+
+Only include folders a unit needs.
+
+## 3. Top-level shape (wide, not deep)
+
+```
+src/
+├── app/          # routing entrypoints only
+├── views/        # route/page composition
+├── features/     # reusable business workflows
+├── entities/     # domain logic, one folder per concept
+├── widgets/      # composed, reusable UI sections
+├── shared/       # cross-domain, no business logic
+├── tests/
+└── docs/
+```
+
+Inside each concept folder: layer folders from §2. Subarea folders only if they pass §1.
+
+## 4. Dependency direction (one-way)
+
+```
+views → features → entities → shared
+```
+
+Entities never import features/views. Features never import views.
+
+## 5. Docs per unit
+
+| Size | Docs |
+|---|---|
+| Small | `README.md` only |
+| 5+ files/folders | + `docs/responsibilities.md` |
+| Real tradeoff history | + `docs/architecture.md` and/or `docs/decisions.md` |
+
+Don't add docs to compensate for a fixable structure.
+
+## 6. Checklist when adding a file
+
+1. Unit: view, feature, entity, widget, or shared?
+2. Layer: one name from §2.
+3. Subarea? Apply §1 first.
+4. Dependency direction (§4) OK?
+5. Crossed ~5 files across layers? Add `docs/responsibilities.md`.

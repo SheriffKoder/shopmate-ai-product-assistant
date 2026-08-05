@@ -2,7 +2,7 @@
  * Data Stream Provider
  * 
  * Purpose: Provides React Context for managing streaming data from AI responses
- * Used in: Layout wrapper, chat components
+ * Used in: AssistantRootProvider and chat components
  * Why: Allows components to access and update stream data without prop drilling
  * 
  * How it works:
@@ -29,7 +29,8 @@
 import type { DataUIPart } from "ai";
 import type React from "react";
 import { createContext, useContext, useMemo, useState } from "react";
-import type { ShopMateUIDataTypes } from '../types/stream';
+import type { AssistantUIDataTypes } from '../types/stream';
+import type { AssistantStepEvent } from '../model/assistant-events';
 
 /**
  * Context value type for data stream
@@ -40,11 +41,13 @@ import type { ShopMateUIDataTypes } from '../types/stream';
  */
 type DataStreamContextValue = {
   /** Array of streaming data parts from the AI response */
-  dataStream: DataUIPart<ShopMateUIDataTypes>[];
+  dataStream: DataUIPart<AssistantUIDataTypes>[];
   /** Function to update the data stream array */
   setDataStream: React.Dispatch<
-    React.SetStateAction<DataUIPart<ShopMateUIDataTypes>[]>
+    React.SetStateAction<DataUIPart<AssistantUIDataTypes>[]>
   >;
+  assistantSteps: AssistantStepEvent[];
+  setAssistantSteps: React.Dispatch<React.SetStateAction<AssistantStepEvent[]>>;
 };
 
 /**
@@ -77,18 +80,19 @@ export function DataStreamProvider({
   //////////////////////////////////
   // Data Stream State: Holds all streaming data parts
   // Why: Centralized state for all stream data
-  // Type: Array of DataUIPart with ShopMate-specific types
+  // Type: Array of host-defined data parts
   //////////////////////////////////
-  const [dataStream, setDataStream] = useState<DataUIPart<ShopMateUIDataTypes>[]>(
+  const [dataStream, setDataStream] = useState<DataUIPart<AssistantUIDataTypes>[]>(
     []
   );
+  const [assistantSteps, setAssistantSteps] = useState<AssistantStepEvent[]>([]);
 
   //////////////////////////////////
   // Memoized Context Value: Prevents unnecessary re-renders
   // Why: useMemo ensures context value only changes when dataStream changes
   // Benefit: Components consuming this context won't re-render unnecessarily
   //////////////////////////////////
-  const value = useMemo(() => ({ dataStream, setDataStream }), [dataStream]);
+  const value = useMemo(() => ({ dataStream, setDataStream, assistantSteps, setAssistantSteps }), [dataStream, assistantSteps]);
 
   return (
     <DataStreamContext.Provider value={value}>
@@ -131,4 +135,3 @@ export function useDataStream() {
   
   return context;
 }
-

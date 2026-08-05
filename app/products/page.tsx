@@ -7,7 +7,7 @@
  */
 
 import { Suspense } from 'react';
-import { ProductsPageContent } from '@/features/products/products-page-content';
+import { ProductsPageContent } from '@/views/products/products-page-content';
 
 export default function ProductsPage() {
   return (

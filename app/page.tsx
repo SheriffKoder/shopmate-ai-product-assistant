@@ -6,7 +6,7 @@
  * Why: Simple wrapper for the Home component
  */
 
-import { Home } from '@/features/home/index';
+import { Home } from '@/views/home/index';
 
 export default function HomePage() {
     return <Home />;

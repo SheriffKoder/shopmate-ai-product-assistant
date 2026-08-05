@@ -1,22 +1,20 @@
 /**
  * Message Part Renderer
  * 
- * Purpose: Renders individual message parts (text, tools, etc.)
- * Used in: calendar-chat.tsx
- * Why: Centralizes message part rendering logic
+ * Purpose: Renders individual message parts with generic tool renderer registration.
+ * Used in: features/ai-assistant/components/message-list.tsx
+ * Why: Centralizes reusable assistant message rendering without importing business tool UI.
  */
 
 'use client';
 
 import { MessageResponse } from '@/components/ai-elements/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '@/components/ai-elements/reasoning';
-import { ProductSearchToolRenderer } from '../tools/product-search/components/product-search-tool-renderer';
-import { CartInfoToolRenderer } from '../tools/cart-info/components/cart-info-tool-renderer';
 import { DefaultToolRenderer } from '../tools/default-tool-renderer';
 import { MarkdownText } from './ui/markdown-text';
 import { DiscussionCard } from './ui/discussion-card';
-import { CartState, CartAction } from '@/features/ai-assistant/types/cart';
-import { DocumentPreview } from '@/features/ai-assistant/artifacts/components';
+import { DocumentPreview } from '@/features/ai-assistant/components/artifacts/components';
+import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
 
 interface MessagePartRendererProps {
   part: any;
@@ -26,8 +24,8 @@ interface MessagePartRendererProps {
   status?: 'idle' | 'streaming' | 'submitted' | 'error' | 'ready';
   isLastPart?: boolean;
   isLastMessage?: boolean;
-  cart?: CartState;
-  dispatchCartAction?: (action: CartAction) => void;
+  toolRenderers?: AssistantToolRendererRegistry;
+  toolRendererContext?: unknown;
 }
 
 export const MessagePartRenderer = ({
@@ -38,11 +36,16 @@ export const MessagePartRenderer = ({
   status,
   isLastPart,
   isLastMessage,
-  cart,
-  dispatchCartAction,
+  toolRenderers,
+  toolRendererContext,
 }: MessagePartRendererProps) => {
   // Render reasoning parts
   if (part.type === 'reasoning') {
+    // Do not render an empty reasoning block, including its expandable chevron.
+    if (!part.text?.trim()) {
+      return null;
+    }
+
     const isStreaming = status === 'streaming' && isLastPart && isLastMessage;
     return (
       <Reasoning
@@ -130,28 +133,15 @@ export const MessagePartRenderer = ({
       }
     }
 
-    // Custom rendering for productSearch tool
-    if (dynamicToolPart.toolName === 'productSearch') {
+    // Look up adapter-provided renderers so assistant core does not know business tool names.
+    const RegisteredToolRenderer = toolRenderers?.[dynamicToolPart.toolName];
+    if (RegisteredToolRenderer) {
       return (
-        <ProductSearchToolRenderer
+        <RegisteredToolRenderer
           toolPart={dynamicToolPart}
           messageId={messageId}
           partIndex={partIndex}
-          dispatchCartAction={dispatchCartAction}
-          cart={cart}
-        />
-      );
-    }
-
-    // Custom rendering for cartInfo tool
-    if (dynamicToolPart.toolName === 'cartInfo') {
-      return (
-        <CartInfoToolRenderer
-          toolPart={dynamicToolPart}
-          messageId={messageId}
-          partIndex={partIndex}
-          dispatchCartAction={dispatchCartAction}
-          cart={cart}
+          context={toolRendererContext}
         />
       );
     }
@@ -182,4 +172,3 @@ export const MessagePartRenderer = ({
   console.warn('Unknown message part type:', part.type, part);
   return null;
 };
-
