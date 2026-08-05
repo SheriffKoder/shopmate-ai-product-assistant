@@ -1,19 +1,13 @@
 /**
- * Checkout Confirmation Page
- * 
- * Purpose: Displays order confirmation after checkout
+ * Checkout Redirect Page
+ *
+ * Purpose: Redirects the legacy checkout route during server-first page promotion.
  * Used in: Next.js routing (/checkout)
- * Why: Provides a dedicated confirmation page for completed orders
+ * Used for: Keeps stale root checkout visits out of deleted client page views.
  */
 
-import { Suspense } from 'react';
-import { CheckoutPageContent } from '@/views/checkout/checkout-page-content';
+import { redirect } from 'next/navigation';
 
 export default function CheckoutPage() {
-  return (
-    <Suspense fallback={<div className="w-full min-h-screen p-4">Loading...</div>}>
-      <CheckoutPageContent />
-    </Suspense>
-  );
+  redirect('/en');
 }
-

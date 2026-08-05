@@ -6,11 +6,11 @@
  * Used for: Delegates server-first product detail composition to a shadow view.
  */
 
-import { ShadowProductDetailView } from '@/shadow/views/product-detail';
-import { getShadowProductStaticParams } from '@/shadow/entities/product/queries/product-queries';
-import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shadow/shared/config/cache';
-import { SHADOW_LOCALES } from '@/shadow/shared/i18n/config';
-import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
+import { ShadowProductDetailView } from '@/views/product-detail';
+import { getShadowProductStaticParams } from '@/entities/product/queries/product-queries';
+import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
+import { SHADOW_LOCALES } from '@/shared/i18n/config';
+import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
 
 type ShadowProductDetailPageProps = {
   params: Promise<{

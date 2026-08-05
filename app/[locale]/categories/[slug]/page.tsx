@@ -6,11 +6,11 @@
  * Used for: Delegates server-first category composition to a shadow view.
  */
 
-import { ShadowCategoryView } from '@/shadow/views/category';
-import { getShadowCategoryStaticParams } from '@/shadow/entities/category/queries/category-queries';
-import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shadow/shared/config/cache';
-import { SHADOW_LOCALES } from '@/shadow/shared/i18n/config';
-import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
+import { ShadowCategoryView } from '@/views/category';
+import { getShadowCategoryStaticParams } from '@/entities/category/queries/category-queries';
+import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
+import { SHADOW_LOCALES } from '@/shared/i18n/config';
+import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
 
 type ShadowCategoryPageProps = {
   params: Promise<{

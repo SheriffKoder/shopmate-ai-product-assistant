@@ -2,11 +2,11 @@
  * Shadow Initial Product Data
  *
  * Purpose: Provides development-only catalog seed records for the shadow project.
- * Used in: Future /shadow/dev seed actions.
+ * Used in: Future /dev seed actions.
  * Used for: Keeps seed input out of public shadow page reads.
  */
 
-import type { ShadowLocalizedList, ShadowLocaleText } from '@/shadow/shared/model/localization';
+import type { ShadowLocalizedList, ShadowLocaleText } from '@/shared/model/localization';
 
 export type ShadowInitialCategory = {
   slug: string;

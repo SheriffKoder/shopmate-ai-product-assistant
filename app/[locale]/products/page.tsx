@@ -6,9 +6,9 @@
  * Used for: Delegates server-first product listing composition to a shadow view.
  */
 
-import { ShadowProductsView } from '@/shadow/views/products';
-import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
-import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shadow/shared/config/cache';
+import { ShadowProductsView } from '@/views/products';
+import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
+import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 
 type ShadowProductsPageProps = {
   params: Promise<{

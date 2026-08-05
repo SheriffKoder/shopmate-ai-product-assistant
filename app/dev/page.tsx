@@ -6,7 +6,7 @@
  * Used for: Hosts future seed, auth, and revalidation controls for shadow data.
  */
 
-import { ShadowDevView } from '@/shadow/views/dev';
+import { ShadowDevView } from '@/views/dev';
 
 type ShadowDevPageProps = {
   searchParams: Promise<{

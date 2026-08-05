@@ -15,7 +15,7 @@ import ButtonDropdown from '@/features/cart/ui/cart-dropdown';
 import { HeaderIconButton } from './HeaderIconButton';
 import { HeaderSearchBar } from './HeaderSearchBar';
 import { useCart } from '@/features/cart/hooks/use-cart';
-import { navigateToProductSearch } from '@/views/products/utils/navigation-utils';
+import { navigateToProductSearch } from './lib/navigation-utils';
 import { useAssistantShell } from '@/features/ai-assistant/providers/assistant-shell-context';
 
 export const MainHeader = () => {

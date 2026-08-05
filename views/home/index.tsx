@@ -1,34 +1,30 @@
 /**
- * Home Main Content Component
- * 
- * Purpose: Main content layout for the home page
- * Used in: app/page.tsx
- * Why: Separates home page content logic into a reusable component
+ * Shadow Home View
+ *
+ * Purpose: Server-first composition surface for the shadow home route.
+ * Used in: app/[locale]/page.tsx
+ * Used for: Loads localized copy and DB-backed catalog data for the home page.
  */
 
-'use client';
+import type { ShadowLocale } from '@/shared/i18n/config';
+import { getShadowDictionary } from '@/shared/i18n/lib/get-dictionary';
+import { getShadowHomePageData } from '@/views/home/queries/get-home-page-data';
+import { ShadowHomePage } from '@/views/home/ui/home-page';
 
-import { HeaderCategories } from './components/categories/HeaderCategories';
-import { BannerSlider } from './components/banner/BannerSlider';
-import { PromotionalCards } from './components/promotional/PromotionalCards';
-import { ProductGrid } from './components/products/ProductGrid';
-import { NonFeaturedProductsGrid } from './components/products/NonFeaturedProductsGrid';
-
-export const Home = () => {
-  return (
-    <div className="flex flex-1 h-full ] p-4 flex-col gap-4">
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-        <div className='col-span-1 md:col-span-1'>
-          <HeaderCategories />
-        </div>
-        <div className='col-span-1 md:col-span-3'>
-          <BannerSlider />
-        </div>
-      </div>
-      <ProductGrid />
-      <NonFeaturedProductsGrid />
-      <PromotionalCards />
-    </div>
-  );
+type ShadowHomeViewProps = {
+  locale: ShadowLocale;
 };
 
+/**
+ * Renders the shadow home view placeholder.
+ *
+ * @param props - Active locale for localized copy and future catalog queries.
+ * @returns A server-rendered home page.
+ */
+export async function ShadowHomeView(props: ShadowHomeViewProps) {
+  const { locale } = props;
+  const dictionary = getShadowDictionary(locale);
+  const data = await getShadowHomePageData();
+
+  return <ShadowHomePage data={data} dictionary={dictionary} locale={locale} />;
+}

@@ -8,8 +8,8 @@
 
 import type { ReactNode } from 'react';
 
-import { getShadowLocaleDirection } from '@/shadow/shared/i18n/config';
-import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
+import { getShadowLocaleDirection } from '@/shared/i18n/config';
+import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
 
 type ShadowLocaleLayoutProps = {
   children: ReactNode;
