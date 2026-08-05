@@ -48,6 +48,7 @@ features/ai-assistant/
 ├── integration/            # Factories for composing generic assistant config.
 ├── lib/                    # Pure assistant utilities, logging, and errors.
 ├── model/                  # Contracts: runtime, persistence, events, documents, endpoints.
+├── navigation/             # Link/router helpers that preserve assistant URL state.
 ├── providers/              # React providers for stream and fullscreen state.
 ├── server/                 # Request parsing and assistant stream orchestration.
 ├── test/                   # In-memory adapters and assistant contract tests.
@@ -67,6 +68,12 @@ application/views
 
 `features/ai-assistant` must never import `features/shop-assistant`, catalog/cart entities, or a concrete Supabase/Prisma/Drizzle client. Database adapters belong under application infrastructure and are injected at the route boundary.
 
+## Assistant URL state
+
+The assistant owns `chatId` as URL state so a conversation can stay attached while the user browses server-first pages. App links that should keep the active assistant session should use `AssistantAwareLink`, and imperative navigation should use `useAssistantAwareRouter`.
+
+Only assistant-owned params are preserved. Page params such as product search, filters, and sorting should stay owned by their pages and should not be copied globally.
+
 ## Adding the assistant to a new project
 
 1. Copy this feature and its generic UI dependencies.
@@ -76,4 +83,3 @@ application/views
 5. Configure the assistant endpoint and persistence routes in `model/api-endpoints.ts`.
 6. Mount `AssistantRootProvider` and `ChatWrapper` from the application shell.
 7. Add business behavior as a separate adapter feature; do not add business imports to this folder.
-

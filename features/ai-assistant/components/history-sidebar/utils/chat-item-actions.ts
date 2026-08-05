@@ -1,6 +1,7 @@
 'use client';
 
 import { assistantHttpHistoryClient } from '@/features/ai-assistant/client/assistant-history-client';
+import { buildAssistantAwareHref } from '@/features/ai-assistant/navigation';
 
 /**
  * Copy chat link with chatId param to clipboard.
@@ -9,9 +10,13 @@ import { assistantHttpHistoryClient } from '@/features/ai-assistant/client/assis
 export async function copyChatLink(chatId: string): Promise<void> {
   if (typeof window === 'undefined') return;
   try {
-    const url = `${window.location.origin}/?chatId=${encodeURIComponent(chatId)}`;
-    await navigator.clipboard.writeText(url);
-    console.log('[chat-item-actions] Copied chat link:', url);
+    const params = new URLSearchParams(window.location.search);
+    params.set('chatId', chatId);
+    const href = buildAssistantAwareHref(window.location.pathname, params);
+    const url = new URL(href, window.location.origin);
+
+    await navigator.clipboard.writeText(url.toString());
+    console.log('[chat-item-actions] Copied chat link:', url.toString());
   } catch (error) {
     console.error('[chat-item-actions] Failed to copy chat link', error);
   }

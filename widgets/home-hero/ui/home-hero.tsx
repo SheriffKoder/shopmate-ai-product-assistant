@@ -6,7 +6,7 @@
  * Used for: Presents localized intro copy and a products navigation action.
  */
 
-import Link from 'next/link';
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { AppLocale } from '@/shared/i18n/config';
 
 type HomeHeroProps = {
@@ -34,12 +34,12 @@ export function HomeHero(props: HomeHeroProps) {
           <h1 className="text-3xl font-semibold tracking-normal text-gray-950 sm:text-4xl">{title}</h1>
           <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p>
         </div>
-        <Link
+        <AssistantAwareLink
           className="inline-flex h-11 items-center justify-center rounded-md bg-gray-950 px-5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
           href={`/${locale}/products`}
         >
           {actionLabel}
-        </Link>
+        </AssistantAwareLink>
       </div>
     </section>
   );

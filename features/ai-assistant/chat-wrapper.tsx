@@ -95,7 +95,7 @@ export const ChatWrapper = ({
     <div
       className={`${isFullScreenState 
         ? 'w-full bottom-0 right-0' 
-        : 'md:w-[400px] w-[calc(100%-24px)] bottom-2 md:bottom-6 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6'
+        : 'md:w-[600px] w-[calc(100%-24px)] bottom-2 md:bottom-6 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6'
       } rounded-lg overflow-hidden
       flex flex-col fixed transition-all duration-300 ease-in-out z-[100]
       ${isFullScreenState ? 'h-screen' : isChatCollapsed ? 'h-[60px]' : 'h-[calc(75vh)]'}`}

@@ -6,7 +6,7 @@
  * Used for: Displays server-provided products without client or URL filtering.
  */
 
-import Link from 'next/link';
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { AppDictionary } from '@/shared/i18n/model/dictionary';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
@@ -46,13 +46,13 @@ export function ProductsPage(props: ProductsPageProps) {
             const categoryName = getLocalizedText(category.name, locale);
 
             return (
-              <Link
+              <AssistantAwareLink
                 className="rounded-md border bg-white px-3 py-2 text-sm font-medium text-gray-950 hover:border-gray-400"
                 href={`/${locale}/categories/${category.slug}`}
                 key={category.id}
               >
                 {categoryName}
-              </Link>
+              </AssistantAwareLink>
             );
           })}
         </nav>

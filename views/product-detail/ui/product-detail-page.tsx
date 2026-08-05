@@ -7,7 +7,7 @@
  */
 
 import Image from 'next/image';
-import Link from 'next/link';
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { AppDictionary } from '@/shared/i18n/model/dictionary';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
@@ -42,9 +42,9 @@ export function ProductDetailPage(props: ProductDetailPageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
-      <Link className="text-sm font-medium text-muted-foreground hover:text-gray-950" href={`/${locale}/products`}>
+      <AssistantAwareLink className="text-sm font-medium text-muted-foreground hover:text-gray-950" href={`/${locale}/products`}>
         {dictionary.productDetail.backToProducts}
-      </Link>
+      </AssistantAwareLink>
 
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
         <div className="space-y-4">

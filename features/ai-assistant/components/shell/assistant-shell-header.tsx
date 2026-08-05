@@ -8,7 +8,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronDown, ChevronUp, FileClock, FileXCorner, Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 interface AssistantShellHeaderProps {
   isCollapsed: boolean;
@@ -65,11 +65,15 @@ export function AssistantShellHeader({
         <button
           type="button"
           onClick={handleSidebarClick}
-          className="p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+          className={`p-1 rounded-md hover:bg-white/10 cursor-pointer ${
+            isCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100 delay-200'
+          }`}
+          aria-hidden={isCollapsed}
           aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          tabIndex={isCollapsed ? -1 : 0}
           title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
-          {isSidebarOpen ? <FileXCorner className="w-5 h-5 text-white" /> : <FileClock className="w-5 h-5 text-white" />}
+          {isSidebarOpen ? <PanelLeftClose className="w-5 h-5 text-white" /> : <PanelLeftOpen className="w-5 h-5 text-white" />}
         </button>
 
         <button

@@ -8,8 +8,9 @@
 
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
+import { useAssistantAwareRouter } from '@/features/ai-assistant/navigation';
 import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
 import { navigateToProductSearch } from '@/features/header-search/lib/navigation-utils';
 import { HeaderSearchBar } from '@/features/header-search/ui/header-search-bar';
@@ -20,7 +21,7 @@ import { HeaderSearchBar } from '@/features/header-search/ui/header-search-bar';
  * @returns Client search control for product navigation.
  */
 export function HeaderSearch() {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
   const locale = getLocaleFromPathname(usePathname());
 
   function handleSearch(query: string) {

@@ -9,9 +9,9 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
 
 /**
@@ -23,9 +23,9 @@ export function AppHeaderHomeLink() {
   const locale = getLocaleFromPathname(usePathname());
 
   return (
-    <Link href={`/${locale}`} className="cursor-pointer flex flex-row items-center gap-2 mb-2">
+    <AssistantAwareLink href={`/${locale}`} className="cursor-pointer flex flex-row items-center gap-2 mb-2">
       <Image src="/images/icon.png" alt="ShopMate AI" width={30} height={30} />
       {/* <span className='text-black text-lg font-bold hidden md:block'>ShopMate AI</span> */}
-    </Link>
+    </AssistantAwareLink>
   );
 }

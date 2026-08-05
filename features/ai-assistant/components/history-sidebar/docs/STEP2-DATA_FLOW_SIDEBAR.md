@@ -109,7 +109,7 @@ LIMIT :limit + 1
 5. Optional: Delete button, share options (future)
 
 **URL Format**:
-- `/?chatId={chatId}` - Updates search params, loads chat in current container
+- `/current-page?chatId={chatId}` - Updates search params, loads chat in current container
 
 **Active State**:
 - Compares current URL search param `chatId` with item's `chatId`
@@ -199,7 +199,7 @@ features/ai-assistant/history-sidebar/
 - **Pagination**: Uses cursor-based pagination with `ending_before` for better performance
 - **Date Grouping**: Groups chats by relative dates (Today, Yesterday, etc.) for better UX
 - **SWR**: Uses `useSWRInfinite` for automatic caching and revalidation
-- **URL Navigation**: Chat items update URL search params (`/?chatId=xxx`) without page navigation
+- **URL Navigation**: Chat items update URL search params (`/current-page?chatId=xxx`) without page navigation
 - **Message Loading**: Chat container automatically fetches and loads messages when chatId changes
 - **User Session**: Currently uses constant user, will be replaced with proper auth later
 
@@ -229,7 +229,7 @@ Users can click on sidebar chat items to load that chat's messages in the curren
 2. **`useNavigateToChat()`**: Hook to navigate to a chat by updating URL
    ```typescript
    const navigateToChat = useNavigateToChat();
-   navigateToChat('abc-123'); // Updates URL to /?chatId=abc-123
+   navigateToChat('abc-123'); // Updates URL to /current-page?chatId=abc-123
    ```
 
 3. **`useClearChat()`**: Hook to clear chat selection from URL
@@ -241,7 +241,7 @@ Users can click on sidebar chat items to load that chat's messages in the curren
 **How it works**:
 - Uses Next.js `useRouter` and `useSearchParams` hooks
 - Updates URL without full page navigation (`router.push` with `scroll: false`)
-- Stores chatId in search params: `/?chatId=abc-123`
+- Stores chatId in search params: `/current-page?chatId=abc-123`
 
 ---
 
@@ -279,7 +279,7 @@ User clicks chat item
   ↓
 navigateToChat(chatId) called
   ↓
-URL updated: /?chatId=abc-123
+URL updated: /current-page?chatId=abc-123
   ↓
 Chat container detects chatId change
   ↓
@@ -342,7 +342,7 @@ Loads messages into useChat
 
 **Flow**:
 ```
-URL: /?chatId=abc-123
+URL: /current-page?chatId=abc-123
   ↓
 useCurrentChatId() returns 'abc-123'
   ↓
@@ -421,7 +421,7 @@ if (!chatId) {
 ```
 1. User clicks chat item in sidebar
    ↓
-2. navigateToChat(chatId) updates URL: /?chatId=abc-123
+2. navigateToChat(chatId) updates URL: /current-page?chatId=abc-123
    ↓
 3. Chat wrapper detects URL change via useCurrentChatId()
    ↓

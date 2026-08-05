@@ -8,9 +8,8 @@
 
 'use client';
 
-import Link from 'next/link';
-
 import { Button } from '@/components/ui/button';
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import { useCart } from '@/features/cart/hooks/use-cart';
 import type { AppLocale } from '@/shared/i18n/config';
 import type { AppDictionary } from '@/shared/i18n/model/dictionary';
@@ -100,7 +99,7 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
           </div>
         </dl>
         <Button asChild className="mt-6 w-full">
-          <Link href={`/${locale}/products`}>{copy.continueShopping}</Link>
+          <AssistantAwareLink href={`/${locale}/products`}>{copy.continueShopping}</AssistantAwareLink>
         </Button>
       </aside>
     </section>

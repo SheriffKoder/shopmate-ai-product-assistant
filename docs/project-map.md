@@ -55,7 +55,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 ## Main Feature Areas
 
-- `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Business adapters inject runtimes and tool renderers from outside the core.
+- `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant-aware navigation helpers, assistant providers/hooks/types, server request handling, and assistant utilities. Business adapters inject runtimes and tool renderers from outside the core.
 - `features/auth/`: auth-facing UI islands such as the user account header button placeholder.
 - `features/cart/`: local-only client cart store, hook, header cart dropdown UI, and browser persistence. The assistant/cart interaction uses this hook contract.
 - `features/catalog/`: legacy-compatible product model and initial catalog data used by cart/assistant interactive surfaces until the Supabase catalog fully replaces those contracts.
@@ -68,6 +68,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/ai-assistant/model/assistant-runtime.ts` defines the reusable runtime contract that business adapters implement.
 - `features/ai-assistant/model/assistant-model-config.ts` defines env-driven default, search, and allowed assistant model ids.
 - `features/ai-assistant/model/tool-renderer-registry.ts` defines the generic client-side tool renderer registry contract.
+- `features/ai-assistant/navigation/` preserves assistant-owned URL state such as `chatId` across app links and imperative router navigation.
 - `features/ai-assistant/providers/assistant-root-provider.tsx` composes fullscreen and data-stream providers behind one reusable assistant root.
 - `features/ai-assistant/server/assistant-model-provider.ts` resolves configured model ids into provider model instances behind one OpenAI-specific boundary.
 - `features/ai-assistant/schema/assistant-request-schema.ts` validates reusable assistant request fields while preserving business context.

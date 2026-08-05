@@ -1,7 +1,8 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useAssistantAwareRouter } from '@/features/ai-assistant/navigation';
 import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
 import type { CartDropdownItem } from './cart-dropdown.types';
 
@@ -11,7 +12,7 @@ interface CartDropdownSummaryProps {
 }
 
 export function CartDropdownSummary({ items, onClose }: CartDropdownSummaryProps) {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
   const locale = getLocaleFromPathname(usePathname());
   if (items.length === 0) return null;
 

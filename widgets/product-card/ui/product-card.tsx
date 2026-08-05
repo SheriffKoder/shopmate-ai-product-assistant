@@ -7,7 +7,7 @@
  */
 
 import Image from 'next/image';
-import Link from 'next/link';
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { Product } from '@/entities/product/model/product';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
@@ -29,7 +29,7 @@ export function ProductCard(props: ProductCardProps) {
   const productDescription = getLocalizedText(product.shortDescription, locale);
 
   return (
-    <Link
+    <AssistantAwareLink
       className="group flex h-full flex-col rounded-lg border bg-white p-4 shadow-sm transition-colors hover:border-gray-400"
       href={`/${locale}/products/${product.slug}`}
     >
@@ -54,6 +54,6 @@ export function ProductCard(props: ProductCardProps) {
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{productDescription}</p>
         <div className="mt-auto pt-4 text-lg font-semibold text-gray-950">${product.price.toFixed(2)}</div>
       </div>
-    </Link>
+    </AssistantAwareLink>
   );
 }

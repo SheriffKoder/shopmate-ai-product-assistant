@@ -6,7 +6,7 @@
  * Used for: Lets users navigate from home to category pages without client state.
  */
 
-import Link from 'next/link';
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { Category } from '@/entities/category/model/category';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
@@ -43,7 +43,7 @@ export function CategoryNav(props: CategoryNavProps) {
             : null;
 
           return (
-            <Link
+            <AssistantAwareLink
               className="rounded-lg border bg-white p-4 shadow-sm transition-colors hover:border-gray-400"
               href={`/${locale}/categories/${category.slug}`}
               key={category.id}
@@ -54,7 +54,7 @@ export function CategoryNav(props: CategoryNavProps) {
                   {categoryDescription}
                 </span>
               ) : null}
-            </Link>
+            </AssistantAwareLink>
           );
         })}
       </div>
