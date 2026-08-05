@@ -1,6 +1,6 @@
 /**
  * @file features/cart/store/cart-store.ts
- * Zustand cart store with local persistence and future API synchronization.
+ * Zustand cart store with local-only persistence.
  */
 
 import { create } from 'zustand';
@@ -8,7 +8,6 @@ import type { CartAction, CartState } from '@/features/cart/model/cart';
 import { emptyCart } from '@/features/cart/model/cart-selectors';
 import { reduceCart } from './cart-reducer';
 import { readPersistedCart, writePersistedCart } from './cart-persistence';
-import { replaceCart } from '../client/cart-api-client';
 import type { Product } from '@/features/catalog/model/product';
 import { addItem, clearCart, decreaseQuantity, increaseQuantity, removeItem, updateQuantity } from '../model/cart-actions';
 
@@ -70,17 +69,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     await get().mutateCart(clearCart());
   },
   async mutateCart(nextCart: CartState) {
-    const previousCart = get().cart;
-    set({ cart: nextCart, isSyncing: true, error: null });
+    set({ cart: nextCart, isSyncing: false, error: null });
     writePersistedCart(nextCart);
-
-    try {
-      const serverCart = await replaceCart(nextCart);
-      set({ cart: serverCart, isSyncing: false });
-      writePersistedCart(serverCart);
-    } catch (error) {
-      set({ cart: previousCart, isSyncing: false, error: error instanceof Error ? error.message : 'Cart sync failed' });
-      writePersistedCart(previousCart);
-    }
   },
 }));
