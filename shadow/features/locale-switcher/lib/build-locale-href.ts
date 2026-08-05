@@ -1,9 +1,9 @@
 /**
  * Shadow Locale Href Builder
  *
- * Purpose: Builds locale-switch links while preserving the active shadow path.
+ * Purpose: Builds locale-switch links while preserving the active localized path.
  * Used in: shadow locale switcher client island.
- * Used for: Replaces only the locale segment in `/shadow/[locale]` URLs.
+ * Used for: Replaces only the leading locale segment in `/[locale]` URLs.
  */
 
 import type { ShadowLocale } from '@/shadow/shared/i18n/config';
@@ -15,15 +15,15 @@ type BuildShadowLocaleHrefInput = {
 };
 
 /**
- * Builds the href for changing locales on shadow public pages.
+ * Builds the href for changing locales on public pages.
  *
  * @param input - Current pathname and locale transition.
- * @returns A localized shadow href that preserves remaining route segments.
+ * @returns A localized href that preserves remaining route segments.
  */
 export function buildShadowLocaleHref(input: BuildShadowLocaleHrefInput) {
   const { pathname, currentLocale, nextLocale } = input;
-  const currentPrefix = `/shadow/${currentLocale}`;
-  const nextPrefix = `/shadow/${nextLocale}`;
+  const currentPrefix = `/${currentLocale}`;
+  const nextPrefix = `/${nextLocale}`;
 
   if (pathname === currentPrefix) {
     return nextPrefix;

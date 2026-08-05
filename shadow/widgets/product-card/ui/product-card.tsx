@@ -31,7 +31,7 @@ export function ShadowProductCard(props: ShadowProductCardProps) {
   return (
     <Link
       className="group flex h-full flex-col rounded-lg border bg-white p-4 shadow-sm transition-colors hover:border-gray-400"
-      href={`/shadow/${locale}/products/${product.slug}`}
+      href={`/${locale}/products/${product.slug}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-gray-100">
         {product.imageUrl ? (

@@ -2,7 +2,7 @@
  * Shadow Home Loading State
  *
  * Purpose: Route-level fallback while the shadow home segment streams.
- * Used in: Next.js routing at /shadow/[locale]
+ * Used in: Next.js routing at /[locale]
  * Used for: Keeps loading UI local to the shadow home route.
  */
 

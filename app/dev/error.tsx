@@ -4,7 +4,7 @@
  * Shadow Dev Error Boundary
  *
  * Purpose: Route-level recoverable error UI for the shadow dev segment.
- * Used in: Next.js routing at /shadow/dev
+ * Used in: Next.js routing at /dev
  * Used for: Provides a reset action for development-only shadow operations.
  */
 

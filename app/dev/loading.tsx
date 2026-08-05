@@ -2,7 +2,7 @@
  * Shadow Dev Loading State
  *
  * Purpose: Route-level fallback while the shadow dev segment streams.
- * Used in: Next.js routing at /shadow/dev
+ * Used in: Next.js routing at /dev
  * Used for: Keeps loading UI local to the development route.
  */
 

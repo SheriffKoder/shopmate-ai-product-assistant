@@ -2,7 +2,7 @@
  * Shadow Product Detail Route
  *
  * Purpose: Thin App Router entry for one shadow product detail page.
- * Used in: Next.js routing at /shadow/[locale]/products/[slug]
+ * Used in: Next.js routing at /[locale]/products/[slug]
  * Used for: Delegates server-first product detail composition to a shadow view.
  */
 

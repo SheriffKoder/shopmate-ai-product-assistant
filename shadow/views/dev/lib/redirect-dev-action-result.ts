@@ -1,7 +1,7 @@
 /**
  * Shadow Dev Action Redirect
  *
- * Purpose: Redirects /shadow/dev server actions with readable status messages.
+ * Purpose: Redirects /dev server actions with readable status messages.
  * Used in: shadow dev server actions.
  * Used for: Shows action outcomes without adding client state to the dev page.
  */
@@ -14,7 +14,7 @@ type RedirectShadowDevActionResultParams = {
 };
 
 /**
- * Redirects back to /shadow/dev with an action result.
+ * Redirects back to /dev with an action result.
  *
  * @param params - Action result status and message.
  */
@@ -24,5 +24,5 @@ export function redirectShadowDevActionResult(params: RedirectShadowDevActionRes
     status: params.status,
   });
 
-  redirect(`/shadow/dev?${searchParams.toString()}`);
+  redirect(`/dev?${searchParams.toString()}`);
 }

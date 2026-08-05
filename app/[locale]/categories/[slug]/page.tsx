@@ -2,7 +2,7 @@
  * Shadow Category Route
  *
  * Purpose: Thin App Router entry for one shadow category page.
- * Used in: Next.js routing at /shadow/[locale]/categories/[slug]
+ * Used in: Next.js routing at /[locale]/categories/[slug]
  * Used for: Delegates server-first category composition to a shadow view.
  */
 

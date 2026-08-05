@@ -2,7 +2,7 @@
  * Shadow Header
  *
  * Purpose: Renders the server-first navigation shell for localized shadow pages.
- * Used in: app/shadow/[locale]/layout.tsx
+ * Used in: app/[locale]/layout.tsx
  * Used for: Provides localized home/products navigation and the locale switcher island.
  */
 
@@ -25,8 +25,8 @@ type ShadowHeaderProps = {
  */
 export function ShadowHeader(props: ShadowHeaderProps) {
   const { locale, dictionary } = props;
-  const homeHref = `/shadow/${locale}`;
-  const productsHref = `/shadow/${locale}/products`;
+  const homeHref = `/${locale}`;
+  const productsHref = `/${locale}/products`;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">

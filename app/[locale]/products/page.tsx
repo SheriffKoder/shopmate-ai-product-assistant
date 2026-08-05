@@ -2,7 +2,7 @@
  * Shadow Products Route
  *
  * Purpose: Thin App Router entry for the shadow products listing.
- * Used in: Next.js routing at /shadow/[locale]/products
+ * Used in: Next.js routing at /[locale]/products
  * Used for: Delegates server-first product listing composition to a shadow view.
  */
 

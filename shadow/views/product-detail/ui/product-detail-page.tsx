@@ -42,7 +42,7 @@ export function ShadowProductDetailPage(props: ShadowProductDetailPageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
-      <Link className="text-sm font-medium text-muted-foreground hover:text-gray-950" href={`/shadow/${locale}/products`}>
+      <Link className="text-sm font-medium text-muted-foreground hover:text-gray-950" href={`/${locale}/products`}>
         {dictionary.productDetail.backToProducts}
       </Link>
 

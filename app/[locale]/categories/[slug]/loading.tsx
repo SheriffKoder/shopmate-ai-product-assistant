@@ -2,7 +2,7 @@
  * Shadow Category Loading State
  *
  * Purpose: Route-level fallback while one shadow category segment streams.
- * Used in: Next.js routing at /shadow/[locale]/categories/[slug]
+ * Used in: Next.js routing at /[locale]/categories/[slug]
  * Used for: Keeps loading UI local to the category route.
  */
 

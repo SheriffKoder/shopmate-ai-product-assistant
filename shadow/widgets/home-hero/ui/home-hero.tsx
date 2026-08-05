@@ -36,7 +36,7 @@ export function ShadowHomeHero(props: ShadowHomeHeroProps) {
         </div>
         <Link
           className="inline-flex h-11 items-center justify-center rounded-md bg-gray-950 px-5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-          href={`/shadow/${locale}/products`}
+          href={`/${locale}/products`}
         >
           {actionLabel}
         </Link>

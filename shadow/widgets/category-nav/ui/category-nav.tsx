@@ -45,7 +45,7 @@ export function ShadowCategoryNav(props: ShadowCategoryNavProps) {
           return (
             <Link
               className="rounded-lg border bg-white p-4 shadow-sm transition-colors hover:border-gray-400"
-              href={`/shadow/${locale}/categories/${category.slug}`}
+              href={`/${locale}/categories/${category.slug}`}
               key={category.id}
             >
               <span className="block text-base font-semibold text-gray-950">{categoryName}</span>

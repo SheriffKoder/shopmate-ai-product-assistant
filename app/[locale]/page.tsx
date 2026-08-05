@@ -2,7 +2,7 @@
  * Shadow Home Route
  *
  * Purpose: Thin App Router entry for the shadow home page.
- * Used in: Next.js routing at /shadow/[locale]
+ * Used in: Next.js routing at /[locale]
  * Used for: Delegates server-first page composition to the shadow home view.
  */
 

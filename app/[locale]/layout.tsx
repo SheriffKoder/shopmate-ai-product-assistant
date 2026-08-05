@@ -1,17 +1,15 @@
 /**
  * Shadow Locale Layout
  *
- * Purpose: Wraps the server-first shadow public pages for one locale.
- * Used in: Next.js routing under /shadow/[locale]
- * Used for: Provides locale metadata context without importing current app features.
+ * Purpose: Wraps the server-first public pages for one locale.
+ * Used in: Next.js routing under /[locale]
+ * Used for: Provides locale metadata while the root layout wrapper owns header/footer.
  */
 
 import type { ReactNode } from 'react';
 
 import { getShadowLocaleDirection } from '@/shadow/shared/i18n/config';
 import { assertShadowLocale } from '@/shadow/shared/i18n/lib/assert-locale';
-import { getShadowDictionary } from '@/shadow/shared/i18n/lib/get-dictionary';
-import { ShadowHeader } from '@/shadow/widgets/shadow-header/ui/shadow-header';
 
 type ShadowLocaleLayoutProps = {
   children: ReactNode;
@@ -31,11 +29,9 @@ export default async function ShadowLocaleLayout(props: ShadowLocaleLayoutProps)
   const { locale: rawLocale } = await params;
   const locale = assertShadowLocale(rawLocale);
   const direction = getShadowLocaleDirection(locale);
-  const dictionary = getShadowDictionary(locale);
 
   return (
     <section lang={locale} dir={direction} className="min-h-screen bg-background text-foreground">
-      <ShadowHeader locale={locale} dictionary={dictionary} />
       {children}
     </section>
   );

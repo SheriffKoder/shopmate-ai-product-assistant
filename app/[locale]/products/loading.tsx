@@ -2,7 +2,7 @@
  * Shadow Products Loading State
  *
  * Purpose: Route-level fallback while the shadow products segment streams.
- * Used in: Next.js routing at /shadow/[locale]/products
+ * Used in: Next.js routing at /[locale]/products
  * Used for: Keeps loading UI local to the product listing route.
  */
 

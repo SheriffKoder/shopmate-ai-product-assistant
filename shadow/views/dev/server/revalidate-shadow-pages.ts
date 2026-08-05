@@ -19,11 +19,11 @@ export async function revalidateShadowPages() {
   revalidateTag(SHADOW_CACHE_TAGS.categories);
   revalidateTag(SHADOW_CACHE_TAGS.products);
   revalidateTag(SHADOW_CACHE_TAGS.featuredProducts);
-  revalidatePath('/shadow/[locale]', 'page');
-  revalidatePath('/shadow/[locale]/products', 'page');
-  revalidatePath('/shadow/[locale]/categories/[slug]', 'page');
-  revalidatePath('/shadow/[locale]/products/[slug]', 'page');
-  revalidatePath('/shadow/dev');
+  revalidatePath('/[locale]', 'page');
+  revalidatePath('/[locale]/products', 'page');
+  revalidatePath('/[locale]/categories/[slug]', 'page');
+  revalidatePath('/[locale]/products/[slug]', 'page');
+  revalidatePath('/dev');
 }
 
 /**

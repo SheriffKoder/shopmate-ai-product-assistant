@@ -48,7 +48,7 @@ export function ShadowProductsPage(props: ShadowProductsPageProps) {
             return (
               <Link
                 className="rounded-md border bg-white px-3 py-2 text-sm font-medium text-gray-950 hover:border-gray-400"
-                href={`/shadow/${locale}/categories/${category.slug}`}
+                href={`/${locale}/categories/${category.slug}`}
                 key={category.id}
               >
                 {categoryName}
