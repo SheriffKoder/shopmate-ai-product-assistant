@@ -52,14 +52,13 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `app/api/ai-assistant/history/route.ts`: paginated chat history for the AI sidebar.
 - `app/api/ai-assistant/document/route.ts`: artifact/document persistence endpoint.
 - `app/api/ai-assistant/user/route.ts`: constant/development user endpoint.
-- `app/api/shop/products/route.ts`: legacy product endpoint that will be removed after the cart/header cleanup no longer needs old shop APIs.
 
 ## Main Feature Areas
 
 - `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Business adapters inject runtimes and tool renderers from outside the core.
 - `features/auth/`: auth-facing UI islands such as the user account header button placeholder.
 - `features/cart/`: local-only client cart store, hook, header cart dropdown UI, and browser persistence. The assistant/cart interaction uses this hook contract.
-- `features/catalog/`: current client catalog fetch hooks and model types used by legacy assistant/cart integration points until the Supabase catalog fully replaces them.
+- `features/catalog/`: legacy-compatible product model and initial catalog data used by cart/assistant interactive surfaces until the Supabase catalog fully replaces those contracts.
 - `features/header-search/`: header product search input and localized product-search navigation helper.
 - `features/locale-switcher/`: locale dropdown island and href builder for EN/AR route switching.
 - `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart data-source contracts, mock/DB-ready catalog sources, tool factories, product/cart tool renderers, renderer registry, UI integration shell, adapter search helpers, and runtime model consumption.
@@ -94,7 +93,6 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 - `entities/category/` and `entities/product/` read public catalog data from prefixed Supabase tables through the server-only service client.
 - `features/cart/store/cart-store.ts` is the central local-only client cart store used by the header and assistant integration.
-- `features/catalog/client/` contains temporary client catalog fetchers for remaining legacy interactive surfaces.
 - `lib/storage/session-storage.ts` is the development storage abstraction for products/cart/user data.
 - `lib/supabase/client.ts`, `types.ts`, `queries/chat-queries.ts`, and `queries/user-queries.ts` provide Supabase persistence for users, chats, messages, and documents.
 - `lib/supabase/migrations/` contains SQL migrations for documents, users, chats, and messages.
