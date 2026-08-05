@@ -18,6 +18,8 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `app/[locale]/products/page.tsx` renders the server-first localized product listing view from `views/products`.
 - `app/[locale]/products/[slug]/page.tsx` renders the server-first localized product detail view from `views/product-detail`.
 - `app/[locale]/categories/[slug]/page.tsx` renders the server-first localized category view from `views/category`.
+- `app/[locale]/checkout/page.tsx` renders the server-first localized checkout shell from `views/checkout`, with cart contents hydrated by a `features/cart` client island.
+- `app/[locale]/checkout/success/page.tsx` renders the server-first localized checkout success shell from `views/checkout-success`, with mock order/user data and local cart receipt items.
 - `app/dev/page.tsx` renders the development/admin view from `views/dev`.
 - `app/not-found.tsx` is the app-level 404 required by project guidelines.
 
@@ -28,6 +30,8 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `views/products/`: server-first products listing composition without URL/server-side filtering.
 - `views/product-detail/`: server-first product detail composition with static params support.
 - `views/category/`: server-first category composition with static params support.
+- `views/checkout/`: server-first checkout composition; local cart state is read only inside `features/cart/ui/checkout-cart-panel.tsx`.
+- `views/checkout-success/`: server-first checkout success composition with mock order/customer data and a cart receipt client island.
 - `views/dev/`: dynamic development/admin composition for env-driven dev user creation, initial catalog seeding, and on-demand revalidation.
 
 ## Server Page Source Responsibilities

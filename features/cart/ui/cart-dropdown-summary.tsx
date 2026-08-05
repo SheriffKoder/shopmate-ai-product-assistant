@@ -18,7 +18,7 @@ export function CartDropdownSummary({ items, onClose }: CartDropdownSummaryProps
   const totalPrice = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
 
   function goToCheckout() {
-    router.push('/checkout');
+    router.push(`/${locale}/checkout`);
     onClose();
   }
 

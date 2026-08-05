@@ -63,6 +63,31 @@ export type ShadowDictionary = {
     gridTitle: string;
     resultCount: string;
   };
+  checkout: ShadowPageDictionary & {
+    actionLabel: string;
+    continueShopping: string;
+    emptyDescription: string;
+    emptyTitle: string;
+    estimatedTotal: string;
+    loading: string;
+    orderSummary: string;
+    quantityLabel: string;
+    subtotal: string;
+  };
+  checkoutSuccess: ShadowPageDictionary & {
+    continueShopping: string;
+    customer: string;
+    deliveryEstimate: string;
+    emptyDescription: string;
+    emptyTitle: string;
+    items: string;
+    loading: string;
+    orderNumber: string;
+    paymentMethod: string;
+    quantityLabel: string;
+    receipt: string;
+    totalPaid: string;
+  };
   dev: ShadowPageDictionary & {
     actionsLabel: string;
     authAction: string;
