@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from 'next/font/local';
 import { LayoutWrapper } from '@/components/layout-wrapper';
@@ -20,7 +20,11 @@ export const metadata: Metadata = {
   description: "Discover the best electronic products with ShopMate AI. Get personalized product recommendations, compare features, and shop smart with our AI-powered shopping assistant.",
   keywords: ["electronics", "shopping", "AI assistant", "product recommendations", "online store"],
   authors: [{ name: "ShopMate AI" }],
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

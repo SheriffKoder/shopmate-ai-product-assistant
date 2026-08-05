@@ -8,7 +8,6 @@
 
 import { ProductDetailView } from '@/views/product-detail';
 import { getProductStaticParams } from '@/entities/product/queries/product-queries';
-import { PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 import { APP_LOCALES } from '@/shared/i18n/config';
 import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
 
@@ -19,7 +18,7 @@ type ProductDetailPageProps = {
   }>;
 };
 
-export const revalidate = PUBLIC_PAGE_REVALIDATE_SECONDS;
+export const revalidate = 864000; // 10 days
 
 /**
  * Prebuilds known product detail pages for every supported locale.

@@ -8,7 +8,6 @@
 
 import { CategoryView } from '@/views/category';
 import { getCategoryStaticParams } from '@/entities/category/queries/category-queries';
-import { PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 import { APP_LOCALES } from '@/shared/i18n/config';
 import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
 
@@ -19,7 +18,7 @@ type CategoryPageProps = {
   }>;
 };
 
-export const revalidate = PUBLIC_PAGE_REVALIDATE_SECONDS;
+export const revalidate = 864000; // 10 days
 
 /**
  * Prebuilds known category pages for every supported locale.

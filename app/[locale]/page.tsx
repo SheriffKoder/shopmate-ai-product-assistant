@@ -8,9 +8,8 @@
 
 import { HomeView } from '@/views/home';
 import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
-import { PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 
-export const revalidate = PUBLIC_PAGE_REVALIDATE_SECONDS;
+export const revalidate = 864000;
 
 type HomePageProps = {
   params: Promise<{

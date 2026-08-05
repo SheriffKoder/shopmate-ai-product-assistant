@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 import { buildAssistantAwareHref } from '@/features/ai-assistant/navigation/lib/build-assistant-aware-href';
 
@@ -43,33 +43,34 @@ function getRouterOptions(options?: AssistantAwareRouterOptions) {
  */
 export function useAssistantAwareRouter() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const push = useCallback(function pushAssistantAwareHref(
     href: string,
     options?: AssistantAwareRouterOptions,
   ) {
+    const searchParams = new URLSearchParams(window.location.search);
     const nextHref = resolveAssistantAwareHref(
       href,
-      new URLSearchParams(searchParams.toString()),
+      searchParams,
       options,
     );
 
     router.push(nextHref, getRouterOptions(options));
-  }, [router, searchParams]);
+  }, [router]);
 
   const replace = useCallback(function replaceAssistantAwareHref(
     href: string,
     options?: AssistantAwareRouterOptions,
   ) {
+    const searchParams = new URLSearchParams(window.location.search);
     const nextHref = resolveAssistantAwareHref(
       href,
-      new URLSearchParams(searchParams.toString()),
+      searchParams,
       options,
     );
 
     router.replace(nextHref, getRouterOptions(options));
-  }, [router, searchParams]);
+  }, [router]);
 
   return useMemo(function getAssistantAwareRouter() {
     return { push, replace };

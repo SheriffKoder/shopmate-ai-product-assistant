@@ -8,7 +8,6 @@
 
 import { ProductsView } from '@/views/products';
 import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
-import { PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 
 type ProductsPageProps = {
   params: Promise<{
@@ -16,7 +15,7 @@ type ProductsPageProps = {
   }>;
 };
 
-export const revalidate = PUBLIC_PAGE_REVALIDATE_SECONDS;
+export const revalidate = 864000; // 10 days
 
 /**
  * Renders the products listing page.
