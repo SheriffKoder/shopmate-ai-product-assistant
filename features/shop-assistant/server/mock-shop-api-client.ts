@@ -37,14 +37,35 @@ export function createMockShopApiClient(
   return {
     async searchProducts(request: CatalogSearchRequest) {
       const query = request.query.trim().toLowerCase();
+      const keywords = Array.isArray(request.keywords)
+        ? request.keywords.filter((keyword): keyword is string => typeof keyword === 'string')
+        : [];
+      const color = typeof request.color === 'string' ? request.color.toLowerCase() : undefined;
+      const minRating = typeof request.minRating === 'number' ? request.minRating : undefined;
+      const searchTerms = [
+        ...query.split(/\s+/),
+        ...keywords.map((keyword) => keyword.toLowerCase()),
+      ].filter((term) => term.length > 1);
+
       return products
         .filter((product) => {
-          const matchesQuery = !query || [product.name, product.category, product.description]
-            .join(' ').toLowerCase().includes(query);
+          const searchableText = [
+            product.name,
+            product.category,
+            product.description,
+            ...product.keywords,
+            ...product.features,
+          ].join(' ').toLowerCase();
+          // Match independent query terms so "iPhone Samsung" can return both brands.
+          const matchesQuery = searchTerms.length === 0 || searchTerms.some((term) => searchableText.includes(term));
+          const matchesKeywords = keywords.length === 0
+            || keywords.some((keyword) => searchableText.includes(keyword.toLowerCase()));
           const matchesCategory = !request.category || product.category.toLowerCase() === request.category.toLowerCase();
           const matchesMin = request.minPrice === undefined || product.price >= request.minPrice;
           const matchesMax = request.maxPrice === undefined || product.price <= request.maxPrice;
-          return matchesQuery && matchesCategory && matchesMin && matchesMax;
+          const matchesColor = !color || product.colors.some((productColor) => productColor.toLowerCase().includes(color));
+          const matchesRating = minRating === undefined || product.rating >= minRating;
+          return matchesQuery && matchesKeywords && matchesCategory && matchesMin && matchesMax && matchesColor && matchesRating;
         })
         .slice(0, request.limit ?? 10)
         .map(toProductDto);

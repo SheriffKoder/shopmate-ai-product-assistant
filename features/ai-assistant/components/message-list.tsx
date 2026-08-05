@@ -46,6 +46,16 @@ export const MessageList = ({
     <>
       {messages.map((message) => {
         console.log('message', message);
+        const persistedThinkingPart = message.parts?.find(
+          (part: any) => part.type === 'data-assistant-thinking-steps'
+        );
+        const persistedThinkingSteps = Array.isArray(persistedThinkingPart?.data)
+          ? persistedThinkingPart.data.reduce((steps: any[], step: any) => {
+              const existingIndex = steps.findIndex((currentStep) => currentStep.id === step.id);
+              if (existingIndex === -1) return [...steps, step];
+              return steps.map((currentStep, index) => index === existingIndex ? step : currentStep);
+            }, [])
+          : [];
         
         // Check if this is a user message that starts with "@" - don't display it
         // We added @ in the discussion card to not show the user message, so we don't need to display it here.
@@ -70,15 +80,21 @@ export const MessageList = ({
                 : '!bg-[#dbdbdb] !text-black rounded-lg px-4 py-3 !ml-auto text-right w-fit' // User message background color
             }
           >
-            {message.role === 'assistant' && message.id === messages.at(-1)?.id && (
-              <ThinkingSteps steps={assistantSteps} />
+            {message.role === 'assistant' && (
+              <ThinkingSteps
+                steps={
+                  message.id === messages.at(-1)?.id && assistantSteps.length > 0
+                    ? assistantSteps
+                    : persistedThinkingSteps
+                }
+              />
             )}
             {message.parts.map((part: any, i: number) => {
               // Filter out internal AI SDK parts that shouldn't be displayed
               // These include: step-finish, text-delta
               // Note: tool-call and tool-result for createDocument are handled in MessagePartRenderer
               // Note: reasoning and step-start are now displayed
-              const internalPartTypes = ['step-finish', 'text-delta'];
+              const internalPartTypes = ['step-finish', 'text-delta', 'data-assistant-thinking-steps'];
               if (internalPartTypes.includes(part.type)) {
                 return null;
               }

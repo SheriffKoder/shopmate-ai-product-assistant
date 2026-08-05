@@ -19,13 +19,32 @@
  * 7. Return the stream as Server-Sent Events.
  */
 
-import { createUIMessageStream, JsonToSseTransformStream } from 'ai';
+import { createUIMessageStream, JsonToSseTransformStream, type UIMessage } from 'ai';
 import type { AssistantRuntime } from '../model/assistant-runtime';
 import type { AssistantPersistence } from '../model/assistant-persistence';
 import { handleApiError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { extractUserQuery, generateUUID } from '../lib/utils';
 import { parseAssistantRequest } from './parse-assistant-request';
+import type { AssistantStepEvent } from '../model/assistant-events';
+
+const THINKING_STEPS_PART_TYPE = 'data-assistant-thinking-steps';
+
+function appendThinkingSteps(messages: UIMessage[], steps: AssistantStepEvent[]): UIMessage[] {
+  if (steps.length === 0) return messages;
+
+  const lastAssistantIndex = messages.findLastIndex((message) => message.role === 'assistant');
+  if (lastAssistantIndex < 0) return messages;
+
+  return messages.map((message, index) => {
+    if (index !== lastAssistantIndex) return message;
+    const parts = (message.parts || []).filter((part: any) => part.type !== THINKING_STEPS_PART_TYPE);
+    return {
+      ...message,
+      parts: [...parts, { type: THINKING_STEPS_PART_TYPE, data: steps }],
+    } as UIMessage;
+  });
+}
 
 /**
  * Handle an assistant HTTP request using an injected business runtime.
@@ -73,10 +92,32 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
     };
 
     // 6. Create one UI message stream that can merge model output and business tool data.
+    const thinkingSteps: AssistantStepEvent[] = [];
+
     const stream = createUIMessageStream({
       execute: async ({ writer: dataStream }) => {
+        const collectingWriter = new Proxy(dataStream, {
+          get(target, property, receiver) {
+            if (property !== 'write') return Reflect.get(target, property, receiver);
+
+            return (part: any) => {
+              if (part?.type === 'data-assistantStep' && part.data) {
+                const nextStep = part.data as AssistantStepEvent;
+                const existingIndex = thinkingSteps.findIndex((step) => step.id === nextStep.id);
+
+                if (existingIndex === -1) {
+                  thinkingSteps.push(nextStep);
+                } else {
+                  thinkingSteps[existingIndex] = nextStep;
+                }
+              }
+              return target.write(part);
+            };
+          },
+        });
+
         // 7. Delegate classification, tool selection, and model stream creation to the runtime.
-        const agentStream = await runtime.stream(runtimeRequest, dataStream);
+        const agentStream = await runtime.stream(runtimeRequest, collectingWriter);
 
         if (agentStream instanceof Response) {
           logger.warn('Runtime returned Response instead of stream - stream merging skipped');
@@ -88,10 +129,15 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
+        const persistedMessages = appendThinkingSteps(
+          messages,
+          thinkingSteps
+        );
+
         // 9. Persist assistant messages after streaming so response delivery stays responsive.
         await persistence.saveAssistantMessages({
           chatId: chat.chatId,
-          messages,
+          messages: persistedMessages,
         });
 
         // 10. Let the business runtime perform optional finish-time work after core persistence.

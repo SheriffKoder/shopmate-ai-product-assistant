@@ -41,6 +41,11 @@ export const MessagePartRenderer = ({
 }: MessagePartRendererProps) => {
   // Render reasoning parts
   if (part.type === 'reasoning') {
+    // Do not render an empty reasoning block, including its expandable chevron.
+    if (!part.text?.trim()) {
+      return null;
+    }
+
     const isStreaming = status === 'streaming' && isLastPart && isLastMessage;
     return (
       <Reasoning
