@@ -2,13 +2,12 @@
  * Header Icon Button Component
  * 
  * Purpose: Reusable icon button for header actions
- * Used in: ButtonDropdown.tsx, main-header.tsx
- * Why: Separates button UI logic into a reusable component
+ * Used in: header action buttons and cart dropdown triggers.
+ * Used for: Shares a consistent icon button primitive across header islands.
  */
 
 'use client';
 
-import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 interface HeaderIconButtonProps {
@@ -34,6 +33,7 @@ export const HeaderIconButton = ({
 }: HeaderIconButtonProps) => {
   return (
     <button
+      type="button"
       onClick={onClick}
       title={tooltip}
       className={`h-full px-3 py-2 rounded-sm cursor-pointer

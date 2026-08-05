@@ -4,9 +4,8 @@ The cart feature combines pure cart rules, Zustand client state, browser persist
 
 ```mermaid
 flowchart TD
-    ProductPage[views/products/product-detail-page-content.tsx] --> Hook[features/cart/hooks/use-cart.ts]
-    CartPage[views/cart/cart-page-content.tsx] --> Hook
-    Header[components/main-header/main-header.tsx] --> Hook
+    ProductPage[views/product-detail/ui/product-detail-page.tsx] --> Hook[features/cart/hooks/use-cart.ts]
+    Header[widgets/app-header/ui/app-header.tsx] --> Hook
     Assistant[features/shop-assistant/tools/* renderer] --> Command[features/shop-assistant/model/shop-assistant-command-handler.ts]
     Command --> Handler[Shop Assistant command dispatcher]
     Handler --> Hook
@@ -73,11 +72,9 @@ flowchart TD
 
 ### Consumers and assistant integration
 
-[`ui/cart-dropdown.tsx`](./ui/cart-dropdown.tsx) and its colocated UI components render cart controls in the header. They receive cart data and callbacks; they do not own cart state.
+[`ui/cart-header-dropdown.tsx`](./ui/cart-header-dropdown.tsx) and its colocated UI components render cart controls in the header. They receive cart data and callbacks; they do not own cart state.
 
-[`views/cart/cart-page-content.tsx`](../../views/cart/cart-page-content.tsx) consumes the same hook for the dedicated cart page, so header and page remain synchronized automatically.
-
-[`components/main-header/main-header.tsx`](../../components/main-header/main-header.tsx) adapts the store's cart items into the dropdown's display model.
+[`widgets/app-header/ui/app-header.tsx`](../../widgets/app-header/ui/app-header.tsx) adapts the store's cart items into the dropdown's display model.
 
 [`features/shop-assistant/model/shop-assistant-command-handler.ts`](../shop-assistant/model/shop-assistant-command-handler.ts) translates assistant commands into cart operations. This keeps the generic AI assistant unaware of both the cart store and ShopMate's data model.
 

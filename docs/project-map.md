@@ -11,7 +11,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 ## Entry Points
 
 - `app/layout.tsx` is the root server layout; it loads global CSS, local font metadata, and wraps pages with `components/layout-wrapper.tsx`.
-- `components/layout-wrapper.tsx` is the app shell: assistant root provider, global toast container, `MainHeader`, page content, one `features/shop-assistant` integration mount, and footer.
+- `components/layout-wrapper.tsx` is the app shell: assistant root provider, global toast container, `widgets/app-header`, page content, one `features/shop-assistant` integration mount, and footer.
 - `proxy.ts` redirects the bare root path `/` to the default localized storefront at `/en`.
 - `app/page.tsx` is a minimal root fallback redirect to `/en`.
 - `app/[locale]/page.tsx` renders the server-first localized home view from `views/home`.
@@ -54,8 +54,10 @@ Use this as the first repo read when you need orientation. It is intentionally c
 ## Main Feature Areas
 
 - `features/ai-assistant/`: reusable provider shell, chat container/wrapper, prompt input with model picker, message rendering, data streaming, generic tool-renderer registration, model configuration, artifacts, history sidebar, assistant providers/hooks/types, server request handling, and assistant utilities. Business adapters inject runtimes and tool renderers from outside the core.
+- `features/auth/`: auth-facing UI islands such as the user account header button placeholder.
 - `features/cart/`: client cart store, hook, cart dropdown UI, and temporary API client. The store is still API-synced until the local-only cart step.
 - `features/catalog/`: current client catalog fetch hooks and model types used by legacy assistant/cart integration points until the Supabase catalog fully replaces them.
+- `features/header-search/`: header product search input and localized product-search navigation helper.
 - `features/locale-switcher/`: locale dropdown island and href builder for EN/AR route switching.
 - `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart data-source contracts, mock/DB-ready catalog sources, tool factories, product/cart tool renderers, renderer registry, UI integration shell, adapter search helpers, and runtime model consumption.
 
@@ -99,8 +101,9 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 - `components/ui/` contains reusable Radix/Tailwind UI primitives.
 - `components/ai-elements/` contains reusable AI/chat display primitives.
-- `components/main-header/` contains the header, search bar, icon buttons, and dropdown pieces.
 - `components/mobile-nav.tsx`, `components/footer.tsx`, and `components/layout-wrapper.tsx` are app-shell UI.
+- `shared/ui/header-icon-button.tsx` is the generic header icon button primitive used by feature-owned header controls.
+- `widgets/app-header/ui/app-header.tsx` composes the feature-owned header search, locale switcher, user button, assistant toggle, and cart dropdown.
 - `lib/utils.ts` and `lib/message-utils.ts` are shared utility files.
 - `app/globals.css` holds global styles and Tailwind setup.
 

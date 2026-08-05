@@ -2,8 +2,8 @@
  * Header Search Bar Component
  * 
  * Purpose: Search input for header
- * Used in: main-header.tsx
- * Why: Separates search bar UI logic into a reusable component
+ * Used in: widgets/app-header/ui/app-header.tsx
+ * Used for: Keeps header product search UI inside the header-search feature.
  */
 
 'use client';
@@ -29,7 +29,7 @@ export const HeaderSearchBar = ({
   const [searchQuery, setSearchQuery] = useState(value || '');
 
   // Update local state when value prop changes
-  React.useEffect(() => {
+  React.useEffect(function syncControlledSearchValue() {
     if (value !== undefined) {
       setSearchQuery(value);
     }
@@ -86,4 +86,3 @@ export const HeaderSearchBar = ({
     </form>
   );
 };
-
