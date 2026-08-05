@@ -1,5 +1,5 @@
 /**
- * Shadow Category Page Data
+ * Category Page Data
  *
  * Purpose: Loads data for one server-first category page.
  * Used in: views/category/index.tsx
@@ -8,14 +8,14 @@
 
 import 'server-only';
 
-import type { ShadowCategory } from '@/entities/category/model/category';
-import { getShadowCategory } from '@/entities/category/queries/category-queries';
-import type { ShadowProduct } from '@/entities/product/model/product';
-import { getShadowProducts } from '@/entities/product/queries/product-queries';
+import type { Category } from '@/entities/category/model/category';
+import { getCategory } from '@/entities/category/queries/category-queries';
+import type { Product } from '@/entities/product/model/product';
+import { getProducts } from '@/entities/product/queries/product-queries';
 
-export type ShadowCategoryPageData = {
-  category: ShadowCategory | null;
-  products: ShadowProduct[];
+export type CategoryPageData = {
+  category: Category | null;
+  products: Product[];
 };
 
 /**
@@ -24,8 +24,8 @@ export type ShadowCategoryPageData = {
  * @param slug - Category slug from the route.
  * @returns Category data and matching products.
  */
-export async function getShadowCategoryPageData(slug: string): Promise<ShadowCategoryPageData> {
-  const [category, products] = await Promise.all([getShadowCategory({ slug }), getShadowProducts()]);
+export async function getCategoryPageData(slug: string): Promise<CategoryPageData> {
+  const [category, products] = await Promise.all([getCategory({ slug }), getProducts()]);
 
   return {
     category,

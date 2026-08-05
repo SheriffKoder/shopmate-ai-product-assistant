@@ -7,12 +7,12 @@
  */
 
 import { CheckoutCartPanel } from '@/features/cart/ui/checkout-cart-panel';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
+import type { AppLocale } from '@/shared/i18n/config';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
 
-type ShadowCheckoutPageProps = {
-  dictionary: ShadowDictionary;
-  locale: ShadowLocale;
+type CheckoutPageProps = {
+  dictionary: AppDictionary;
+  locale: AppLocale;
 };
 
 /**
@@ -21,7 +21,7 @@ type ShadowCheckoutPageProps = {
  * @param props - Localized dictionary copy and active locale.
  * @returns Server-rendered checkout shell.
  */
-export function ShadowCheckoutPage(props: ShadowCheckoutPageProps) {
+export function CheckoutPage(props: CheckoutPageProps) {
   const { dictionary, locale } = props;
 
   return (

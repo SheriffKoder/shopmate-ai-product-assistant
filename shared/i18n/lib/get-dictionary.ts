@@ -1,27 +1,27 @@
 /**
- * Shadow Dictionary Lookup
+ * Dictionary Lookup
  *
- * Purpose: Resolves a typed dictionary for a supported shadow locale.
- * Used in: shadow server routes, views, and widgets.
+ * Purpose: Resolves a typed dictionary for a supported locale.
+ * Used in: server routes, views, and widgets.
  * Used for: Keeps localized copy access behind one small shared API.
  */
 
-import { shadowArDictionary } from '@/shared/i18n/dictionaries/ar';
-import { shadowEnDictionary } from '@/shared/i18n/dictionaries/en';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
+import { arDictionary } from '@/shared/i18n/dictionaries/ar';
+import { enDictionary } from '@/shared/i18n/dictionaries/en';
+import type { AppLocale } from '@/shared/i18n/config';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
 
-const SHADOW_DICTIONARIES: Record<ShadowLocale, ShadowDictionary> = {
-  en: shadowEnDictionary,
-  ar: shadowArDictionary,
+const DICTIONARIES: Record<AppLocale, AppDictionary> = {
+  en: enDictionary,
+  ar: arDictionary,
 };
 
 /**
- * Gets the localized dictionary for a supported shadow locale.
+ * Gets the localized dictionary for a supported locale.
  *
- * @param locale - Supported shadow locale.
+ * @param locale - Supported locale.
  * @returns Dictionary copy for the locale.
  */
-export function getShadowDictionary(locale: ShadowLocale): ShadowDictionary {
-  return SHADOW_DICTIONARIES[locale];
+export function getDictionary(locale: AppLocale): AppDictionary {
+  return DICTIONARIES[locale];
 }

@@ -1,24 +1,24 @@
 /**
- * Shadow Category Transform
+ * Category Transform
  *
- * Purpose: Converts shadow category database rows into domain categories.
- * Used in: shadow category repositories.
+ * Purpose: Converts category database rows into domain categories.
+ * Used in: category repositories.
  * Used for: Keeps DB naming and validation out of server page composition.
  */
 
-import type { ShadowCategory, ShadowCategoryRow } from '@/entities/category/model/category';
-import { shadowCategoryRowSchema, shadowCategorySchema } from '@/entities/category/schema/category-schema';
+import type { Category, CategoryRow } from '@/entities/category/model/category';
+import { categoryRowSchema, categorySchema } from '@/entities/category/schema/category-schema';
 
 /**
- * Converts one Supabase category row into a shadow category domain object.
+ * Converts one Supabase category row into a category domain object.
  *
  * @param row - Raw category row from Supabase.
- * @returns A validated shadow category.
+ * @returns A validated category.
  */
-export function transformShadowCategoryRow(row: ShadowCategoryRow): ShadowCategory {
-  const parsedRow = shadowCategoryRowSchema.parse(row);
+export function transformCategoryRow(row: CategoryRow): Category {
+  const parsedRow = categoryRowSchema.parse(row);
 
-  return shadowCategorySchema.parse({
+  return categorySchema.parse({
     id: parsedRow.id,
     slug: parsedRow.slug,
     name: parsedRow.name,

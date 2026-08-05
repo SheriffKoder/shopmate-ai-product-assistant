@@ -1,17 +1,17 @@
 /**
- * Shadow Dev View
+ * Dev View
  *
- * Purpose: Server-first composition surface for shadow development tooling.
+ * Purpose: Server-first composition surface for development tooling.
  * Used in: app/dev/page.tsx
  * Used for: Holds placeholders for future seed, auth, and revalidation actions.
  */
 
-import { SHADOW_DEFAULT_LOCALE } from '@/shared/i18n/config';
-import { getShadowDictionary } from '@/shared/i18n/lib/get-dictionary';
-import { getShadowDevActionResult } from '@/views/dev/lib/get-dev-action-result';
-import { ShadowDevPage } from '@/views/dev/ui/dev-page';
+import { DEFAULT_LOCALE } from '@/shared/i18n/config';
+import { getDictionary } from '@/shared/i18n/lib/get-dictionary';
+import { getDevActionResult } from '@/views/dev/lib/get-dev-action-result';
+import { DevPage } from '@/views/dev/ui/dev-page';
 
-type ShadowDevViewProps = {
+type DevViewProps = {
   searchParams: {
     message?: string;
     status?: string;
@@ -19,15 +19,15 @@ type ShadowDevViewProps = {
 };
 
 /**
- * Renders the shadow development tooling page.
+ * Renders the development tooling page.
  *
  * @param props - Search params carrying the latest action result.
  * @returns A server-rendered development tooling page.
  */
-export function ShadowDevView(props: ShadowDevViewProps) {
+export function DevView(props: DevViewProps) {
   const { searchParams } = props;
-  const dictionary = getShadowDictionary(SHADOW_DEFAULT_LOCALE);
-  const actionResult = getShadowDevActionResult(searchParams);
+  const dictionary = getDictionary(DEFAULT_LOCALE);
+  const actionResult = getDevActionResult(searchParams);
 
-  return <ShadowDevPage actionResult={actionResult} dictionary={dictionary} />;
+  return <DevPage actionResult={actionResult} dictionary={dictionary} />;
 }

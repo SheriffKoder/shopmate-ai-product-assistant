@@ -1,5 +1,5 @@
 /**
- * Shadow Product Card Widget
+ * Product Card Widget
  *
  * Purpose: Renders a localized product summary card from server data.
  * Used in: widgets/product-grid/ui/product-grid.tsx
@@ -8,13 +8,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ShadowProduct } from '@/entities/product/model/product';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import type { Product } from '@/entities/product/model/product';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
 
-type ShadowProductCardProps = {
-  locale: ShadowLocale;
-  product: ShadowProduct;
+type ProductCardProps = {
+  locale: AppLocale;
+  product: Product;
 };
 
 /**
@@ -23,10 +23,10 @@ type ShadowProductCardProps = {
  * @param props - Product and active locale.
  * @returns A linked product summary card.
  */
-export function ShadowProductCard(props: ShadowProductCardProps) {
+export function ProductCard(props: ProductCardProps) {
   const { locale, product } = props;
-  const productName = getShadowLocalizedText(product.name, locale);
-  const productDescription = getShadowLocalizedText(product.shortDescription, locale);
+  const productName = getLocalizedText(product.name, locale);
+  const productDescription = getLocalizedText(product.shortDescription, locale);
 
   return (
     <Link

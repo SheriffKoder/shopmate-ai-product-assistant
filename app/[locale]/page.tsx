@@ -1,32 +1,32 @@
 /**
- * Shadow Home Route
+ * Home Route
  *
- * Purpose: Thin App Router entry for the shadow home page.
+ * Purpose: Thin App Router entry for the home page.
  * Used in: Next.js routing at /[locale]
- * Used for: Delegates server-first page composition to the shadow home view.
+ * Used for: Delegates server-first page composition to the home view.
  */
 
-import { ShadowHomeView } from '@/views/home';
-import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
-import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
+import { HomeView } from '@/views/home';
+import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
+import { PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 
-export const revalidate = SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS;
+export const revalidate = PUBLIC_PAGE_REVALIDATE_SECONDS;
 
-type ShadowHomePageProps = {
+type HomePageProps = {
   params: Promise<{
     locale: string;
   }>;
 };
 
 /**
- * Renders the shadow home page for the requested locale.
+ * Renders the home page for the requested locale.
  *
  * @param props - Locale route params from Next.js.
- * @returns The server-first shadow home view.
+ * @returns The server-first home view.
  */
-export default async function ShadowHomePage(props: ShadowHomePageProps) {
+export default async function HomePage(props: HomePageProps) {
   const { locale: rawLocale } = await props.params;
-  const locale = assertShadowLocale(rawLocale);
+  const locale = assertAppLocale(rawLocale);
 
-  return <ShadowHomeView locale={locale} />;
+  return <HomeView locale={locale} />;
 }

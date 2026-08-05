@@ -1,21 +1,21 @@
 /**
- * Shadow Category Page UI
+ * Category Page UI
  *
  * Purpose: Renders one localized server-first category page.
  * Used in: views/category/index.tsx
  * Used for: Displays a DB-backed category product grid without client fetching.
  */
 
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowLocalizedText } from '@/shared/i18n/lib/get-localized-text';
-import type { ShadowCategoryPageData } from '@/views/category/queries/get-category-page-data';
-import { ShadowProductGrid } from '@/widgets/product-grid/ui/product-grid';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import type { CategoryPageData } from '@/views/category/queries/get-category-page-data';
+import { ProductGrid } from '@/widgets/product-grid/ui/product-grid';
 
-type ShadowCategoryPageProps = {
-  data: ShadowCategoryPageData;
-  dictionary: ShadowDictionary;
-  locale: ShadowLocale;
+type CategoryPageProps = {
+  data: CategoryPageData;
+  dictionary: AppDictionary;
+  locale: AppLocale;
 };
 
 /**
@@ -24,16 +24,16 @@ type ShadowCategoryPageProps = {
  * @param props - Category page data, dictionary copy, and active locale.
  * @returns A localized category product listing.
  */
-export function ShadowCategoryPage(props: ShadowCategoryPageProps) {
+export function CategoryPage(props: CategoryPageProps) {
   const { data, dictionary, locale } = props;
 
   if (!data.category) {
     return null;
   }
 
-  const categoryName = getShadowLocalizedText(data.category.name, locale);
+  const categoryName = getLocalizedText(data.category.name, locale);
   const categoryDescription = data.category.description
-    ? getShadowLocalizedText(data.category.description, locale)
+    ? getLocalizedText(data.category.description, locale)
     : dictionary.category.description;
 
   return (
@@ -46,7 +46,7 @@ export function ShadowCategoryPage(props: ShadowCategoryPageProps) {
           {dictionary.category.resultCount.replace('{count}', String(data.products.length))}
         </p>
       </section>
-      <ShadowProductGrid
+      <ProductGrid
         emptyState={dictionary.category.emptyState}
         locale={locale}
         products={data.products}

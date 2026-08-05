@@ -1,30 +1,30 @@
 /**
- * Shadow Initial Product Data
+ * Initial Product Data
  *
- * Purpose: Provides development-only catalog seed records for the shadow project.
+ * Purpose: Provides development-only catalog seed records for the server-first pages project.
  * Used in: Future /dev seed actions.
- * Used for: Keeps seed input out of public shadow page reads.
+ * Used for: Keeps seed input out of public page reads.
  */
 
-import type { ShadowLocalizedList, ShadowLocaleText } from '@/shared/model/localization';
+import type { LocalizedList, LocaleText } from '@/shared/model/localization';
 
-export type ShadowInitialCategory = {
+export type InitialCategory = {
   slug: string;
-  name: ShadowLocaleText;
-  description: ShadowLocaleText;
+  name: LocaleText;
+  description: LocaleText;
   sortOrder: number;
 };
 
-export type ShadowInitialProduct = {
+export type InitialProduct = {
   slug: string;
   categorySlug: string;
-  name: ShadowLocaleText;
-  shortDescription: ShadowLocaleText;
-  description: ShadowLocaleText;
+  name: LocaleText;
+  shortDescription: LocaleText;
+  description: LocaleText;
   price: number;
   rating: number;
   reviewsCount: number;
-  features: ShadowLocalizedList;
+  features: LocalizedList;
   imageUrl: string | null;
   imageUrlVariations: string[];
   isFeatured: boolean;
@@ -32,7 +32,7 @@ export type ShadowInitialProduct = {
   colors: string[];
 };
 
-export const shadowInitialCategories: ShadowInitialCategory[] = [
+export const initialCategories: InitialCategory[] = [
   {
     slug: 'smartphone',
     name: {
@@ -59,7 +59,7 @@ export const shadowInitialCategories: ShadowInitialCategory[] = [
   },
 ];
 
-export const shadowInitialProducts: ShadowInitialProduct[] = [
+export const initialProducts: InitialProduct[] = [
   {
     slug: 'samsung-galaxy-s24-ultra',
     categorySlug: 'smartphone',

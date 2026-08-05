@@ -1,25 +1,25 @@
 /**
- * Shadow Product Model
+ * Product Model
  *
- * Purpose: Defines pure domain types for shadow catalog products.
- * Used in: shadow product transforms, repositories, queries, and future views.
+ * Purpose: Defines pure domain types for catalog products.
+ * Used in: product transforms, repositories, queries, and future views.
  * Used for: Keeps page-facing product data independent from Supabase row details.
  */
 
-import type { ShadowLocalizedList, ShadowLocaleText } from '@/shared/model/localization';
+import type { LocalizedList, LocaleText } from '@/shared/model/localization';
 
-export type ShadowProduct = {
+export type Product = {
   id: string;
   slug: string;
   categoryId: string;
   categorySlug: string;
-  name: ShadowLocaleText;
-  shortDescription: ShadowLocaleText;
-  description: ShadowLocaleText;
+  name: LocaleText;
+  shortDescription: LocaleText;
+  description: LocaleText;
   price: number;
   rating: number;
   reviewsCount: number;
-  features: ShadowLocalizedList;
+  features: LocalizedList;
   imageUrl: string | null;
   imageUrlVariations: string[];
   isFeatured: boolean;
@@ -27,11 +27,11 @@ export type ShadowProduct = {
   colors: string[];
 };
 
-export type ShadowProductSlugParam = {
+export type ProductSlugParam = {
   slug: string;
 };
 
-export type ShadowProductRow = {
+export type ProductRow = {
   id: string;
   slug: string;
   category_id: string;

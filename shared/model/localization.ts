@@ -1,17 +1,17 @@
 /**
- * Shadow Localization Model
+ * Localization Model
  *
- * Purpose: Defines shared localized value shapes for shadow domain objects.
- * Used in: shadow category and product models.
+ * Purpose: Defines shared localized value shapes for domain objects.
+ * Used in: category and product models.
  * Used for: Keeps EN/AR catalog text contracts consistent across entities.
  */
 
-export type ShadowLocaleText = {
+export type LocaleText = {
   en: string;
   ar: string;
 };
 
-export type ShadowLocalizedList = {
+export type LocalizedList = {
   en: string[];
   ar: string[];
 };

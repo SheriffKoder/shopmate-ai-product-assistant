@@ -1,14 +1,14 @@
 /**
- * Shadow Arabic Dictionary
+ * Arabic Dictionary
  *
- * Purpose: Provides Arabic copy for shadow public and development pages.
- * Used in: shadow dictionary lookup.
+ * Purpose: Provides Arabic copy for public and development pages.
+ * Used in: dictionary lookup.
  * Used for: Keeps AR page, header, and dev labels centralized.
  */
 
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
 
-export const shadowArDictionary = {
+export const arDictionary = {
   common: {
     brandName: 'شوب ميت',
     home: 'الرئيسية',
@@ -114,4 +114,4 @@ export const shadowArDictionary = {
     revalidateDescription: 'تحديث وسوم التخزين المؤقت ومسارات ISR العامة بعد تغييرات البيانات.',
     revalidateTitle: 'تخزين الصفحات',
   },
-} satisfies ShadowDictionary;
+} satisfies AppDictionary;

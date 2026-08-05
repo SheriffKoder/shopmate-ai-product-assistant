@@ -1,16 +1,16 @@
 /**
- * Shadow Home Loading State
+ * Home Loading State
  *
- * Purpose: Route-level fallback while the shadow home segment streams.
+ * Purpose: Route-level fallback while the home segment streams.
  * Used in: Next.js routing at /[locale]
- * Used for: Keeps loading UI local to the shadow home route.
+ * Used for: Keeps loading UI local to the home route.
  */
 
 /**
- * Renders the shadow home route loading fallback.
+ * Renders the home route loading fallback.
  *
- * @returns A minimal loading region for the shadow home page.
+ * @returns A minimal loading region for the home page.
  */
-export default function ShadowHomeLoading() {
-  return <main className="min-h-screen p-6">Loading shadow home...</main>;
+export default function HomeLoading() {
+  return <main className="min-h-screen p-6">Loading home...</main>;
 }

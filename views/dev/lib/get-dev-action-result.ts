@@ -1,17 +1,17 @@
 /**
- * Shadow Dev Action Result Parser
+ * Dev Action Result Parser
  *
  * Purpose: Reads action outcomes from /dev search params.
  * Used in: views/dev/index.tsx
  * Used for: Keeps server action redirects and page messages small and consistent.
  */
 
-export type ShadowDevActionResult = {
+export type DevActionResult = {
   message: string;
   status: 'error' | 'success';
 };
 
-type ShadowDevActionSearchParams = {
+type DevActionSearchParams = {
   message?: string;
   status?: string;
 };
@@ -22,7 +22,7 @@ type ShadowDevActionSearchParams = {
  * @param searchParams - Search params supplied by the dev route.
  * @returns A typed action result or null when no action has run.
  */
-export function getShadowDevActionResult(searchParams: ShadowDevActionSearchParams): ShadowDevActionResult | null {
+export function getDevActionResult(searchParams: DevActionSearchParams): DevActionResult | null {
   if (!searchParams.message) {
     return null;
   }

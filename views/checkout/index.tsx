@@ -6,12 +6,12 @@
  * Used for: Loads checkout copy and renders the cart-driven checkout shell.
  */
 
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowDictionary } from '@/shared/i18n/lib/get-dictionary';
-import { ShadowCheckoutPage } from '@/views/checkout/ui/checkout-page';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getDictionary } from '@/shared/i18n/lib/get-dictionary';
+import { CheckoutPage } from '@/views/checkout/ui/checkout-page';
 
-type ShadowCheckoutViewProps = {
-  locale: ShadowLocale;
+type CheckoutViewProps = {
+  locale: AppLocale;
 };
 
 /**
@@ -20,9 +20,9 @@ type ShadowCheckoutViewProps = {
  * @param props - Active locale for checkout rendering.
  * @returns A server-rendered checkout page with a cart client island.
  */
-export async function ShadowCheckoutView(props: ShadowCheckoutViewProps) {
+export async function CheckoutView(props: CheckoutViewProps) {
   const { locale } = props;
-  const dictionary = getShadowDictionary(locale);
+  const dictionary = getDictionary(locale);
 
-  return <ShadowCheckoutPage dictionary={dictionary} locale={locale} />;
+  return <CheckoutPage dictionary={dictionary} locale={locale} />;
 }

@@ -8,7 +8,7 @@
  * Used for: Provides a reset action for success rendering failures.
  */
 
-type ShadowCheckoutSuccessErrorProps = {
+type CheckoutSuccessErrorProps = {
   error: Error & {
     digest?: string;
   };
@@ -21,7 +21,7 @@ type ShadowCheckoutSuccessErrorProps = {
  * @param props - Next.js error and reset callback.
  * @returns A local error fallback for checkout success.
  */
-export default function ShadowCheckoutSuccessError(props: ShadowCheckoutSuccessErrorProps) {
+export default function CheckoutSuccessError(props: CheckoutSuccessErrorProps) {
   const { error, reset } = props;
 
   return (

@@ -11,6 +11,6 @@
  *
  * @returns A minimal loading region for checkout success.
  */
-export default function ShadowCheckoutSuccessLoading() {
+export default function CheckoutSuccessLoading() {
   return <main className="min-h-screen p-6">Loading checkout success...</main>;
 }

@@ -1,30 +1,30 @@
 /**
- * Shadow Products View
+ * Products View
  *
- * Purpose: Server-first composition surface for the shadow products route.
+ * Purpose: Server-first composition surface for the products route.
  * Used in: app/[locale]/products/page.tsx
  * Used for: Loads localized copy and DB-backed catalog data for product listings.
  */
 
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowDictionary } from '@/shared/i18n/lib/get-dictionary';
-import { getShadowProductsPageData } from '@/views/products/queries/get-products-page-data';
-import { ShadowProductsPage } from '@/views/products/ui/products-page';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getDictionary } from '@/shared/i18n/lib/get-dictionary';
+import { getProductsPageData } from '@/views/products/queries/get-products-page-data';
+import { ProductsPage } from '@/views/products/ui/products-page';
 
-type ShadowProductsViewProps = {
-  locale: ShadowLocale;
+type ProductsViewProps = {
+  locale: AppLocale;
 };
 
 /**
- * Renders the shadow products listing view.
+ * Renders the products listing view.
  *
  * @param props - Active locale for localized products rendering.
  * @returns A server-rendered products page.
  */
-export async function ShadowProductsView(props: ShadowProductsViewProps) {
+export async function ProductsView(props: ProductsViewProps) {
   const { locale } = props;
-  const dictionary = getShadowDictionary(locale);
-  const data = await getShadowProductsPageData();
+  const dictionary = getDictionary(locale);
+  const data = await getProductsPageData();
 
-  return <ShadowProductsPage data={data} dictionary={dictionary} locale={locale} />;
+  return <ProductsPage data={data} dictionary={dictionary} locale={locale} />;
 }

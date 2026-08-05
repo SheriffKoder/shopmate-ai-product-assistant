@@ -1,5 +1,5 @@
 /**
- * Shadow Home Hero Widget
+ * Home Hero Widget
  *
  * Purpose: Renders the server-first home page hero.
  * Used in: views/home/ui/home-page.tsx
@@ -7,10 +7,10 @@
  */
 
 import Link from 'next/link';
-import type { ShadowLocale } from '@/shared/i18n/config';
+import type { AppLocale } from '@/shared/i18n/config';
 
-type ShadowHomeHeroProps = {
-  locale: ShadowLocale;
+type HomeHeroProps = {
+  locale: AppLocale;
   eyebrow: string;
   title: string;
   description: string;
@@ -18,12 +18,12 @@ type ShadowHomeHeroProps = {
 };
 
 /**
- * Renders the localized shadow home hero.
+ * Renders the localized home hero.
  *
  * @param props - Localized hero copy and active locale.
  * @returns A semantic hero section.
  */
-export function ShadowHomeHero(props: ShadowHomeHeroProps) {
+export function HomeHero(props: HomeHeroProps) {
   const { locale, eyebrow, title, description, actionLabel } = props;
 
   return (

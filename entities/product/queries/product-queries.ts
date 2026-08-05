@@ -1,69 +1,69 @@
 /**
- * Shadow Product Queries
+ * Product Queries
  *
- * Purpose: Provides read use cases for shadow product data.
- * Used in: Future shadow views and static param generators.
+ * Purpose: Provides read use cases for product data.
+ * Used in: Future views and static param generators.
  * Used for: Keeps views independent from Supabase repositories.
  */
 
 import 'server-only';
 
 import { unstable_cache } from 'next/cache';
-import type { ShadowProduct, ShadowProductSlugParam } from '@/entities/product/model/product';
+import type { Product, ProductSlugParam } from '@/entities/product/model/product';
 import {
-  getShadowProductBySlug,
-  listShadowFeaturedProducts,
-  listShadowProducts,
-  listShadowProductSlugs,
+  getProductBySlug,
+  listFeaturedProducts,
+  listProducts,
+  listProductSlugs,
 } from '@/entities/product/repository/product-repository';
-import { SHADOW_CACHE_TAGS, SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
+import { CATALOG_CACHE_TAGS, PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 
-const getCachedShadowProducts = unstable_cache(listShadowProducts, ['shadow-products'], {
-  revalidate: SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS,
-  tags: [SHADOW_CACHE_TAGS.products],
+const getCachedProducts = unstable_cache(listProducts, ['catalog-products'], {
+  revalidate: PUBLIC_PAGE_REVALIDATE_SECONDS,
+  tags: [CATALOG_CACHE_TAGS.products],
 });
 
-const getCachedShadowFeaturedProducts = unstable_cache(listShadowFeaturedProducts, ['shadow-featured-products'], {
-  revalidate: SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS,
-  tags: [SHADOW_CACHE_TAGS.featuredProducts, SHADOW_CACHE_TAGS.products],
+const getCachedFeaturedProducts = unstable_cache(listFeaturedProducts, ['catalog-featured-products'], {
+  revalidate: PUBLIC_PAGE_REVALIDATE_SECONDS,
+  tags: [CATALOG_CACHE_TAGS.featuredProducts, CATALOG_CACHE_TAGS.products],
 });
 
-const getCachedShadowProductBySlug = unstable_cache(getShadowProductBySlug, ['shadow-product-by-slug'], {
-  revalidate: SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS,
-  tags: [SHADOW_CACHE_TAGS.products],
+const getCachedProductBySlug = unstable_cache(getProductBySlug, ['catalog-product-by-slug'], {
+  revalidate: PUBLIC_PAGE_REVALIDATE_SECONDS,
+  tags: [CATALOG_CACHE_TAGS.products],
 });
 
-const getCachedShadowProductSlugs = unstable_cache(listShadowProductSlugs, ['shadow-product-slugs'], {
-  revalidate: SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS,
-  tags: [SHADOW_CACHE_TAGS.products],
+const getCachedProductSlugs = unstable_cache(listProductSlugs, ['catalog-product-slugs'], {
+  revalidate: PUBLIC_PAGE_REVALIDATE_SECONDS,
+  tags: [CATALOG_CACHE_TAGS.products],
 });
 
 /**
- * Gets products for public shadow pages.
+ * Gets products for public pages.
  *
  * @returns Active products ready for rendering.
  */
-export async function getShadowProducts(): Promise<ShadowProduct[]> {
-  return getCachedShadowProducts();
+export async function getProducts(): Promise<Product[]> {
+  return getCachedProducts();
 }
 
 /**
- * Gets featured products for public shadow pages.
+ * Gets featured products for public pages.
  *
  * @returns Active featured products ready for rendering.
  */
-export async function getShadowFeaturedProducts(): Promise<ShadowProduct[]> {
-  return getCachedShadowFeaturedProducts();
+export async function getFeaturedProducts(): Promise<Product[]> {
+  return getCachedFeaturedProducts();
 }
 
 /**
- * Gets one product for a public shadow page.
+ * Gets one product for a public page.
  *
  * @param params - Product slug lookup params.
  * @returns The matching product, or null when missing.
  */
-export async function getShadowProduct(params: ShadowProductSlugParam): Promise<ShadowProduct | null> {
-  return getCachedShadowProductBySlug(params);
+export async function getProduct(params: ProductSlugParam): Promise<Product | null> {
+  return getCachedProductBySlug(params);
 }
 
 /**
@@ -71,6 +71,6 @@ export async function getShadowProduct(params: ShadowProductSlugParam): Promise<
  *
  * @returns Active product slug params.
  */
-export async function getShadowProductStaticParams(): Promise<ShadowProductSlugParam[]> {
-  return getCachedShadowProductSlugs();
+export async function getProductStaticParams(): Promise<ProductSlugParam[]> {
+  return getCachedProductSlugs();
 }

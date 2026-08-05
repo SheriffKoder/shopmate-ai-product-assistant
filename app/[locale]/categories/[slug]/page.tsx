@@ -1,35 +1,35 @@
 /**
- * Shadow Category Route
+ * Category Route
  *
- * Purpose: Thin App Router entry for one shadow category page.
+ * Purpose: Thin App Router entry for one category page.
  * Used in: Next.js routing at /[locale]/categories/[slug]
- * Used for: Delegates server-first category composition to a shadow view.
+ * Used for: Delegates server-first category composition to a view.
  */
 
-import { ShadowCategoryView } from '@/views/category';
-import { getShadowCategoryStaticParams } from '@/entities/category/queries/category-queries';
-import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
-import { SHADOW_LOCALES } from '@/shared/i18n/config';
-import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
+import { CategoryView } from '@/views/category';
+import { getCategoryStaticParams } from '@/entities/category/queries/category-queries';
+import { PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
+import { APP_LOCALES } from '@/shared/i18n/config';
+import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
 
-type ShadowCategoryPageProps = {
+type CategoryPageProps = {
   params: Promise<{
     locale: string;
     slug: string;
   }>;
 };
 
-export const revalidate = SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS;
+export const revalidate = PUBLIC_PAGE_REVALIDATE_SECONDS;
 
 /**
- * Prebuilds known shadow category pages for every supported locale.
+ * Prebuilds known category pages for every supported locale.
  *
  * @returns Locale/category slug combinations for static generation.
  */
 export async function generateStaticParams() {
-  const categoryParams = await getShadowCategoryStaticParams();
+  const categoryParams = await getCategoryStaticParams();
 
-  return SHADOW_LOCALES.flatMap(function mapLocale(locale) {
+  return APP_LOCALES.flatMap(function mapLocale(locale) {
     return categoryParams.map(function mapCategory(category) {
       return {
         locale,
@@ -40,14 +40,14 @@ export async function generateStaticParams() {
 }
 
 /**
- * Renders one shadow category page.
+ * Renders one category page.
  *
  * @param props - Locale and category slug route params from Next.js.
- * @returns The server-first shadow category view.
+ * @returns The server-first category view.
  */
-export default async function ShadowCategoryPage(props: ShadowCategoryPageProps) {
+export default async function CategoryPage(props: CategoryPageProps) {
   const { locale: rawLocale, slug } = await props.params;
-  const locale = assertShadowLocale(rawLocale);
+  const locale = assertAppLocale(rawLocale);
 
-  return <ShadowCategoryView locale={locale} slug={slug} />;
+  return <CategoryView locale={locale} slug={slug} />;
 }

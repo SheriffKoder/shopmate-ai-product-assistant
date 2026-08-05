@@ -1,5 +1,5 @@
 /**
- * Shadow Products Page Data
+ * Products Page Data
  *
  * Purpose: Loads data for the server-first products listing route.
  * Used in: views/products/index.tsx
@@ -8,14 +8,14 @@
 
 import 'server-only';
 
-import type { ShadowCategory } from '@/entities/category/model/category';
-import { getShadowCategories } from '@/entities/category/queries/category-queries';
-import type { ShadowProduct } from '@/entities/product/model/product';
-import { getShadowProducts } from '@/entities/product/queries/product-queries';
+import type { Category } from '@/entities/category/model/category';
+import { getCategories } from '@/entities/category/queries/category-queries';
+import type { Product } from '@/entities/product/model/product';
+import { getProducts } from '@/entities/product/queries/product-queries';
 
-export type ShadowProductsPageData = {
-  categories: ShadowCategory[];
-  products: ShadowProduct[];
+export type ProductsPageData = {
+  categories: Category[];
+  products: Product[];
 };
 
 /**
@@ -23,8 +23,8 @@ export type ShadowProductsPageData = {
  *
  * @returns Categories and products ready for rendering.
  */
-export async function getShadowProductsPageData(): Promise<ShadowProductsPageData> {
-  const [categories, products] = await Promise.all([getShadowCategories(), getShadowProducts()]);
+export async function getProductsPageData(): Promise<ProductsPageData> {
+  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
 
   return {
     categories,

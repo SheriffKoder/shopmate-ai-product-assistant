@@ -6,10 +6,10 @@
  * Used for: Delegates server-first checkout composition to the checkout view.
  */
 
-import { ShadowCheckoutView } from '@/views/checkout';
-import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
+import { CheckoutView } from '@/views/checkout';
+import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
 
-type ShadowCheckoutPageProps = {
+type CheckoutPageProps = {
   params: Promise<{
     locale: string;
   }>;
@@ -21,9 +21,9 @@ type ShadowCheckoutPageProps = {
  * @param props - Locale route params from Next.js.
  * @returns The server-first checkout view with a client cart island.
  */
-export default async function ShadowCheckoutPage(props: ShadowCheckoutPageProps) {
+export default async function CheckoutPage(props: CheckoutPageProps) {
   const { locale: rawLocale } = await props.params;
-  const locale = assertShadowLocale(rawLocale);
+  const locale = assertAppLocale(rawLocale);
 
-  return <ShadowCheckoutView locale={locale} />;
+  return <CheckoutView locale={locale} />;
 }

@@ -1,32 +1,32 @@
 /**
- * Shadow Products Route
+ * Products Route
  *
- * Purpose: Thin App Router entry for the shadow products listing.
+ * Purpose: Thin App Router entry for the products listing.
  * Used in: Next.js routing at /[locale]/products
- * Used for: Delegates server-first product listing composition to a shadow view.
+ * Used for: Delegates server-first product listing composition to a view.
  */
 
-import { ShadowProductsView } from '@/views/products';
-import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
-import { SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
+import { ProductsView } from '@/views/products';
+import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
+import { PUBLIC_PAGE_REVALIDATE_SECONDS } from '@/shared/config/cache';
 
-type ShadowProductsPageProps = {
+type ProductsPageProps = {
   params: Promise<{
     locale: string;
   }>;
 };
 
-export const revalidate = SHADOW_PUBLIC_PAGE_REVALIDATE_SECONDS;
+export const revalidate = PUBLIC_PAGE_REVALIDATE_SECONDS;
 
 /**
- * Renders the shadow products listing page.
+ * Renders the products listing page.
  *
  * @param props - Locale route params from Next.js.
- * @returns The server-first shadow products view.
+ * @returns The server-first products view.
  */
-export default async function ShadowProductsPage(props: ShadowProductsPageProps) {
+export default async function ProductsPage(props: ProductsPageProps) {
   const { locale: rawLocale } = await props.params;
-  const locale = assertShadowLocale(rawLocale);
+  const locale = assertAppLocale(rawLocale);
 
-  return <ShadowProductsView locale={locale} />;
+  return <ProductsView locale={locale} />;
 }

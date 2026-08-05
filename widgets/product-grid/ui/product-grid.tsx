@@ -1,19 +1,19 @@
 /**
- * Shadow Product Grid Widget
+ * Product Grid Widget
  *
  * Purpose: Renders localized server-first product grids.
- * Used in: shadow home, products, and category views.
+ * Used in: home, products, and category views.
  * Used for: Keeps product list markup reusable without client data fetching.
  */
 
-import type { ShadowProduct } from '@/entities/product/model/product';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { ShadowProductCard } from '@/widgets/product-card/ui/product-card';
+import type { Product } from '@/entities/product/model/product';
+import type { AppLocale } from '@/shared/i18n/config';
+import { ProductCard } from '@/widgets/product-card/ui/product-card';
 
-type ShadowProductGridProps = {
+type ProductGridProps = {
   emptyState: string;
-  locale: ShadowLocale;
-  products: ShadowProduct[];
+  locale: AppLocale;
+  products: Product[];
   title: string;
 };
 
@@ -23,9 +23,9 @@ type ShadowProductGridProps = {
  * @param props - Products, active locale, and localized section text.
  * @returns A server-rendered product grid or empty state.
  */
-export function ShadowProductGrid(props: ShadowProductGridProps) {
+export function ProductGrid(props: ProductGridProps) {
   const { emptyState, locale, products, title } = props;
-  const sectionId = `shadow-product-grid-${title.toLowerCase().replace(/\s+/g, '-')}`;
+  const sectionId = `product-grid-${title.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
     <section aria-labelledby={sectionId} className="space-y-4">
@@ -35,7 +35,7 @@ export function ShadowProductGrid(props: ShadowProductGridProps) {
       {products.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {products.map(function renderProduct(product) {
-            return <ShadowProductCard key={product.id} locale={locale} product={product} />;
+            return <ProductCard key={product.id} locale={locale} product={product} />;
           })}
         </div>
       ) : (

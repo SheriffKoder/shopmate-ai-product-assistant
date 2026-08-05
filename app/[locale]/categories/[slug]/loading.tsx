@@ -1,16 +1,16 @@
 /**
- * Shadow Category Loading State
+ * Category Loading State
  *
- * Purpose: Route-level fallback while one shadow category segment streams.
+ * Purpose: Route-level fallback while one category segment streams.
  * Used in: Next.js routing at /[locale]/categories/[slug]
  * Used for: Keeps loading UI local to the category route.
  */
 
 /**
- * Renders the shadow category loading fallback.
+ * Renders the category loading fallback.
  *
- * @returns A minimal loading region for the shadow category page.
+ * @returns A minimal loading region for the category page.
  */
-export default function ShadowCategoryLoading() {
-  return <main className="min-h-screen p-6">Loading shadow category...</main>;
+export default function CategoryLoading() {
+  return <main className="min-h-screen p-6">Loading category...</main>;
 }

@@ -1,14 +1,14 @@
 /**
- * Shadow Dev Route
+ * Dev Route
  *
- * Purpose: Thin App Router entry for shadow development operations.
+ * Purpose: Thin App Router entry for development operations.
  * Used in: Next.js routing at /dev
- * Used for: Hosts future seed, auth, and revalidation controls for shadow data.
+ * Used for: Hosts future seed, auth, and revalidation controls for catalog data.
  */
 
-import { ShadowDevView } from '@/views/dev';
+import { DevView } from '@/views/dev';
 
-type ShadowDevPageProps = {
+type DevPageProps = {
   searchParams: Promise<{
     message?: string;
     status?: string;
@@ -18,12 +18,12 @@ type ShadowDevPageProps = {
 export const dynamic = 'force-dynamic';
 
 /**
- * Renders the shadow development page.
+ * Renders the development page.
  *
- * @returns The server-first shadow development view placeholder.
+ * @returns The server-first development view placeholder.
  */
-export default async function ShadowDevPage(props: ShadowDevPageProps) {
+export default async function DevPage(props: DevPageProps) {
   const searchParams = await props.searchParams;
 
-  return <ShadowDevView searchParams={searchParams} />;
+  return <DevView searchParams={searchParams} />;
 }

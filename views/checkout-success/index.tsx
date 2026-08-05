@@ -6,12 +6,12 @@
  * Used for: Loads success copy and mock order data before rendering the cart receipt island.
  */
 
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowDictionary } from '@/shared/i18n/lib/get-dictionary';
-import { ShadowCheckoutSuccessPage } from '@/views/checkout-success/ui/checkout-success-page';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getDictionary } from '@/shared/i18n/lib/get-dictionary';
+import { CheckoutSuccessPage } from '@/views/checkout-success/ui/checkout-success-page';
 
-type ShadowCheckoutSuccessViewProps = {
-  locale: ShadowLocale;
+type CheckoutSuccessViewProps = {
+  locale: AppLocale;
 };
 
 const MOCK_SUCCESS_ORDER = {
@@ -27,12 +27,12 @@ const MOCK_SUCCESS_ORDER = {
  * @param props - Active locale for success rendering.
  * @returns A server-rendered success page with a cart receipt island.
  */
-export async function ShadowCheckoutSuccessView(props: ShadowCheckoutSuccessViewProps) {
+export async function CheckoutSuccessView(props: CheckoutSuccessViewProps) {
   const { locale } = props;
-  const dictionary = getShadowDictionary(locale);
+  const dictionary = getDictionary(locale);
 
   return (
-    <ShadowCheckoutSuccessPage
+    <CheckoutSuccessPage
       dictionary={dictionary}
       locale={locale}
       order={MOCK_SUCCESS_ORDER}
@@ -40,4 +40,4 @@ export async function ShadowCheckoutSuccessView(props: ShadowCheckoutSuccessView
   );
 }
 
-export type ShadowCheckoutSuccessOrder = typeof MOCK_SUCCESS_ORDER;
+export type CheckoutSuccessOrder = typeof MOCK_SUCCESS_ORDER;

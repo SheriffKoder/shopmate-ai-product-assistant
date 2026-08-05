@@ -1,5 +1,5 @@
 /**
- * Shadow Products Page UI
+ * Products Page UI
  *
  * Purpose: Renders the localized server-first products listing page.
  * Used in: views/products/index.tsx
@@ -7,17 +7,17 @@
  */
 
 import Link from 'next/link';
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowLocalizedText } from '@/shared/i18n/lib/get-localized-text';
-import { getShadowProductsResultCountLabel } from '@/views/products/lib/get-products-result-count-label';
-import type { ShadowProductsPageData } from '@/views/products/queries/get-products-page-data';
-import { ShadowProductGrid } from '@/widgets/product-grid/ui/product-grid';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import { getProductsResultCountLabel } from '@/views/products/lib/get-products-result-count-label';
+import type { ProductsPageData } from '@/views/products/queries/get-products-page-data';
+import { ProductGrid } from '@/widgets/product-grid/ui/product-grid';
 
-type ShadowProductsPageProps = {
-  data: ShadowProductsPageData;
-  dictionary: ShadowDictionary;
-  locale: ShadowLocale;
+type ProductsPageProps = {
+  data: ProductsPageData;
+  dictionary: AppDictionary;
+  locale: AppLocale;
 };
 
 /**
@@ -26,9 +26,9 @@ type ShadowProductsPageProps = {
  * @param props - Products page data, dictionary copy, and active locale.
  * @returns A localized server-rendered products listing.
  */
-export function ShadowProductsPage(props: ShadowProductsPageProps) {
+export function ProductsPage(props: ProductsPageProps) {
   const { data, dictionary, locale } = props;
-  const resultCountLabel = getShadowProductsResultCountLabel(dictionary, data.products.length);
+  const resultCountLabel = getProductsResultCountLabel(dictionary, data.products.length);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
@@ -43,7 +43,7 @@ export function ShadowProductsPage(props: ShadowProductsPageProps) {
       {data.categories.length > 0 ? (
         <nav aria-label={dictionary.products.categoryNavLabel} className="flex flex-wrap gap-2">
           {data.categories.map(function renderCategoryFilter(category) {
-            const categoryName = getShadowLocalizedText(category.name, locale);
+            const categoryName = getLocalizedText(category.name, locale);
 
             return (
               <Link
@@ -57,7 +57,7 @@ export function ShadowProductsPage(props: ShadowProductsPageProps) {
           })}
         </nav>
       ) : null}
-      <ShadowProductGrid
+      <ProductGrid
         emptyState={dictionary.products.emptyState}
         locale={locale}
         products={data.products}

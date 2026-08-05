@@ -6,7 +6,7 @@
  * Used for: Keeps shell search navigation independent from page views.
  */
 
-import type { ShadowLocale } from '@/shared/i18n/config';
+import type { AppLocale } from '@/shared/i18n/config';
 
 type HeaderRouter = {
   push: (href: string) => void;
@@ -22,7 +22,7 @@ type HeaderRouter = {
 export function navigateToProductSearch(
   router: HeaderRouter,
   searchQuery: string,
-  locale: ShadowLocale,
+  locale: AppLocale,
 ) {
   const query = searchQuery.trim();
 

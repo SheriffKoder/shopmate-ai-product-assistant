@@ -12,14 +12,14 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/features/cart/hooks/use-cart';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
-import type { ShadowCheckoutSuccessOrder } from '@/views/checkout-success';
+import type { AppLocale } from '@/shared/i18n/config';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
+import type { CheckoutSuccessOrder } from '@/views/checkout-success';
 
 type CheckoutSuccessCartPanelProps = {
-  copy: ShadowDictionary['checkoutSuccess'];
-  locale: ShadowLocale;
-  order: ShadowCheckoutSuccessOrder;
+  copy: AppDictionary['checkoutSuccess'];
+  locale: AppLocale;
+  order: CheckoutSuccessOrder;
 };
 
 /**

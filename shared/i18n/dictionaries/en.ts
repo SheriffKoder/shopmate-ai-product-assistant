@@ -1,14 +1,14 @@
 /**
- * Shadow English Dictionary
+ * English Dictionary
  *
- * Purpose: Provides English copy for shadow public and development pages.
- * Used in: shadow dictionary lookup.
+ * Purpose: Provides English copy for public and development pages.
+ * Used in: dictionary lookup.
  * Used for: Keeps EN page, header, and dev labels centralized.
  */
 
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
 
-export const shadowEnDictionary = {
+export const enDictionary = {
   common: {
     brandName: 'ShopMate',
     home: 'Home',
@@ -21,13 +21,13 @@ export const shadowEnDictionary = {
   },
   header: {
     navigation: {
-      label: 'Shadow navigation',
+      label: ' navigation',
       home: 'Home',
       products: 'Products',
     },
   },
   home: {
-    title: 'Shadow home',
+    title: ' home',
     eyebrow: 'Server-first catalog',
     description: 'A localized catalog page that will read products and categories from Supabase.',
     heroAction: 'Browse products',
@@ -37,18 +37,18 @@ export const shadowEnDictionary = {
     emptyState: 'No catalog products are available yet.',
   },
   products: {
-    title: 'Shadow products',
+    title: ' products',
     eyebrow: 'Catalog listing',
-    description: 'A server-rendered product listing for the shadow migration.',
+    description: 'A server-rendered product listing for the migration.',
     categoryNavLabel: 'Product categories',
     emptyState: 'No products are available yet.',
     gridTitle: 'Products',
     resultCount: '{count} products found',
   },
   productDetail: {
-    title: 'Shadow product',
+    title: ' product',
     eyebrow: 'Product detail',
-    description: 'A server-rendered product detail page for the shadow migration.',
+    description: 'A server-rendered product detail page for the migration.',
     backToProducts: 'Back to products',
     colorsTitle: 'Available colors',
     descriptionTitle: 'Product details',
@@ -61,9 +61,9 @@ export const shadowEnDictionary = {
     viewLabel: 'view',
   },
   category: {
-    title: 'Shadow category',
+    title: ' category',
     eyebrow: 'Category listing',
-    description: 'A server-rendered category page for the shadow migration.',
+    description: 'A server-rendered category page for the migration.',
     emptyState: 'No products are available in this category yet.',
     gridTitle: 'Category products',
     resultCount: '{count} products found',
@@ -100,18 +100,18 @@ export const shadowEnDictionary = {
     totalPaid: 'Total paid',
   },
   dev: {
-    title: 'Shadow dev tools',
+    title: ' dev tools',
     eyebrow: 'Development only',
     description: 'Seed, auth, and revalidation controls will live here.',
-    actionsLabel: 'Shadow development actions',
+    actionsLabel: ' development actions',
     authAction: 'Prepare dev user',
     authDescription: 'Create or confirm the env-driven Supabase Auth user reserved for later assistant work.',
     authTitle: 'Dev user',
     seedAction: 'Seed catalog',
-    seedDescription: 'Upsert the shadow initial categories and products into the configured prefixed tables.',
+    seedDescription: 'Upsert the initial categories and products into the configured prefixed tables.',
     seedTitle: 'Initial catalog',
     revalidateAction: 'Revalidate pages',
-    revalidateDescription: 'Refresh shadow cache tags and public ISR paths after data changes.',
+    revalidateDescription: 'Refresh cache tags and public ISR paths after data changes.',
     revalidateTitle: 'Page cache',
   },
-} satisfies ShadowDictionary;
+} satisfies AppDictionary;

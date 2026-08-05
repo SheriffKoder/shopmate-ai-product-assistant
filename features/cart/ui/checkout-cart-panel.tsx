@@ -12,12 +12,12 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/features/cart/hooks/use-cart';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
+import type { AppLocale } from '@/shared/i18n/config';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
 
 type CheckoutCartPanelProps = {
-  copy: ShadowDictionary['checkout'];
-  locale: ShadowLocale;
+  copy: AppDictionary['checkout'];
+  locale: AppLocale;
 };
 
 /**

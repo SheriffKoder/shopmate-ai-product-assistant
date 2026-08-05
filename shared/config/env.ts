@@ -1,82 +1,82 @@
 /**
- * Shadow Environment Config
+ * Environment Config
  *
- * Purpose: Validates environment variables for the parallel shadow architecture.
+ * Purpose: Validates environment variables for the parallel architecture.
  * Used in: shared/supabase/server
- * Used for: Keeps shadow Supabase and development credentials isolated from current app config.
+ * Used for: Keeps server-first Supabase and development credentials isolated from current app config.
  */
 
-type ShadowEnvKey =
+type AppEnvKey =
   | 'SHADOW_NEXT_PUBLIC_SUPABASE_URL'
   | 'SHADOW_SUPABASE_SERVICE_ROLE_KEY'
   | 'SHADOW_DEV_EMAIL'
   | 'SHADOW_DEV_PASSWORD'
   | 'SHADOW_SUPABASE_TABLE_PREFIX';
 
-type ShadowEnv = Record<ShadowEnvKey, string>;
+type AppEnv = Record<AppEnvKey, string>;
 
 /**
- * Reads one required shadow environment variable.
+ * Reads one required environment variable.
  *
  * @param key - Environment variable name to read.
  * @returns The configured environment value.
  * @throws Error when the value is missing.
  */
-function readRequiredShadowEnv(key: ShadowEnvKey) {
+function readRequiredAppEnv(key: AppEnvKey) {
   const value = process.env[key];
 
   if (!value) {
-    throw new Error(`Missing ${key} environment variable. Add it to .env.local for shadow pages.`);
+    throw new Error(`Missing ${key} environment variable. Add it to .env.local for pages.`);
   }
 
   return value;
 }
 
 /**
- * Reads one optional shadow environment variable.
+ * Reads one optional environment variable.
  *
  * @param key - Environment variable name to read.
  * @param fallback - Safe value to use when the env var is not configured.
  * @returns The configured environment value or fallback.
  */
-function readOptionalShadowEnv(key: ShadowEnvKey, fallback: string) {
+function readOptionalAppEnv(key: AppEnvKey, fallback: string) {
   return process.env[key] || fallback;
 }
 
 /**
- * Reads and validates all required shadow environment variables.
+ * Reads and validates all required environment variables.
  *
- * @returns The validated shadow environment config.
+ * @returns The validated environment config.
  */
-export function getShadowEnv(): ShadowEnv {
+export function getAppEnv(): AppEnv {
   return {
-    SHADOW_NEXT_PUBLIC_SUPABASE_URL: readRequiredShadowEnv('SHADOW_NEXT_PUBLIC_SUPABASE_URL'),
-    SHADOW_SUPABASE_SERVICE_ROLE_KEY: readRequiredShadowEnv('SHADOW_SUPABASE_SERVICE_ROLE_KEY'),
-    SHADOW_DEV_EMAIL: readRequiredShadowEnv('SHADOW_DEV_EMAIL'),
-    SHADOW_DEV_PASSWORD: readRequiredShadowEnv('SHADOW_DEV_PASSWORD'),
-    SHADOW_SUPABASE_TABLE_PREFIX: readOptionalShadowEnv('SHADOW_SUPABASE_TABLE_PREFIX', 'sm_'),
+    SHADOW_NEXT_PUBLIC_SUPABASE_URL: readRequiredAppEnv('SHADOW_NEXT_PUBLIC_SUPABASE_URL'),
+    SHADOW_SUPABASE_SERVICE_ROLE_KEY: readRequiredAppEnv('SHADOW_SUPABASE_SERVICE_ROLE_KEY'),
+    SHADOW_DEV_EMAIL: readRequiredAppEnv('SHADOW_DEV_EMAIL'),
+    SHADOW_DEV_PASSWORD: readRequiredAppEnv('SHADOW_DEV_PASSWORD'),
+    SHADOW_SUPABASE_TABLE_PREFIX: readOptionalAppEnv('SHADOW_SUPABASE_TABLE_PREFIX', 'sm_'),
   };
 }
 
 /**
- * Reads the shadow Supabase service credentials.
+ * Reads the server-first Supabase service credentials.
  *
  * @returns The validated Supabase URL and service role key for server-side access.
  */
-export function getShadowSupabaseServiceEnv() {
-  const shadowEnv = getShadowEnv();
+export function getSupabaseServiceEnv() {
+  const appEnv = getAppEnv();
 
   return {
-    supabaseUrl: shadowEnv.SHADOW_NEXT_PUBLIC_SUPABASE_URL,
-    supabaseServiceRoleKey: shadowEnv.SHADOW_SUPABASE_SERVICE_ROLE_KEY,
+    supabaseUrl: appEnv.SHADOW_NEXT_PUBLIC_SUPABASE_URL,
+    supabaseServiceRoleKey: appEnv.SHADOW_SUPABASE_SERVICE_ROLE_KEY,
   };
 }
 
 /**
- * Reads the table prefix for shadow Supabase catalog tables.
+ * Reads the table prefix for server-first Supabase catalog tables.
  *
  * @returns The configured table prefix, defaulting to sm_.
  */
-export function getShadowSupabaseTablePrefix() {
-  return getShadowEnv().SHADOW_SUPABASE_TABLE_PREFIX;
+export function getCatalogTablePrefix() {
+  return getAppEnv().SHADOW_SUPABASE_TABLE_PREFIX;
 }

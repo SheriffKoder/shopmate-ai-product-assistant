@@ -1,63 +1,63 @@
 /**
- * Shadow Category Repository
+ * Category Repository
  *
- * Purpose: Reads shadow category rows from Supabase.
- * Used in: shadow category query use cases.
+ * Purpose: Reads category rows from Supabase.
+ * Used in: category query use cases.
  * Used for: Isolates database access from views and routes.
  */
 
 import 'server-only';
 
-import { createShadowServiceClient } from '@/shared/supabase/server/create-shadow-service-client';
-import type { ShadowCategory, ShadowCategoryRow, ShadowCategorySlugParam } from '@/entities/category/model/category';
-import { transformShadowCategoryRow } from '@/entities/category/transform/category-transform';
-import { getShadowCatalogTableNames } from '@/shared/config/table-names';
+import { createSupabaseServiceClient } from '@/shared/supabase/server/create-service-client';
+import type { Category, CategoryRow, CategorySlugParam } from '@/entities/category/model/category';
+import { transformCategoryRow } from '@/entities/category/transform/category-transform';
+import { getCatalogTableNames } from '@/shared/config/table-names';
 
-const SHADOW_CATEGORY_COLUMNS = 'id, slug, name, description, sort_order';
+const CATEGORY_COLUMNS = 'id, slug, name, description, sort_order';
 
 /**
- * Lists active shadow categories in display order.
+ * Lists active categories in display order.
  *
- * @returns Active shadow categories.
+ * @returns Active categories.
  */
-export async function listShadowCategories(): Promise<ShadowCategory[]> {
-  const supabase = createShadowServiceClient();
-  const tableNames = getShadowCatalogTableNames();
+export async function listCategories(): Promise<Category[]> {
+  const supabase = createSupabaseServiceClient();
+  const tableNames = getCatalogTableNames();
   const { data, error } = await supabase
     .from(tableNames.categories)
-    .select(SHADOW_CATEGORY_COLUMNS)
+    .select(CATEGORY_COLUMNS)
     .eq('is_active', true)
     .order('sort_order', { ascending: true })
     .order('slug', { ascending: true });
 
   if (error) {
-    throw new Error(`Failed to list shadow categories: ${error.message}`);
+    throw new Error(`Failed to list categories: ${error.message}`);
   }
 
-  return ((data ?? []) as ShadowCategoryRow[]).map(transformShadowCategoryRow);
+  return ((data ?? []) as CategoryRow[]).map(transformCategoryRow);
 }
 
 /**
- * Finds one active shadow category by slug.
+ * Finds one active category by slug.
  *
  * @param params - Category slug lookup params.
- * @returns The matching shadow category, or null when missing.
+ * @returns The matching category, or null when missing.
  */
-export async function getShadowCategoryBySlug(params: ShadowCategorySlugParam): Promise<ShadowCategory | null> {
-  const supabase = createShadowServiceClient();
-  const tableNames = getShadowCatalogTableNames();
+export async function getCategoryBySlug(params: CategorySlugParam): Promise<Category | null> {
+  const supabase = createSupabaseServiceClient();
+  const tableNames = getCatalogTableNames();
   const { data, error } = await supabase
     .from(tableNames.categories)
-    .select(SHADOW_CATEGORY_COLUMNS)
+    .select(CATEGORY_COLUMNS)
     .eq('is_active', true)
     .eq('slug', params.slug)
     .maybeSingle();
 
   if (error) {
-    throw new Error(`Failed to get shadow category ${params.slug}: ${error.message}`);
+    throw new Error(`Failed to get category ${params.slug}: ${error.message}`);
   }
 
-  return data ? transformShadowCategoryRow(data as ShadowCategoryRow) : null;
+  return data ? transformCategoryRow(data as CategoryRow) : null;
 }
 
 /**
@@ -65,8 +65,8 @@ export async function getShadowCategoryBySlug(params: ShadowCategorySlugParam): 
  *
  * @returns Category slug params.
  */
-export async function listShadowCategorySlugs(): Promise<ShadowCategorySlugParam[]> {
-  const categories = await listShadowCategories();
+export async function listCategorySlugs(): Promise<CategorySlugParam[]> {
+  const categories = await listCategories();
 
   return categories.map(function mapCategorySlug(category) {
     return { slug: category.slug };

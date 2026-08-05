@@ -1,14 +1,14 @@
 /**
- * Shadow Dev Action Redirect
+ * Dev Action Redirect
  *
  * Purpose: Redirects /dev server actions with readable status messages.
- * Used in: shadow dev server actions.
+ * Used in: development server actions.
  * Used for: Shows action outcomes without adding client state to the dev page.
  */
 
 import { redirect } from 'next/navigation';
 
-type RedirectShadowDevActionResultParams = {
+type RedirectDevActionResultParams = {
   message: string;
   status: 'error' | 'success';
 };
@@ -18,7 +18,7 @@ type RedirectShadowDevActionResultParams = {
  *
  * @param params - Action result status and message.
  */
-export function redirectShadowDevActionResult(params: RedirectShadowDevActionResultParams): never {
+export function redirectDevActionResult(params: RedirectDevActionResultParams): never {
   const searchParams = new URLSearchParams({
     message: params.message,
     status: params.status,

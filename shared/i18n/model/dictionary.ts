@@ -1,52 +1,52 @@
 /**
- * Shadow Dictionary Model
+ * Dictionary Model
  *
- * Purpose: Defines the typed copy contract for shadow localized pages.
- * Used in: shadow i18n dictionaries, server views, and shadow widgets.
+ * Purpose: Defines the typed copy contract for localized pages.
+ * Used in: i18n dictionaries, server views, and widgets.
  * Used for: Keeps page and header copy out of JSX while preserving type safety.
  */
 
-import type { ShadowLocale } from '@/shared/i18n/config';
+import type { AppLocale } from '@/shared/i18n/config';
 
-type ShadowNavigationDictionary = {
+type NavigationDictionary = {
   label: string;
   home: string;
   products: string;
 };
 
-type ShadowCommonDictionary = {
+type CommonDictionary = {
   brandName: string;
   home: string;
   products: string;
   language: string;
-  localeNames: Record<ShadowLocale, string>;
+  localeNames: Record<AppLocale, string>;
 };
 
-type ShadowPageDictionary = {
+type PageDictionary = {
   title: string;
   eyebrow: string;
   description: string;
 };
 
-export type ShadowDictionary = {
-  common: ShadowCommonDictionary;
+export type AppDictionary = {
+  common: CommonDictionary;
   header: {
-    navigation: ShadowNavigationDictionary;
+    navigation: NavigationDictionary;
   };
-  home: ShadowPageDictionary & {
+  home: PageDictionary & {
     heroAction: string;
     categoriesTitle: string;
     featuredTitle: string;
     latestTitle: string;
     emptyState: string;
   };
-  products: ShadowPageDictionary & {
+  products: PageDictionary & {
     categoryNavLabel: string;
     emptyState: string;
     gridTitle: string;
     resultCount: string;
   };
-  productDetail: ShadowPageDictionary & {
+  productDetail: PageDictionary & {
     backToProducts: string;
     colorsTitle: string;
     descriptionTitle: string;
@@ -58,12 +58,12 @@ export type ShadowDictionary = {
     relatedTitle: string;
     viewLabel: string;
   };
-  category: ShadowPageDictionary & {
+  category: PageDictionary & {
     emptyState: string;
     gridTitle: string;
     resultCount: string;
   };
-  checkout: ShadowPageDictionary & {
+  checkout: PageDictionary & {
     actionLabel: string;
     continueShopping: string;
     emptyDescription: string;
@@ -74,7 +74,7 @@ export type ShadowDictionary = {
     quantityLabel: string;
     subtotal: string;
   };
-  checkoutSuccess: ShadowPageDictionary & {
+  checkoutSuccess: PageDictionary & {
     continueShopping: string;
     customer: string;
     deliveryEstimate: string;
@@ -88,7 +88,7 @@ export type ShadowDictionary = {
     receipt: string;
     totalPaid: string;
   };
-  dev: ShadowPageDictionary & {
+  dev: PageDictionary & {
     actionsLabel: string;
     authAction: string;
     authDescription: string;

@@ -1,5 +1,5 @@
 /**
- * Shadow Product Detail Page UI
+ * Product Detail Page UI
  *
  * Purpose: Renders one localized server-first product detail page.
  * Used in: views/product-detail/index.tsx
@@ -8,17 +8,17 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowLocalizedText } from '@/shared/i18n/lib/get-localized-text';
-import { getShadowLocalizedList } from '@/views/product-detail/lib/get-localized-list';
-import type { ShadowProductDetailPageData } from '@/views/product-detail/queries/get-product-detail-page-data';
-import { ShadowProductGrid } from '@/widgets/product-grid/ui/product-grid';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import { getLocalizedList } from '@/views/product-detail/lib/get-localized-list';
+import type { ProductDetailPageData } from '@/views/product-detail/queries/get-product-detail-page-data';
+import { ProductGrid } from '@/widgets/product-grid/ui/product-grid';
 
-type ShadowProductDetailPageProps = {
-  data: ShadowProductDetailPageData;
-  dictionary: ShadowDictionary;
-  locale: ShadowLocale;
+type ProductDetailPageProps = {
+  data: ProductDetailPageData;
+  dictionary: AppDictionary;
+  locale: AppLocale;
 };
 
 /**
@@ -27,7 +27,7 @@ type ShadowProductDetailPageProps = {
  * @param props - Product detail data, dictionary copy, and active locale.
  * @returns A localized product detail surface.
  */
-export function ShadowProductDetailPage(props: ShadowProductDetailPageProps) {
+export function ProductDetailPage(props: ProductDetailPageProps) {
   const { data, dictionary, locale } = props;
 
   if (!data.product) {
@@ -35,10 +35,10 @@ export function ShadowProductDetailPage(props: ShadowProductDetailPageProps) {
   }
 
   const product = data.product;
-  const productName = getShadowLocalizedText(product.name, locale);
-  const shortDescription = getShadowLocalizedText(product.shortDescription, locale);
-  const description = getShadowLocalizedText(product.description, locale);
-  const features = getShadowLocalizedList(product.features, locale);
+  const productName = getLocalizedText(product.name, locale);
+  const shortDescription = getLocalizedText(product.shortDescription, locale);
+  const description = getLocalizedText(product.description, locale);
+  const features = getLocalizedList(product.features, locale);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
@@ -142,7 +142,7 @@ export function ShadowProductDetailPage(props: ShadowProductDetailPageProps) {
         </div>
       </section>
 
-      <ShadowProductGrid
+      <ProductGrid
         emptyState={dictionary.productDetail.relatedEmptyState}
         locale={locale}
         products={data.relatedProducts}

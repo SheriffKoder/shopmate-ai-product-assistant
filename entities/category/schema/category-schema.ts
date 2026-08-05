@@ -1,35 +1,35 @@
 /**
- * Shadow Category Schema
+ * Category Schema
  *
- * Purpose: Validates shadow category rows and domain objects.
- * Used in: shadow category transforms and future seed validation.
+ * Purpose: Validates category rows and domain objects.
+ * Used in: category transforms and future seed validation.
  * Used for: Protects server-first pages from malformed catalog data.
  */
 
 import { z } from 'zod';
 
-export const shadowLocaleTextSchema = z.object({
+export const localeTextSchema = z.object({
   en: z.string().min(1),
   ar: z.string().min(1),
 });
 
-export const shadowLocalizedListSchema = z.object({
+export const localizedListSchema = z.object({
   en: z.array(z.string().min(1)),
   ar: z.array(z.string().min(1)),
 });
 
-export const shadowCategorySchema = z.object({
+export const categorySchema = z.object({
   id: z.string().uuid(),
   slug: z.string().min(1),
-  name: shadowLocaleTextSchema,
-  description: shadowLocaleTextSchema.nullable(),
+  name: localeTextSchema,
+  description: localeTextSchema.nullable(),
   sortOrder: z.number().int(),
 });
 
-export const shadowCategoryRowSchema = z.object({
+export const categoryRowSchema = z.object({
   id: z.string().uuid(),
   slug: z.string().min(1),
-  name: shadowLocaleTextSchema,
-  description: shadowLocaleTextSchema.nullable(),
+  name: localeTextSchema,
+  description: localeTextSchema.nullable(),
   sort_order: z.number().int(),
 });

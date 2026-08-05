@@ -6,10 +6,10 @@
  * Used for: Delegates server-first success composition to the checkout success view.
  */
 
-import { ShadowCheckoutSuccessView } from '@/views/checkout-success';
-import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
+import { CheckoutSuccessView } from '@/views/checkout-success';
+import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
 
-type ShadowCheckoutSuccessPageProps = {
+type CheckoutSuccessPageProps = {
   params: Promise<{
     locale: string;
   }>;
@@ -21,9 +21,9 @@ type ShadowCheckoutSuccessPageProps = {
  * @param props - Locale route params from Next.js.
  * @returns The server-first success view with a local cart receipt island.
  */
-export default async function ShadowCheckoutSuccessPage(props: ShadowCheckoutSuccessPageProps) {
+export default async function CheckoutSuccessPage(props: CheckoutSuccessPageProps) {
   const { locale: rawLocale } = await props.params;
-  const locale = assertShadowLocale(rawLocale);
+  const locale = assertAppLocale(rawLocale);
 
-  return <ShadowCheckoutSuccessView locale={locale} />;
+  return <CheckoutSuccessView locale={locale} />;
 }

@@ -38,13 +38,13 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 - `views/`: route composition. Each view loads dictionary copy, calls catalog queries, handles page-level outcomes such as `notFound()`, and passes ready data to UI.
 - `entities/category/` and `entities/product/`: catalog domain types, Zod row schemas, transforms, Supabase repositories, and cached read queries.
-- `widgets/`: reusable server UI sections such as the temporary shadow header, home hero, category navigation, product card, and product grid.
+- `widgets/`: reusable server UI sections such as the temporary header, home hero, category navigation, product card, and product grid.
 - `features/locale-switcher/`: the small client-only locale dropdown island and pure href builder.
 - `shared/i18n/`: EN/AR locale config, typed dictionaries, locale assertion, dictionary loading, and localized catalog text helpers.
 - `shared/config/`: cache constants, environment validation, and `SHADOW_SUPABASE_TABLE_PREFIX`-driven table names.
-- `shared/supabase/server/create-shadow-service-client.ts`: server-only Supabase service client boundary for catalog reads and dev writes.
+- `shared/supabase/server/create-service-client.ts`: server-only Supabase service client boundary for catalog reads and dev writes.
 - `shadow/development/initial-data/products.ts`: seed data consumed only by `/dev`.
-- `shadow/development/migrations/032_create_shadow_catalog.sql`: active shadow catalog migration for prefixed catalog tables. Other copied migration files in this folder are external compatibility history and should not be read unless the user explicitly asks.
+- `shadow/development/migrations/032_create_shadow_catalog.sql`: active catalog migration for prefixed catalog tables. Other copied migration files in this folder are external compatibility history and should not be read unless the user explicitly asks.
 
 ## API Routes
 

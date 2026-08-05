@@ -11,7 +11,7 @@
 import { usePathname } from 'next/navigation';
 
 import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
-import { ShadowLocaleSwitcher } from '@/features/locale-switcher/ui/locale-switcher';
+import { AppLocaleSwitcher } from '@/features/locale-switcher/ui/locale-switcher';
 
 const HEADER_LOCALE_NAMES = {
   en: 'EN',
@@ -27,7 +27,7 @@ export function HeaderLocaleSwitcher() {
   const locale = getLocaleFromPathname(usePathname());
 
   return (
-    <ShadowLocaleSwitcher
+    <AppLocaleSwitcher
       locale={locale}
       label="Language"
       localeNames={HEADER_LOCALE_NAMES}

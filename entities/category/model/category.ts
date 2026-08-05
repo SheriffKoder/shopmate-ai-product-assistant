@@ -1,26 +1,26 @@
 /**
- * Shadow Category Model
+ * Category Model
  *
- * Purpose: Defines pure domain types for shadow catalog categories.
- * Used in: shadow category transforms, repositories, queries, and future views.
+ * Purpose: Defines pure domain types for catalog categories.
+ * Used in: category transforms, repositories, queries, and future views.
  * Used for: Keeps page-facing category data independent from Supabase row details.
  */
 
-import type { ShadowLocaleText } from '@/shared/model/localization';
+import type { LocaleText } from '@/shared/model/localization';
 
-export type ShadowCategory = {
+export type Category = {
   id: string;
   slug: string;
-  name: ShadowLocaleText;
-  description: ShadowLocaleText | null;
+  name: LocaleText;
+  description: LocaleText | null;
   sortOrder: number;
 };
 
-export type ShadowCategorySlugParam = {
+export type CategorySlugParam = {
   slug: string;
 };
 
-export type ShadowCategoryRow = {
+export type CategoryRow = {
   id: string;
   slug: string;
   name: unknown;

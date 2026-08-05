@@ -1,32 +1,32 @@
 'use client';
 
 /**
- * Shadow Locale Switcher
+ * Locale Switcher
  *
  * Purpose: Provides the localized header's only client-side interaction.
- * Used in: widgets/shadow-header/ui/shadow-header.tsx and the promoted app header.
- * Used for: Switches between EN and AR while preserving the current shadow path.
+ * Used in: the promoted app header.
+ * Used for: Switches between EN and AR while preserving the current path.
  */
 
 import { useId } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { SHADOW_LOCALES, type ShadowLocale } from '@/shared/i18n/config';
-import { buildShadowLocaleHref } from '@/features/locale-switcher/lib/build-locale-href';
+import { APP_LOCALES, type AppLocale } from '@/shared/i18n/config';
+import { buildAppLocaleHref } from '@/features/locale-switcher/lib/build-locale-href';
 
-type ShadowLocaleSwitcherProps = {
-  locale: ShadowLocale;
+type AppLocaleSwitcherProps = {
+  locale: AppLocale;
   label: string;
-  localeNames: Record<ShadowLocale, string>;
+  localeNames: Record<AppLocale, string>;
 };
 
 /**
- * Renders a keyboard-accessible locale selector for shadow routes.
+ * Renders a keyboard-accessible locale selector for routes.
  *
  * @param props - Active locale, control label, and localized locale names.
  * @returns A client-rendered locale select control.
  */
-export function ShadowLocaleSwitcher(props: ShadowLocaleSwitcherProps) {
+export function AppLocaleSwitcher(props: AppLocaleSwitcherProps) {
   const { locale, label, localeNames } = props;
   const selectId = useId();
   const pathname = usePathname();
@@ -37,8 +37,8 @@ export function ShadowLocaleSwitcher(props: ShadowLocaleSwitcherProps) {
    *
    * @param nextLocale - Locale selected by the user.
    */
-  function handleLocaleChange(nextLocale: ShadowLocale) {
-    const href = buildShadowLocaleHref({
+  function handleLocaleChange(nextLocale: AppLocale) {
+    const href = buildAppLocaleHref({
       pathname,
       currentLocale: locale,
       nextLocale,
@@ -55,12 +55,12 @@ export function ShadowLocaleSwitcher(props: ShadowLocaleSwitcherProps) {
       <select
         id={selectId}
         value={locale}
-        onChange={(event) => handleLocaleChange(event.target.value as ShadowLocale)}
+        onChange={(event) => handleLocaleChange(event.target.value as AppLocale)}
         className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
       >
-        {SHADOW_LOCALES.map((shadowLocale) => (
-          <option key={shadowLocale} value={shadowLocale}>
-            {localeNames[shadowLocale]}
+        {APP_LOCALES.map((locale) => (
+          <option key={locale} value={locale}>
+            {localeNames[locale]}
           </option>
         ))}
       </select>

@@ -1,5 +1,5 @@
 /**
- * Shadow Locale Layout
+ * Locale Layout
  *
  * Purpose: Wraps the server-first public pages for one locale.
  * Used in: Next.js routing under /[locale]
@@ -8,10 +8,10 @@
 
 import type { ReactNode } from 'react';
 
-import { getShadowLocaleDirection } from '@/shared/i18n/config';
-import { assertShadowLocale } from '@/shared/i18n/lib/assert-locale';
+import { getLocaleDirection } from '@/shared/i18n/config';
+import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
 
-type ShadowLocaleLayoutProps = {
+type AppLocaleLayoutProps = {
   children: ReactNode;
   params: Promise<{
     locale: string;
@@ -19,16 +19,16 @@ type ShadowLocaleLayoutProps = {
 };
 
 /**
- * Renders the locale-scoped shadow page shell.
+ * Renders the locale-scoped page shell.
  *
  * @param props - Route children and locale params from Next.js.
  * @returns A server-rendered locale wrapper.
  */
-export default async function ShadowLocaleLayout(props: ShadowLocaleLayoutProps) {
+export default async function AppLocaleLayout(props: AppLocaleLayoutProps) {
   const { children, params } = props;
   const { locale: rawLocale } = await params;
-  const locale = assertShadowLocale(rawLocale);
-  const direction = getShadowLocaleDirection(locale);
+  const locale = assertAppLocale(rawLocale);
+  const direction = getLocaleDirection(locale);
 
   return (
     <section lang={locale} dir={direction} className="min-h-screen bg-background text-foreground">

@@ -1,28 +1,28 @@
 /**
- * Shadow Product Transform
+ * Product Transform
  *
- * Purpose: Converts shadow product database rows into domain products.
- * Used in: shadow product repositories.
+ * Purpose: Converts product database rows into domain products.
+ * Used in: product repositories.
  * Used for: Keeps DB naming and validation out of server page composition.
  */
 
-import type { ShadowProduct, ShadowProductRow } from '@/entities/product/model/product';
-import { shadowProductRowSchema, shadowProductSchema } from '@/entities/product/schema/product-schema';
+import type { Product, ProductRow } from '@/entities/product/model/product';
+import { productRowSchema, productSchema } from '@/entities/product/schema/product-schema';
 
 /**
- * Converts one Supabase product row into a shadow product domain object.
+ * Converts one Supabase product row into a product domain object.
  *
  * @param row - Raw product row from Supabase with its category slug relation.
- * @returns A validated shadow product.
+ * @returns A validated product.
  */
-export function transformShadowProductRow(row: ShadowProductRow): ShadowProduct {
-  const parsedRow = shadowProductRowSchema.parse(row);
+export function transformProductRow(row: ProductRow): Product {
+  const parsedRow = productRowSchema.parse(row);
 
   if (!parsedRow.category?.slug) {
-    throw new Error(`Shadow product ${parsedRow.slug} is missing its category relation.`);
+    throw new Error(` product ${parsedRow.slug} is missing its category relation.`);
   }
 
-  return shadowProductSchema.parse({
+  return productSchema.parse({
     id: parsedRow.id,
     slug: parsedRow.slug,
     categoryId: parsedRow.category_id,

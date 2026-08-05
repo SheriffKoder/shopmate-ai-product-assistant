@@ -1,33 +1,33 @@
 /**
- * Shadow Table Names
+ * Table Names
  *
- * Purpose: Builds Supabase table names for the shadow catalog.
- * Used in: shadow repositories.
+ * Purpose: Builds Supabase table names for the catalog.
+ * Used in: repositories.
  * Used for: Keeps the sm_ table prefix configurable without hardcoding table names in data access files.
  */
 
 import 'server-only';
 
-import { getShadowSupabaseTablePrefix } from '@/shared/config/env';
+import { getCatalogTablePrefix } from '@/shared/config/env';
 
 /**
- * Builds one prefixed shadow table name.
+ * Builds one prefixed table name.
  *
  * @param tableName - Unprefixed table name.
  * @returns The prefixed Supabase table name.
  */
-function getShadowTableName(tableName: string) {
-  return `${getShadowSupabaseTablePrefix()}${tableName}`;
+function getCatalogTableName(tableName: string) {
+  return `${getCatalogTablePrefix()}${tableName}`;
 }
 
 /**
- * Builds all shadow catalog table names.
+ * Builds all catalog table names.
  *
  * @returns Prefixed category and product table names.
  */
-export function getShadowCatalogTableNames() {
+export function getCatalogTableNames() {
   return {
-    categories: getShadowTableName('categories'),
-    products: getShadowTableName('products'),
+    categories: getCatalogTableName('categories'),
+    products: getCatalogTableName('products'),
   };
 }

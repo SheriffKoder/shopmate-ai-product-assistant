@@ -1,5 +1,5 @@
 /**
- * Shadow Category Nav Widget
+ * Category Nav Widget
  *
  * Purpose: Displays localized category links for server-first catalog pages.
  * Used in: views/home/ui/home-page.tsx
@@ -7,13 +7,13 @@
  */
 
 import Link from 'next/link';
-import type { ShadowCategory } from '@/entities/category/model/category';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import { getShadowLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import type { Category } from '@/entities/category/model/category';
+import type { AppLocale } from '@/shared/i18n/config';
+import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
 
-type ShadowCategoryNavProps = {
-  categories: ShadowCategory[];
-  locale: ShadowLocale;
+type CategoryNavProps = {
+  categories: Category[];
+  locale: AppLocale;
   title: string;
 };
 
@@ -23,7 +23,7 @@ type ShadowCategoryNavProps = {
  * @param props - Categories, active locale, and localized heading.
  * @returns A server-rendered category navigation section.
  */
-export function ShadowCategoryNav(props: ShadowCategoryNavProps) {
+export function CategoryNav(props: CategoryNavProps) {
   const { categories, locale, title } = props;
 
   if (categories.length === 0) {
@@ -31,15 +31,15 @@ export function ShadowCategoryNav(props: ShadowCategoryNavProps) {
   }
 
   return (
-    <section aria-labelledby="shadow-home-categories" className="space-y-4">
-      <h2 id="shadow-home-categories" className="text-xl font-semibold text-gray-950">
+    <section aria-labelledby="home-categories" className="space-y-4">
+      <h2 id="home-categories" className="text-xl font-semibold text-gray-950">
         {title}
       </h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {categories.map(function renderCategory(category) {
-          const categoryName = getShadowLocalizedText(category.name, locale);
+          const categoryName = getLocalizedText(category.name, locale);
           const categoryDescription = category.description
-            ? getShadowLocalizedText(category.description, locale)
+            ? getLocalizedText(category.description, locale)
             : null;
 
           return (

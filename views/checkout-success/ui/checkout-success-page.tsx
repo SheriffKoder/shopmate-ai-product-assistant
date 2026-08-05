@@ -7,14 +7,14 @@
  */
 
 import { CheckoutSuccessCartPanel } from '@/features/cart/ui/checkout-success-cart-panel';
-import type { ShadowLocale } from '@/shared/i18n/config';
-import type { ShadowDictionary } from '@/shared/i18n/model/dictionary';
-import type { ShadowCheckoutSuccessOrder } from '@/views/checkout-success';
+import type { AppLocale } from '@/shared/i18n/config';
+import type { AppDictionary } from '@/shared/i18n/model/dictionary';
+import type { CheckoutSuccessOrder } from '@/views/checkout-success';
 
-type ShadowCheckoutSuccessPageProps = {
-  dictionary: ShadowDictionary;
-  locale: ShadowLocale;
-  order: ShadowCheckoutSuccessOrder;
+type CheckoutSuccessPageProps = {
+  dictionary: AppDictionary;
+  locale: AppLocale;
+  order: CheckoutSuccessOrder;
 };
 
 /**
@@ -23,7 +23,7 @@ type ShadowCheckoutSuccessPageProps = {
  * @param props - Localized dictionary copy, active locale, and mock order data.
  * @returns Server-rendered checkout success shell.
  */
-export function ShadowCheckoutSuccessPage(props: ShadowCheckoutSuccessPageProps) {
+export function CheckoutSuccessPage(props: CheckoutSuccessPageProps) {
   const { dictionary, locale, order } = props;
 
   return (
