@@ -32,7 +32,7 @@ export default function NotFound() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 w-full mt-4">
           <Link href="/" className="flex-1">
-            <Button className="cursor-pointer w-full bg-gradient-to-r from-primary to-secondary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+            <Button className="cursor-pointer w-full bg-foreground text-background py-2 px-4 font-roboto transition-colors hover:text-primary hover:bg-foreground/90">
               <Home className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
@@ -40,7 +40,7 @@ export default function NotFound() {
           <Link href="/products" className="flex-1">
             <Button
               variant="outline"
-              className="cursor-pointer w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors"
+              className="cursor-pointer w-full border-foreground text-foreground hover:bg-foreground/10 py-2 px-4 font-roboto transition-colors"
             >
               <Search className="w-4 h-4 mr-2" />
               Browse Products

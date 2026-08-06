@@ -56,7 +56,7 @@ function ProductTile({ locale, product }: { locale: AppLocale; product: Product 
   const image = product.imageUrl ?? product.imageUrlVariations[0];
 
   return (
-    <AssistantAwareLink className="w-42 flex-none space-y-2 text-center" href={`/${locale}/products/${product.slug}`}>
+    <AssistantAwareLink className="w-42 flex-none space-y-2 text-center cursor-pointer hover:opacity-80" href={`/${locale}/products/${product.slug}`}>
       <div className="relative aspect-square bg-secondary">
         {image ? <Image alt={name} className="object-cover" fill sizes="112px" src={image} /> : null}
       </div>
