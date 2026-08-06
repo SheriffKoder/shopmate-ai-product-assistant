@@ -36,6 +36,7 @@ import {
 import { processProductAssistantRequest } from './agents/products-cart/agent';
 import type { QueryClassification } from './agents';
 import { writeAssistantStep } from './assistant-step';
+import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
 
 /**
  * Agent request type - matches what agents expect
@@ -48,6 +49,7 @@ export type AgentRequest = {
   catalogSource: CatalogSource;
   cartSource?: CartSource;
   userQuery: string;
+  persistenceMode: PersistenceMode;
 };
 
 /**
@@ -109,6 +111,7 @@ export async function routeToAgent(
           messages: request.messages,
           dataStream,
           models: request.models,
+          persistenceMode: request.persistenceMode,
         });
 
       case 'notrelated':

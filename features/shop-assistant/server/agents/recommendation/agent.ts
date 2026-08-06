@@ -19,6 +19,7 @@ import { createSheetDocument } from '@/features/ai-assistant/components/artifact
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -31,6 +32,7 @@ interface RecommendationRequest {
   catalogSource: import('@/features/shop-assistant/model/catalog-source').CatalogSource;
   cartSource?: import('@/features/shop-assistant/model/cart-source').CartSource;
   userQuery: string;
+  persistenceMode: PersistenceMode;
 }
 
 /**
@@ -43,7 +45,7 @@ export async function processRecommendationRequest(
   request: RecommendationRequest,
   dataStream?: UIMessageStreamWriter<any>
 ) {
-  const { messages, products = [], cart, models } = request;
+  const { messages, products = [], cart, models, persistenceMode } = request;
 
   // Get system prompt
   const systemPrompt = getRecommendationPrompt();
@@ -179,6 +181,7 @@ export async function processRecommendationRequest(
               title,
               dataStream,
               documentId, // Use synced documentId for Supabase persistence
+              persistenceMode,
             });
             logger.debug('[Recommendation Agent] createTextDocument completed');
           } else if (kind === 'sheet') {
@@ -190,6 +193,7 @@ export async function processRecommendationRequest(
               title,
               dataStream,
               documentId, // Use synced documentId for Supabase persistence
+              persistenceMode,
             });
             logger.debug('[Recommendation Agent] createSheetDocument completed');
           } else {

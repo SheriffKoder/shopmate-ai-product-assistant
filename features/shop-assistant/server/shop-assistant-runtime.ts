@@ -62,6 +62,7 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
         catalogSource,
         cartSource,
         userQuery: request.userQuery,
+        persistenceMode: request.persistenceMode,
       } as AgentRequest,
       request.userQuery,
       dataStream

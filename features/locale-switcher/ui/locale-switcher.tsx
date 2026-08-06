@@ -13,7 +13,7 @@ import { Languages } from 'lucide-react';
 
 import { APP_LOCALES, type AppLocale } from '@/shared/i18n/config';
 import { buildAppLocaleHref } from '@/features/locale-switcher/lib/build-locale-href';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { CustomDropdown } from '@/shared/ui/custom-dropdown';
 
 type AppLocaleSwitcherProps = {
   locale: AppLocale;
@@ -31,6 +31,12 @@ export function AppLocaleSwitcher(props: AppLocaleSwitcherProps) {
   const { locale, label, localeNames } = props;
   const pathname = usePathname();
   const router = useRouter();
+  const localeItems = APP_LOCALES.map(function mapLocaleOption(nextLocale) {
+    return {
+      id: nextLocale,
+      label: localeNames[nextLocale],
+    };
+  });
 
   /**
    * Navigates to the selected locale while keeping the current page path.
@@ -48,23 +54,17 @@ export function AppLocaleSwitcher(props: AppLocaleSwitcherProps) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger aria-label={label} className="header-control gap-2">
-        <Languages aria-hidden="true" className="size-5 stroke-2" />
-        <span>{localeNames[locale]}</span>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="border-foreground bg-foreground p-0 text-background shadow-none">
-        {APP_LOCALES.map((nextLocale) => (
-          <DropdownMenuItem
-            key={nextLocale}
-            onSelect={() => handleLocaleChange(nextLocale)}
-            className="px-3 py-2 text-background focus:bg-foreground focus:text-primary data-[selected=true]:text-primary"
-            data-selected={nextLocale === locale}
-          >
-            {localeNames[nextLocale]}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <CustomDropdown
+      ariaLabel={label}
+      contentClassName="border border-foreground p-0 shadow-none"
+      direction="down"
+      itemClassName="px-3 py-2 hover:bg-primary hover:text-foreground focus:bg-primary focus:text-foreground"
+      items={localeItems}
+      onItemSelect={function selectLocale(nextLocale) { handleLocaleChange(nextLocale as AppLocale); }}
+      selectedItemClassName="text-primary"
+      selectedItemId={locale}
+      startIcon={<Languages aria-hidden="true" className="size-5 stroke-2" />}
+      triggerClassName="header-control min-w-0 max-w-none gap-2"
+    />
   );
 }

@@ -18,6 +18,7 @@ interface HeaderIconButtonProps {
   className?: string;
   tooltip?: string;
   isActive?: boolean;
+  disabled?: boolean;
   activeClassName?: string;
   inactiveClassName?: string;
 }
@@ -32,15 +33,18 @@ export const HeaderIconButton = ({
   isActive = false,
   activeClassName = 'bg-primary text-foreground',
   inactiveClassName = 'bg-background text-foreground',
+  disabled = false,
 }: HeaderIconButtonProps) => {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       title={tooltip}
       className={`header-icon-control cursor-pointer
       ${className}
-      ${isActive ? activeClassName : inactiveClassName}`}
+      ${isActive ? activeClassName : inactiveClassName}
+      ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
     >
       {label ? <span className="font-button hidden md:block">{label}</span> : null}
       <Icon aria-hidden="true" />
