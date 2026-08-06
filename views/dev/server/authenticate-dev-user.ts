@@ -11,6 +11,7 @@
 import { createSupabaseServiceClient } from '@/shared/supabase/server/create-service-client';
 import { getAppEnv } from '@/shared/config/env';
 import { redirectDevActionResult } from '@/views/dev/lib/redirect-dev-action-result';
+import { upsertUserForAuthUser } from '@/lib/supabase/queries/user-queries';
 
 /**
  * Ensures the configured development user exists in Supabase Auth.
@@ -18,25 +19,54 @@ import { redirectDevActionResult } from '@/views/dev/lib/redirect-dev-action-res
 export async function authenticateDevUser() {
   const appEnv = getAppEnv();
   const supabase = createSupabaseServiceClient();
-  const email = appEnv.SHADOW_DEV_EMAIL.trim();
-  const password = appEnv.SHADOW_DEV_PASSWORD;
+  const email = appEnv.DEV_EMAIL.trim();
+  const password = appEnv.DEV_PASSWORD;
   const { data, error } = await supabase.auth.admin.createUser({
     email,
     email_confirm: true,
     password,
   });
 
+  let authUser = data.user;
+
   if (error) {
     const alreadyExists = error.message.toLowerCase().includes('already');
 
+    if (!alreadyExists) {
+      redirectDevActionResult({
+        message: `Failed to create development user: ${error.message}`,
+        status: 'error',
+      });
+    }
+
+    const existingUser = await supabase.auth.admin.listUsers();
+    authUser = existingUser.data.users.find(function findConfiguredUser(user) {
+      return user.email?.toLowerCase() === email.toLowerCase();
+    }) ?? null;
+  }
+
+  if (!authUser) {
     redirectDevActionResult({
-      message: alreadyExists ? ` dev user already exists for ${email}.` : `Failed to create development user: ${error.message}`,
-      status: alreadyExists ? 'success' : 'error',
+      message: `Failed to resolve development user for ${email}.`,
+      status: 'error',
+    });
+  }
+
+  const applicationUser = await upsertUserForAuthUser({
+    authUserId: authUser.id,
+    email,
+    name: 'ShopMate User',
+  });
+
+  if (!applicationUser) {
+    redirectDevActionResult({
+      message: `Auth user was ready, but the application user could not be linked for ${email}.`,
+      status: 'error',
     });
   }
 
   redirectDevActionResult({
-    message: ` dev user ready for ${data.user.email ?? email}.`,
+    message: ` dev user and application user ready for ${authUser.email ?? email}.`,
     status: 'success',
   });
 }
