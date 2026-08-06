@@ -6,4 +6,4 @@
  * Used in: current server-side artifact tools until document persistence is fully adapterized.
  */
 
-export { supabaseAdmin } from '@/lib/supabase/client';
+export { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
