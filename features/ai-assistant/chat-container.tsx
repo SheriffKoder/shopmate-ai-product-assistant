@@ -31,6 +31,10 @@ import { useUpdateChatIdInUrl } from './components/history-sidebar/utils/chat-na
 import { useAssistantModelSelection } from './hooks/use-assistant-model-selection';
 import type { AssistantToolRendererRegistry } from './model/tool-renderer-registry';
 import { assistantApiEndpoints } from './model/api-endpoints';
+import { getDictationConfig } from './dictation/model/dictation-config';
+import { useArtifact } from './components/artifacts/hooks/use-artifact';
+import { useUserSession } from './hooks/use-user-session';
+import { MessageSavingOrchestrator } from './message-persistence/saving-orchestrator';
 
 interface ChatContainerProps {
   chatId: string; // Combined chatId (URL or fallback)
@@ -53,12 +57,18 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
   // How: setDataStream adds each data part to the stream array
   //////////////////////////////////
   const { setDataStream, assistantSteps, setAssistantSteps } = useDataStream();
+  const { setArtifact } = useArtifact();
 
   //////////////////////////////////
   // Assistant Model Selection: Reusable model picker state included in every request
   // Why: Keeps hard-coded model ids out of the assistant runtime while allowing user switching
   //////////////////////////////////
   const { selectedModelId, modelOptions, setSelectedModelId } = useAssistantModelSelection();
+  const { user } = useUserSession();
+  const savingOrchestrator = new MessageSavingOrchestrator(user ? 'database' : 'local');
+
+  // Dictation integration: injects client-safe provider settings without coupling the assistant shell to a provider.
+  const dictationConfig = getDictationConfig();
   
   //////////////////////////////////
   // Chat Hook: To send messages to the API and receive responses
@@ -99,7 +109,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
     // 2. Update URL params if urlChatId is null but chatId exists (new chat created)
     // Note: updateChatIdInUrl only updates if different, preventing rerenders
     //////////////////////////////////
-    onFinish: () => {
+    onFinish: ({ messages: finishedMessages }) => {
       // Update URL if this is a new chat (no chatId in URL yet i.e user interacting with a new chat)
       // This happens when user sends first message in a new chat
       if (!urlChatId && chatId) {
@@ -109,6 +119,16 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
       // Trigger sidebar refresh to show new chat
       if (onChatFinish) {
         onChatFinish();
+      }
+
+      if (!user) {
+        savingOrchestrator.saveLocalChat({
+          chatId,
+          title: finishedMessages.find((message) => message.role === 'user')?.parts?.[0]?.type === 'text'
+            ? String((finishedMessages.find((message) => message.role === 'user')?.parts?.[0] as { text?: string }).text || 'New conversation')
+            : 'New conversation',
+          messages: finishedMessages,
+        });
       }
     },
   });
@@ -145,6 +165,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
     setMessages,
     currentChatId: chatId, // Current chatId from useChat (to detect if we're already on this chat)
     hasMessages: messages.length > 0, // Whether messages already exist (to skip fetch if already loaded)
+    setArtifact,
   });
 
   //////////////////////////////////
@@ -234,6 +255,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
           selectedModelId={selectedModelId}
           modelOptions={modelOptions}
           onModelChange={setSelectedModelId}
+          dictationConfig={dictationConfig}
         />
       </div>
 

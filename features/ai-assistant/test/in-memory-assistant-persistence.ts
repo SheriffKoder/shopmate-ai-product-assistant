@@ -7,7 +7,7 @@
  */
 
 import type { UIMessage } from 'ai';
-import type { AssistantPersistence } from '../model/assistant-persistence';
+import type { AssistantPersistence } from '../message-persistence/model/assistant-persistence';
 
 export function createInMemoryAssistantPersistence(): AssistantPersistence {
   const chats = new Set<string>();

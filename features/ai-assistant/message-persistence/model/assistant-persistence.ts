@@ -1,16 +1,8 @@
-/**
- * @file features/ai-assistant/model/assistant-persistence.ts
- * Generic assistant persistence contract.
- *
- * Purpose: Keeps the assistant request handler independent from Supabase details.
- * Used in: assistant request handling and the default Supabase adapter.
- */
+/** Generic assistant message-persistence contracts. */
 
 import type { UIMessage } from 'ai';
 
-export interface AssistantChatSession {
-  chatId: string;
-}
+export interface AssistantChatSession { chatId: string; }
 
 export interface AssistantPersistence {
   loadOrCreateChat(args: { chatId?: string; messages: UIMessage[] }): Promise<AssistantChatSession>;
@@ -30,7 +22,6 @@ export interface AssistantHistoryPage {
   nextCursor?: string;
 }
 
-/** Provider-neutral operations required by the history sidebar. */
 export interface AssistantHistoryClient {
   list(args: { cursor?: string; limit?: number }): Promise<AssistantHistoryPage>;
   delete(args: { chatId: string }): Promise<void>;

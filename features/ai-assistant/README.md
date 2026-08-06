@@ -1,6 +1,6 @@
 # AI Assistant
 
-The reusable assistant feature. It owns chat transport, streaming, message and artifact presentation, history UI, persistence contracts, and assistant state needed to render a conversation.
+The reusable assistant feature. It owns chat transport, streaming, message and artifact presentation, history UI, message-persistence contracts, and assistant state needed to render a conversation.
 
 It does not own products, carts, business rules, agents, business prompts, or a database provider.
 
@@ -47,7 +47,10 @@ features/ai-assistant/
 ├── hooks/                  # Assistant-only interaction hooks.
 ├── integration/            # Factories for composing generic assistant config.
 ├── lib/                    # Pure assistant utilities, logging, and errors.
-├── model/                  # Contracts: runtime, persistence, events, documents, endpoints.
+├── message-persistence/    # Message persistence contracts and server adapters.
+│   ├── model/              # Persistence and history contracts.
+│   └── server/             # Server-side persistence implementations.
+├── model/                  # Contracts: runtime, events, documents, and endpoints.
 ├── navigation/             # Link/router helpers that preserve assistant URL state.
 ├── providers/              # React providers for stream and fullscreen state.
 ├── server/                 # Request parsing and assistant stream orchestration.
@@ -66,7 +69,7 @@ application/views
       → shared types/utilities
 ```
 
-`features/ai-assistant` must never import `features/shop-assistant`, catalog/cart entities, or a concrete Supabase/Prisma/Drizzle client. Database adapters belong under application infrastructure and are injected at the route boundary.
+`features/ai-assistant` must never import `features/shop-assistant` or catalog/cart entities. Message persistence is grouped under `message-persistence/`; its server adapter owns the database persistence boundary and is injected at the route boundary. Client UI and generic contracts must remain provider-neutral.
 
 ## Assistant URL state
 
@@ -78,8 +81,9 @@ Only assistant-owned params are preserved. Page params such as product search, f
 
 1. Copy this feature and its generic UI dependencies.
 2. Implement `AssistantRuntime` for the project, or use the default runtime for normal chat.
-3. Implement `AssistantPersistence` only if chat history must be stored.
-4. Implement `AssistantHistoryClient` if the history sidebar is enabled.
-5. Configure the assistant endpoint and persistence routes in `model/api-endpoints.ts`.
-6. Mount `AssistantRootProvider` and `ChatWrapper` from the application shell.
-7. Add business behavior as a separate adapter feature; do not add business imports to this folder.
+3. Implement the contracts in `message-persistence/model/` if chat history must be stored.
+4. Add a server adapter under `message-persistence/server/` for the selected persistence provider.
+5. Implement `AssistantHistoryClient` if the history sidebar is enabled.
+6. Configure the assistant endpoint and persistence routes in `model/api-endpoints.ts`.
+7. Mount `AssistantRootProvider` and `ChatWrapper` from the application shell.
+8. Add business behavior as a separate adapter feature; do not add business imports to this folder.

@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { useUserSession } from './use-user-session';
 
 type ChatRequestBody = Record<string, unknown>;
 
@@ -34,6 +35,7 @@ export function useChatSubmission({
 }: UseChatSubmissionProps): UseChatSubmissionReturn {
   const [input, setInput] = useState('');
   const [clickedSuggestionCard, setClickedSuggestionCard] = useState<any>(null);
+  const { user } = useUserSession();
 
   /**
    * Prepare message body with adapter-provided business context
@@ -46,6 +48,7 @@ export function useChatSubmission({
     return {
       ...businessBody,
       ...(selectedModelId && { modelId: selectedModelId }),
+      persistenceMode: user ? 'database' : 'local',
     };
   };
 

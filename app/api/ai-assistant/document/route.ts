@@ -12,10 +12,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
 import type { Document } from '@/lib/supabase/types';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { getSupabaseTableNames } from '@/shared/config/table-names';
+
+const tableNames = getSupabaseTableNames();
 
 /**
  * GET /api/document?id={documentId}
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
     // Fetch all versions of document (ordered by createdAt ascending)
     // This enables version history - latest version is last in array
     const { data: documents, error } = await supabaseAdmin
-      .from('Document')
+      .from(tableNames.documents)
       .select('*')
       .eq('id', id)
       .order('createdAt', { ascending: true });
@@ -184,7 +187,7 @@ export async function POST(request: NextRequest) {
 
     // Check if document exists to reuse userId (for version history consistency)
     const { data: existingDocs } = await supabaseAdmin
-      .from('Document')
+      .from(tableNames.documents)
       .select('userId')
       .eq('id', id)
       .limit(1);
@@ -213,7 +216,7 @@ export async function POST(request: NextRequest) {
     const timestamp = new Date().toISOString();
     
     const { data: document, error } = await supabaseAdmin
-      .from('Document')
+      .from(tableNames.documents)
       .insert({
         id,
         title,
@@ -285,7 +288,7 @@ export async function DELETE(request: NextRequest) {
 
     // Build delete query
     let deleteQuery = supabaseAdmin
-      .from('Document')
+      .from(tableNames.documents)
       .delete()
       .eq('id', id);
 

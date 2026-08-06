@@ -10,4 +10,4 @@ export type {
   AssistantHistoryClient,
   AssistantHistoryItem,
   AssistantHistoryPage,
-} from './assistant-persistence';
+} from '../message-persistence/model/assistant-persistence';

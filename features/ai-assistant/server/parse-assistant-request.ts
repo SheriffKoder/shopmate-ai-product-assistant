@@ -30,6 +30,8 @@ export interface ParsedAssistantRequest<TBusinessContext = Record<string, unknow
   messages: UIMessage[];
   /** Selected model id from the client, if present. */
   modelId?: string;
+  /** Storage mode selected by the browser session. */
+  persistenceMode: 'local' | 'database';
   /** Top-level non-assistant fields passed to the injected runtime. */
   businessContext: TBusinessContext;
 }
@@ -51,13 +53,14 @@ export async function parseAssistantRequest<TBusinessContext = Record<string, un
   const validatedBody = assistantRequestSchema.parse(body) as AssistantRequestBody;
 
   // 3. Keep assistant-owned fields explicit and pass the rest to the runtime adapter.
-  const { id, messages, modelId, ...businessContext } = validatedBody;
+  const { id, messages, modelId, persistenceMode, ...businessContext } = validatedBody;
 
   // 4. Return a stable shape consumed by the reusable handler.
   return {
     chatId: id,
     messages: messages as UIMessage[],
     modelId,
+    persistenceMode,
     businessContext: businessContext as TBusinessContext,
   };
 }
