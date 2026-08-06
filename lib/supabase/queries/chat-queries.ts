@@ -12,9 +12,12 @@
  * 4. Provides type-safe operations using Chat and Message types
  */
 
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
 import type { Chat, ChatInsert, Message, MessageInsert } from '@/lib/supabase/types';
 import { logger } from '@/features/ai-assistant/lib/logger';
+import { getSupabaseTableNames } from '@/shared/config/table-names';
+
+const tableNames = getSupabaseTableNames();
 
 /**
  * Create a new chat
@@ -90,7 +93,7 @@ export async function createChat({
     // How: Uses Supabase insert with select to return created record
     //////////////////////////////////
     const { data, error } = await supabaseAdmin
-      .from('Chat')
+      .from(tableNames.chats)
       .insert(chatData)
       .select()
       .single();
@@ -173,7 +176,7 @@ export async function getChatById({
     // How: Use eq() to filter by id, single() to get one result
     //////////////////////////////////
     const { data, error } = await supabaseAdmin
-      .from('Chat')
+      .from(tableNames.chats)
       .select('*')
       .eq('id', id.trim())
       .single();
@@ -307,7 +310,7 @@ export async function saveMessages({
     // Note: Multiple messages inserted in single operation (transaction)
     //////////////////////////////////
     const { data, error } = await supabaseAdmin
-      .from('Message')
+      .from(tableNames.messages)
       .insert(messageData)
       .select();
 
@@ -387,7 +390,7 @@ export async function getMessagesByChatId({
     // Note: Order by ascending (oldest first) for chronological conversation
     //////////////////////////////////
     const { data, error } = await supabaseAdmin
-      .from('Message')
+      .from(tableNames.messages)
       .select('*')
       .eq('chatId', chatId.trim())
       .order('createdAt', { ascending: true });
@@ -482,7 +485,7 @@ export async function getChatsByUserId({
     // How: If endingBefore provided, fetch chat first to get its createdAt, then query chats before that date
     //////////////////////////////////
     let query = supabaseAdmin
-      .from('Chat')
+      .from(tableNames.chats)
       .select('*')
       .eq('userId', userId.trim())
       .order('createdAt', { ascending: false })
@@ -491,7 +494,7 @@ export async function getChatsByUserId({
     // If endingBefore is provided, fetch that chat first to get its createdAt
     if (endingBefore) {
       const { data: cursorChat, error: cursorError } = await supabaseAdmin
-        .from('Chat')
+        .from(tableNames.chats)
         .select('createdAt')
         .eq('id', endingBefore.trim())
         .eq('userId', userId.trim())
@@ -596,7 +599,7 @@ export async function deleteChatById({ id }: { id: string }): Promise<boolean> {
     // Note: ON DELETE CASCADE will handle this automatically, but explicit is clearer
     //////////////////////////////////
     const { error: messagesError } = await supabaseAdmin
-      .from('Message')
+      .from(tableNames.messages)
       .delete()
       .eq('chatId', chatId);
 
@@ -615,7 +618,7 @@ export async function deleteChatById({ id }: { id: string }): Promise<boolean> {
     // Note: This will also cascade delete messages if the explicit delete above failed
     //////////////////////////////////
     const { error: chatError, data } = await supabaseAdmin
-      .from('Chat')
+      .from(tableNames.chats)
       .delete()
       .eq('id', chatId)
       .select();

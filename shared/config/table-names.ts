@@ -1,8 +1,8 @@
 /**
  * Table Names
  *
- * Purpose: Builds Supabase table names for the catalog.
- * Used in: repositories.
+ * Purpose: Builds all application Supabase table names.
+ * Used in: Catalog repositories, assistant persistence, and artifact routes.
  * Used for: Keeps the sm_ table prefix configurable without hardcoding table names in data access files.
  */
 
@@ -29,5 +29,20 @@ export function getCatalogTableNames() {
   return {
     categories: getCatalogTableName('categories'),
     products: getCatalogTableName('products'),
+  };
+}
+
+/**
+ * Builds all application table names.
+ *
+ * @returns Prefixed catalog and assistant table names.
+ */
+export function getSupabaseTableNames() {
+  return {
+    ...getCatalogTableNames(),
+    users: getCatalogTableName('users'),
+    chats: getCatalogTableName('chats'),
+    messages: getCatalogTableName('messages'),
+    documents: getCatalogTableName('documents'),
   };
 }

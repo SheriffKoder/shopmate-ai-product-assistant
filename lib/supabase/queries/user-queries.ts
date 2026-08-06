@@ -12,9 +12,13 @@
  * 4. Provides type-safe operations using User types
  */
 
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
 import type { User, UserInsert } from '@/lib/supabase/types';
 import { logger } from '@/features/ai-assistant/lib/logger';
+import { getSupabaseTableNames } from '@/shared/config/table-names';
+import { getAppEnv } from '@/shared/config/env';
+
+const tableNames = getSupabaseTableNames();
 
 /**
  * Create a new user in the database
@@ -74,7 +78,7 @@ export async function createUser({
     // How: Uses Supabase insert with select to return created record
     //////////////////////////////////
     const { data, error } = await supabaseAdmin
-      .from('User')
+      .from(tableNames.users)
       .insert(userData)
       .select()
       .single();
@@ -157,7 +161,7 @@ export async function getUserByEmail({
     // How: Use eq() to filter by email, single() to get one result
     //////////////////////////////////
     const { data, error } = await supabaseAdmin
-      .from('User')
+      .from(tableNames.users)
       .select('*')
       .eq('email', email.trim())
       .single();
@@ -238,7 +242,7 @@ export async function getUserById({
     // How: Use eq() to filter by id, single() to get one result
     //////////////////////////////////
     const { data, error } = await supabaseAdmin
-      .from('User')
+      .from(tableNames.users)
       .select('*')
       .eq('id', id.trim())
       .single();
@@ -278,6 +282,51 @@ export async function getUserById({
 }
 
 /**
+ * Creates or links an application user to a Supabase Auth user.
+ *
+ * @param authUserId - Supabase Auth user UUID.
+ * @param email - Auth user's email address.
+ * @param name - Optional display name.
+ * @returns The linked application user or null when persistence fails.
+ */
+export async function upsertUserForAuthUser({
+  authUserId,
+  email,
+  name,
+}: {
+  authUserId: string;
+  email: string;
+  name?: string | null;
+}): Promise<User | null> {
+  if (!authUserId || !email.trim()) {
+    logger.warn('[upsertUserForAuthUser] Auth user ID and email are required');
+    return null;
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from(tableNames.users)
+    .upsert(
+      {
+        id: authUserId,
+        auth_user_id: authUserId,
+        email: email.trim(),
+        name: name?.trim() || null,
+        updatedAt: new Date().toISOString(),
+      },
+      { onConflict: 'id' },
+    )
+    .select()
+    .single();
+
+  if (error) {
+    logger.error('[upsertUserForAuthUser] Supabase error:', error);
+    return null;
+  }
+
+  return data as User;
+}
+
+/**
  * Get or create a constant user (for demo purposes)
  * 
  * Steps:
@@ -306,7 +355,7 @@ export async function getOrCreateConstantUser(): Promise<User | null> {
   // Why: We use a single user for all operations (simplified system)
   // How: These values are used to identify/create the constant user
   //////////////////////////////////
-  const CONSTANT_USER_EMAIL = 'shopmate-user@example.com';
+  const CONSTANT_USER_EMAIL = getAppEnv().DEV_EMAIL;
   const CONSTANT_USER_NAME = 'ShopMate User';
 
   try {

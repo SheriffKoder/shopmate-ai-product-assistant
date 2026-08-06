@@ -7,11 +7,11 @@
  */
 
 type AppEnvKey =
-  | 'SHADOW_NEXT_PUBLIC_SUPABASE_URL'
-  | 'SHADOW_SUPABASE_SERVICE_ROLE_KEY'
-  | 'SHADOW_DEV_EMAIL'
-  | 'SHADOW_DEV_PASSWORD'
-  | 'SHADOW_SUPABASE_TABLE_PREFIX';
+  | 'NEXT_PUBLIC_SUPABASE_URL'
+  | 'SUPABASE_SERVICE_ROLE_KEY'
+  | 'DEV_EMAIL'
+  | 'DEV_PASSWORD'
+  | 'SUPABASE_TABLE_PREFIX';
 
 type AppEnv = Record<AppEnvKey, string>;
 
@@ -50,11 +50,11 @@ function readOptionalAppEnv(key: AppEnvKey, fallback: string) {
  */
 export function getAppEnv(): AppEnv {
   return {
-    SHADOW_NEXT_PUBLIC_SUPABASE_URL: readRequiredAppEnv('SHADOW_NEXT_PUBLIC_SUPABASE_URL'),
-    SHADOW_SUPABASE_SERVICE_ROLE_KEY: readRequiredAppEnv('SHADOW_SUPABASE_SERVICE_ROLE_KEY'),
-    SHADOW_DEV_EMAIL: readRequiredAppEnv('SHADOW_DEV_EMAIL'),
-    SHADOW_DEV_PASSWORD: readRequiredAppEnv('SHADOW_DEV_PASSWORD'),
-    SHADOW_SUPABASE_TABLE_PREFIX: readOptionalAppEnv('SHADOW_SUPABASE_TABLE_PREFIX', 'sm_'),
+    NEXT_PUBLIC_SUPABASE_URL: readRequiredAppEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    SUPABASE_SERVICE_ROLE_KEY: readRequiredAppEnv('SUPABASE_SERVICE_ROLE_KEY'),
+    DEV_EMAIL: readRequiredAppEnv('DEV_EMAIL'),
+    DEV_PASSWORD: readRequiredAppEnv('DEV_PASSWORD'),
+    SUPABASE_TABLE_PREFIX: readOptionalAppEnv('SUPABASE_TABLE_PREFIX', 'sm_'),
   };
 }
 
@@ -67,8 +67,8 @@ export function getSupabaseServiceEnv() {
   const appEnv = getAppEnv();
 
   return {
-    supabaseUrl: appEnv.SHADOW_NEXT_PUBLIC_SUPABASE_URL,
-    supabaseServiceRoleKey: appEnv.SHADOW_SUPABASE_SERVICE_ROLE_KEY,
+    supabaseUrl: appEnv.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseServiceRoleKey: appEnv.SUPABASE_SERVICE_ROLE_KEY,
   };
 }
 
@@ -78,5 +78,5 @@ export function getSupabaseServiceEnv() {
  * @returns The configured table prefix, defaulting to sm_.
  */
 export function getCatalogTablePrefix() {
-  return getAppEnv().SHADOW_SUPABASE_TABLE_PREFIX;
+  return getAppEnv().SUPABASE_TABLE_PREFIX;
 }

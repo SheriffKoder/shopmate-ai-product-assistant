@@ -3,7 +3,7 @@
  *
  * Purpose: Creates a server-only Supabase service client for the server-first Supabase project.
  * Used in: Future repositories and development seed/revalidation actions.
- * Used for: Isolates catalog database access from the current app Supabase client.
+ * Used for: Provides the canonical server-only database access for all application domains.
  */
 
 import 'server-only';
@@ -28,3 +28,6 @@ export function createSupabaseServiceClient() {
 }
 
 export type SupabaseServiceClient = ReturnType<typeof createSupabaseServiceClient>;
+
+/** Shared service-role client for server-side repositories and routes. */
+export const supabaseAdmin = createSupabaseServiceClient();
