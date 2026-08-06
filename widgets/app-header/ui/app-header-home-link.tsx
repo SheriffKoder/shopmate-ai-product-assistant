@@ -24,7 +24,7 @@ export function AppHeaderHomeLink() {
 
   return (
     <AssistantAwareLink href={`/${locale}`} className="cursor-pointer flex flex-row items-center gap-2 mb-2">
-      <Image src="/images/icon.png" alt="ShopMate AI" width={30} height={30} />
+      <Image src="/images/icon.png" alt="ShopMate AI" width={80} height={40} />
       {/* <span className='text-black text-lg font-bold hidden md:block'>ShopMate AI</span> */}
     </AssistantAwareLink>
   );

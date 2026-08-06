@@ -18,13 +18,11 @@
 'use client';
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Bot } from 'lucide-react';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { AssistantModelOption } from '../model/assistant-model-config';
 
 interface ModelPickerProps {
@@ -52,23 +50,35 @@ export function ModelPicker({
     return null;
   }
 
+  const selectedModel = modelOptions.find(function findSelectedModel(modelOption) {
+    return modelOption.id === selectedModelId;
+  });
+
   return (
-    <Select value={selectedModelId} onValueChange={onModelChange} disabled={disabled}>
-      <SelectTrigger
-        aria-label="Assistant model"
-        size="sm"
-        className="h-9 min-w-[8.75rem] max-w-[10.5rem] shrink-0 border-[#d0d0d0] bg-white px-2 text-xs font-medium text-black shadow-sm hover:bg-[#f7f7f7] focus-visible:ring-2"
-      >
-        <Bot className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
-        <SelectValue placeholder="Model" />
-      </SelectTrigger>
-      <SelectContent align="end" className="z-[200] bg-white text-black">
-        {modelOptions.map((modelOption) => (
-          <SelectItem key={modelOption.id} value={modelOption.id}>
-            {modelOption.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          aria-label="Assistant model"
+          className="h-9 min-w-[8.75rem] max-w-[10.5rem] shrink-0 rounded-md bg-background px-3 text-left font-button text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={disabled}
+          type="button"
+        >
+          {selectedModel?.label ?? 'Model'}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="z-[200] min-w-[10.5rem] rounded-md bg-foreground p-1 text-background">
+        {modelOptions.map(function renderModelOption(modelOption) {
+          return (
+            <DropdownMenuItem
+              className="rounded-md font-button text-xs text-background focus:bg-primary focus:text-foreground"
+              key={modelOption.id}
+              onSelect={function selectModel() { onModelChange(modelOption.id); }}
+            >
+              {modelOption.label}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

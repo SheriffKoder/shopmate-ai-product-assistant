@@ -27,7 +27,7 @@ const PureDocumentHeader = ({
   kind,
   isStreaming,
 }: DocumentHeaderProps) => (
-  <div className="bg-gray-200 flex flex-row items-start justify-between gap-2 rounded-t-2xl border border-b-0 p-4 sm:items-center dark:border-zinc-700 dark:bg-muted">
+  <div className="artifact-header bg-foreground text-background flex flex-row items-start justify-between gap-2 border-b-0 p-4 sm:items-center">
     <div className="flex flex-row items-start gap-3 sm:items-center">
       <div className="text-muted-foreground">
         {isStreaming ? (
@@ -38,7 +38,7 @@ const PureDocumentHeader = ({
           <File size={16} />
         )}
       </div>
-      <div className="-translate-y-1 font-medium sm:translate-y-0">{title}</div>
+      <div className="-translate-y-1 font-semibold sm:translate-y-0">{title}</div>
     </div>
     <div className="w-8" />
   </div>

@@ -34,9 +34,12 @@ export function CartHeaderButton() {
   return (
     <CartHeaderDropdown
       icon={ShoppingCart}
+      label="Cart"
       items={cartItems}
       badgeCount={cart.totalItems}
       className=""
+      inactiveClassName="bg-foreground text-background"
+      activeClassName="bg-primary text-foreground"
       headerTitle="Shopping Cart"
       tooltip="Shopping Cart"
       removeItem={removeItem}

@@ -14,7 +14,7 @@ import { CartDropdownItems } from './cart-dropdown-items';
 import { CartDropdownSummary } from './cart-dropdown-summary';
 import type { CartDropdownProps } from './cart-dropdown.types';
 
-export default function CartHeaderDropdown({ icon: Icon, items, badgeCount, className = '', headerTitle, tooltip, removeItem, decreaseQuantity, increaseQuantity }: CartDropdownProps) {
+export default function CartHeaderDropdown({ icon: Icon, label, items, badgeCount, className = '', activeClassName, inactiveClassName, headerTitle, tooltip, removeItem, decreaseQuantity, increaseQuantity }: CartDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -28,10 +28,10 @@ export default function CartHeaderDropdown({ icon: Icon, items, badgeCount, clas
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <HeaderIconButton icon={Icon} onClick={() => setIsOpen((open) => !open)} badgeCount={badgeCount} className={className} tooltip={tooltip} isActive={isOpen} />
+      <HeaderIconButton icon={Icon} label={label} onClick={() => setIsOpen((open) => !open)} badgeCount={badgeCount} className={className} activeClassName={activeClassName} inactiveClassName={inactiveClassName} tooltip={tooltip} isActive={isOpen} />
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-[320px] bg-[#191919]/20 backdrop-blur-xl rounded-lg border border-white/20 shadow-lg z-50 overflow-hidden">
-          {headerTitle && <div className="px-4 py-3 border-b border-white/10 bg-gradient-to-r from-primary to-secondary"><h3 className="text-sm font-semibold text-white">{headerTitle}</h3></div>}
+        <div className="absolute right-0 top-full z-50 mt-2 w-[320px] overflow-hidden border border-foreground bg-background shadow-lg">
+          {headerTitle && <div className="border-b border-foreground bg-foreground px-4 py-3"><h3 className="text-sm font-semibold text-primary">{headerTitle}</h3></div>}
           <CartDropdownItems items={items} removeItem={removeItem} decreaseQuantity={decreaseQuantity} increaseQuantity={increaseQuantity} />
           <CartDropdownSummary items={items} onClose={() => setIsOpen(false)} />
         </div>

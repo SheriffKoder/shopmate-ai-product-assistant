@@ -62,7 +62,7 @@ export const PromptInput = ({
         onClick={handleSubmit}
         disabled={status === 'streaming' || !input.trim()}
         className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center
-        bg-gradient-to-r from-primary to-secondary hover:opacity-90 cursor-pointer transition-all duration-300 text-white"
+        bg-foreground hover:opacity-90 cursor-pointer transition-all duration-300 text-background"
       >
         {status === 'streaming' ? (
           <Loader2 className="h-4 w-4 animate-spin" />

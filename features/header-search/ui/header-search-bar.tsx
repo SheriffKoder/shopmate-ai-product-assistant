@@ -65,21 +65,20 @@ export const HeaderSearchBar = ({
           value={searchQuery}
           onChange={handleChange}
           placeholder={placeholder}
-          className={`w-full h-full py-2 max-w-md rounded-sm bg-black/10 border-2 border-black/5 text-black/90 
-          placeholder:text-black/50 outline-none focus:bg-black/15 
-          transition-all duration-300 text-sm ${
+          className={`h-10 w-full max-w-md bg-foreground/5 py-2 font-button placeholder:font-button text-sm text-foreground border border-transparent rounded
+          placeholder:text-foreground/50 outline-none transition-colors duration-150 focus:bg-primary/20 focus:border focus:border-foreground/20 ${
             searchQuery.trim() ? 'pl-10 pr-10' : 'pl-10 pr-4'
           }`}
         />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/50" />
+        <Search aria-hidden="true" className="absolute left-3 top-1/2 size-5 -translate-y-1/2 stroke-2 text-foreground" />
         {searchQuery.trim() && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/50 hover:text-black/80 transition-colors"
+            className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-foreground transition-colors hover:text-primary"
             aria-label="Clear search"
           >
-            <X className="w-4 h-4" />
+            <X aria-hidden="true" className="size-5 stroke-2" />
           </button>
         )}
       </div>

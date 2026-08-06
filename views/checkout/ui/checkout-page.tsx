@@ -27,9 +27,6 @@ export function CheckoutPage(props: CheckoutPageProps) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
       <section className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {dictionary.checkout.eyebrow}
-        </p>
         <h1 className="text-3xl font-semibold text-gray-950">{dictionary.checkout.title}</h1>
         <p className="max-w-3xl text-base leading-7 text-muted-foreground">
           {dictionary.checkout.description}

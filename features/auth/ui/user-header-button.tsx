@@ -22,6 +22,8 @@ export function UserHeaderButton() {
     <HeaderIconButton
       icon={User}
       tooltip="User Account"
+      inactiveClassName="bg-background text-foreground"
+      activeClassName="bg-primary text-foreground"
       onClick={() => {
         console.log('User clicked');
       }}

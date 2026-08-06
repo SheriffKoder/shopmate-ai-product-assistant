@@ -24,11 +24,13 @@ export function AssistantToggleButton() {
   return (
     <HeaderIconButton
       icon={MessageCircle}
+      label="Shop Assistant"
       tooltip={isAssistantOpen ? 'Close AI Assistant' : 'Open AI Assistant'}
       onClick={toggleAssistant}
       isActive={isAssistantOpen}
-      inactiveClassName="bg-black text-primary"
-      activeClassName="bg-primary text-black"
+      className="header-assistant-control"
+      inactiveClassName=""
+      activeClassName="[&]:bg-primary [&]:text-foreground"
     />
   );
 }

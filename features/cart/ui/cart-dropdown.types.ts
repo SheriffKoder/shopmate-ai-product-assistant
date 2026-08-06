@@ -13,9 +13,12 @@ export interface CartDropdownItem {
 
 export interface CartDropdownProps {
   icon: LucideIcon;
+  label?: string;
   items: CartDropdownItem[];
   badgeCount?: number;
   className?: string;
+  activeClassName?: string;
+  inactiveClassName?: string;
   headerTitle?: string;
   tooltip?: string;
   removeItem?: (productId: string) => Promise<void>;

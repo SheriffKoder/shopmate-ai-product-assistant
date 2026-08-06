@@ -5,8 +5,10 @@
  * Used for: Keeping business-specific suggestions in the host adapter.
  */
 
+import type { LucideIcon } from 'lucide-react';
+
 export interface SuggestionCard {
-  icon: string;
+  icon: LucideIcon | string;
   backgroundColor: string;
   textColor: string;
   header: string;

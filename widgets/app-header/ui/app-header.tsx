@@ -8,28 +8,30 @@
 
 import { AssistantToggleButton } from '@/features/ai-assistant/ui/assistant-toggle-button';
 import { CartHeaderButton } from '@/features/cart/ui/cart-header-button';
-import { HeaderSearch } from '@/features/header-search/ui/header-search';
+// import { HeaderSearch } from '@/features/header-search/ui/header-search';
 import { HeaderLocaleSwitcher } from '@/features/locale-switcher/ui/header-locale-switcher';
 import { UserHeaderButton } from '@/features/auth/ui/user-header-button';
 import { AppHeaderHomeLink } from '@/widgets/app-header/ui/app-header-home-link';
+import { AppHeaderNavigation } from '@/widgets/app-header/ui/app-header-navigation';
+import { AppHeaderMobileNavigation } from '@/widgets/app-header/ui/app-header-mobile-navigation';
 
 export const AppHeader = () => {
   return (
-    <div className='fixed top-0 left-0 w-full h-[70px] bg-white flex flex-row items-center justify-between px-4 z-50'>
+    <div className="fixed left-0 top-0 z-50 flex h-[70px] w-full flex-row items-center justify-between bg-background px-4">
 
       <AppHeaderHomeLink />
 
-      <div className='flex flex-1 items-center justify-center'>
-        <HeaderSearch />
-      </div>
-      
+      <AppHeaderMobileNavigation />
 
-      <div className='flex flex-row items-center gap-4'>
+      <div className="hidden flex-1 items-center justify-center md:flex">
+        <AppHeaderNavigation />
+      </div>
+
+      <div className="flex flex-row items-center gap-4">
         <HeaderLocaleSwitcher />
         <UserHeaderButton />
         <AssistantToggleButton />
         <CartHeaderButton />
-
       </div>
     </div>
   );

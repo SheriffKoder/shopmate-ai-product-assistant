@@ -17,6 +17,7 @@ export type HomePageData = {
   categories: Category[];
   featuredProducts: Product[];
   latestProducts: Product[];
+  products: Product[];
 };
 
 const HOME_LATEST_PRODUCT_LIMIT = 6;
@@ -49,5 +50,6 @@ export async function getHomePageData(): Promise<HomePageData> {
     categories,
     featuredProducts,
     latestProducts,
+    products,
   };
 }

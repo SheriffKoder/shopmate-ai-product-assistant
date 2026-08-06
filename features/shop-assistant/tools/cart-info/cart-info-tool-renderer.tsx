@@ -138,7 +138,7 @@ export const CartInfoToolRenderer = ({
           {/* Checkout Button */}
           {showCheckout && (
             <Button
-              className="w-full bg-gradient-to-r from-primary to-secondary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-foreground text-background font-semibold py-2 px-4 transition-colors hover:bg-primary hover:text-foreground cursor-pointer"
               onClick={() => {
                 // Handle checkout - can be implemented later
                 console.log('Checkout clicked');

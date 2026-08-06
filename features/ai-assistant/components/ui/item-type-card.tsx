@@ -8,7 +8,6 @@
 
 'use client';
 
-import Image from 'next/image';
 import { SuggestionCard } from '../../config/intro-suggestions';
 
 interface ItemTypeCardProps {
@@ -18,40 +17,27 @@ interface ItemTypeCardProps {
 }
 
 export const ItemTypeCard = ({ card, onClick, isMessage = false }: ItemTypeCardProps) => {
+
   const cardContent = (
     <div
-      className={`flex items-start gap-3 p-4 rounded-lg transition-all duration-200 ${
+      className={`flex h-full gap-3 rounded p-4 transition-all duration-200 ${
+        isMessage ? 'flex-row items-center' : 'flex-col items-start'
+      } ${
         isMessage 
-          ? 'bg-gradient-to-r from-primary to-secondary hover:bg-[#e0e0e0] cursor-pointer text-left' 
-          : 'bg-gradient-to-r from-primary to-secondary hover:bg-[#e0e0e0] cursor-pointer text-left'
+          ? 'bg-gradient-to-r from-primary to-primary hover:bg-[#e0e0e0] text-foreground cursor-pointer text-left' 
+          : 'bg-gradient-to-r from-primary to-primary hover:bg-[#e0e0e0] text-foreground cursor-pointer text-left'
       }`}
       style={{
+        backgroundColor: card.backgroundColor,
         color: card.textColor,
       }}
     >
-      {/* Icon */}
-      {/* <div className="flex-shrink-0 flex items-center justify-center">
-        {card.icon ? (
-          <div 
-            className="w-12 h-12 flex items-center justify-center p-2 rounded-lg"
-            style={{ backgroundColor: card.backgroundColor }}
-          >
-            <Image
-              src={card.icon}
-              alt={card.header}
-              className="h-full w-full object-contain"
-              width={40}
-              height={40}
-            />
-          </div>
-        ) : null}
-        <div className={`icon-placeholder w-8 h-8 rounded-full bg-white/20 ${card.icon ? 'hidden' : ''}`} />
-      </div> */}
+      <card.icon aria-hidden="true" className="mt-0.5 size-4 shrink-0" strokeWidth={2} />
       
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-sm mb-1 text-white">{card.header}</h4>
-        <p className="text-xs opacity-90 text-white/70">{card.description}</p>
+        <h4 className="mb-1 text-sm font-medium opacity-70">{card.header}</h4>
+        {card.description ? <p className="text-xs opacity-90">{card.description}</p> : null}
       </div>
     </div>
   );
@@ -65,10 +51,9 @@ export const ItemTypeCard = ({ card, onClick, isMessage = false }: ItemTypeCardP
   return (
     <button
       onClick={onClick}
-      className="w-full text-left"
+      className="h-full w-full text-left"
     >
       {cardContent}
     </button>
   );
 };
-

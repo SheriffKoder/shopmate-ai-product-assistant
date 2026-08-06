@@ -50,15 +50,15 @@ export function AssistantShellHeader({
       onClick={isFullScreen ? undefined : onToggleCollapsed}
       className={`p-4 font-semibold flex flex-row items-center justify-between gap-2 transition-colors
         ${isFullScreen ? 'cursor-default' : 'cursor-pointer'}
-        ${isCollapsed ? 'bg-gradient-to-r from-primary to-secondary' : 'bg-gradient-to-r from-black to-black'}`}
+        ${isCollapsed ? 'bg-foreground text-background' : 'bg-foreground text-background'}`}
       role="button"
       tabIndex={0}
       aria-label={isCollapsed ? 'Expand chat' : 'Collapse chat'}
       onKeyDown={handleHeaderKeyDown}
     >
       <div className="flex flex-row items-center gap-2">
-        <Image src="/images/icon.png" alt="AI Assistant" width={24} height={24} />
-        <span className="text-white">AI Assistant</span>
+        <Image src="/images/icon.png" alt="AI Assistant" className='p-1 bg-white rounded h-6 w-9' width={52} height={24} />
+        <span className="text-white">Shop Assistant</span>
       </div>
 
       <div className="flex flex-row items-center gap-2">

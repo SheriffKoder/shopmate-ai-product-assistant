@@ -8,11 +8,12 @@
  * Used for: Switches between EN and AR while preserving the current path.
  */
 
-import { useId } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { Languages } from 'lucide-react';
 
 import { APP_LOCALES, type AppLocale } from '@/shared/i18n/config';
 import { buildAppLocaleHref } from '@/features/locale-switcher/lib/build-locale-href';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 type AppLocaleSwitcherProps = {
   locale: AppLocale;
@@ -28,7 +29,6 @@ type AppLocaleSwitcherProps = {
  */
 export function AppLocaleSwitcher(props: AppLocaleSwitcherProps) {
   const { locale, label, localeNames } = props;
-  const selectId = useId();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -48,22 +48,23 @@ export function AppLocaleSwitcher(props: AppLocaleSwitcherProps) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor={selectId} className="text-sm font-medium text-muted-foreground">
-        {label}
-      </label>
-      <select
-        id={selectId}
-        value={locale}
-        onChange={(event) => handleLocaleChange(event.target.value as AppLocale)}
-        className="h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
-      >
-        {APP_LOCALES.map((locale) => (
-          <option key={locale} value={locale}>
-            {localeNames[locale]}
-          </option>
+    <DropdownMenu>
+      <DropdownMenuTrigger aria-label={label} className="header-control gap-2">
+        <Languages aria-hidden="true" className="size-5 stroke-2" />
+        <span>{localeNames[locale]}</span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="border-foreground bg-foreground p-0 text-background shadow-none">
+        {APP_LOCALES.map((nextLocale) => (
+          <DropdownMenuItem
+            key={nextLocale}
+            onSelect={() => handleLocaleChange(nextLocale)}
+            className="px-3 py-2 text-background focus:bg-foreground focus:text-primary data-[selected=true]:text-primary"
+            data-selected={nextLocale === locale}
+          >
+            {localeNames[nextLocale]}
+          </DropdownMenuItem>
         ))}
-      </select>
-    </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

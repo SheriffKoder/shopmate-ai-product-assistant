@@ -58,9 +58,9 @@ export function CheckoutCartPanel(props: CheckoutCartPanelProps) {
 
   return (
     <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="rounded-md border bg-white shadow-sm">
-        <div className="border-b px-5 py-4">
-          <h2 className="text-lg font-semibold text-gray-950">{copy.orderSummary}</h2>
+      <div className="border border-foreground/70 bg-white shadow-sm">
+        <div className="border-b border-foreground/70 bg-foreground px-5 py-4 text-background">
+          <h2 className="text-lg font-semibold">{copy.orderSummary}</h2>
         </div>
         <ul className="divide-y">
           {cart.items.map(function renderCheckoutItem(item) {
@@ -94,7 +94,7 @@ export function CheckoutCartPanel(props: CheckoutCartPanelProps) {
           })}
         </ul>
       </div>
-      <aside className="h-fit rounded-md border bg-white p-5 shadow-sm">
+      <aside className="h-fit border border-foreground/70 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-950">{copy.estimatedTotal}</h2>
         <div className="mt-5 space-y-3 text-sm">
           <div className="flex items-center justify-between text-muted-foreground">

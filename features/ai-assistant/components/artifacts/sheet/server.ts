@@ -25,6 +25,7 @@ import { supabaseAdmin } from '@/app/infrastructure/assistant/supabase/artifact-
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import { writeAssistantStep } from '@/features/ai-assistant/server/assistant-step';
 
 /**
  * Parameters for creating a sheet document
@@ -123,6 +124,12 @@ Use commas as delimiters and newlines for rows.`,
     type: 'data-artifactStatus',
     data: 'complete',
     transient: true,
+  });
+  writeAssistantStep(dataStream, {
+    id: `artifact:${title}`,
+    label: 'Creating artifact',
+    summary: title,
+    status: 'done',
   });
 
   // ✅ PERSISTENCE PHASE: Save to Supabase AFTER streaming completes

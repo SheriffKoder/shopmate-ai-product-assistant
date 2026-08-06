@@ -1,19 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import localFont from 'next/font/local';
+import { Instrument_Serif, Roboto } from 'next/font/google';
 import { LayoutWrapper } from '@/components/layout-wrapper';
 
-// Local Fonts  
-// 1. import, 2. add to body, 3. add to tailwind config
-// 4. use as a className as. font-ogg-reg
-const OggRegular = localFont({
-  src: [
-    {
-      path: '../public/fonts/Ogg-Regular-BF646c18fc465e5.ttf',
-    },
-  ],
-  variable: '--font-ogg-reg'
-})
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-instrument-serif',
+});
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
   title: "ShopMate AI - Your Intelligent Shopping Assistant",
@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${OggRegular.variable} relative min-h-[100vh] cf2`}>
+      <body className={`${instrumentSerif.variable} ${roboto.variable} relative min-h-[100vh]`}>
         <LayoutWrapper>
           {children}
         </LayoutWrapper>

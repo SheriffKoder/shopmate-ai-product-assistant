@@ -34,10 +34,10 @@ export function CartDropdownSummary({ items, onClose }: CartDropdownSummaryProps
         <span className="text-black font-semibold text-lg">Total:</span>
         <span className="text-black font-bold text-xl">${totalPrice.toFixed(2)}</span>
       </div>
-      <Button className="cursor-pointer w-full bg-gradient-to-r from-primary to-secondary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors" onClick={goToCheckout}>
+      <Button className="cursor-pointer w-full bg-foreground text-background font-semibold py-2 px-4 transition-colors rounded-none" onClick={goToCheckout}>
         Checkout
       </Button>
-      <Button variant="outline" className="cursor-pointer w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-2 px-4 rounded-lg transition-colors" onClick={goToCart}>
+      <Button variant="outline" className="cursor-pointer w-full border-none border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-2 px-4 transition-colors rounded-none" onClick={goToCart}>
         Keep Shopping
       </Button>
     </div>

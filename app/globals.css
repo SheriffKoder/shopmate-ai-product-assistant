@@ -1,7 +1,6 @@
 /* https://medium.com/@kevstrosky/theme-colors-with-tailwind-css-v4-0-and-next-themes-dark-light-custom-mode-36dca1e20419 */
 
 
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100..900&display=swap');
 @import "tailwindcss";
 
 /* custom variant for dark theme dark:bg-red-500 */
@@ -11,11 +10,11 @@
 
 /* define colors for different theme names */
 @theme {
-  --color-background: #ffffff;
+  --color-background: #ebe8e8;
   --color-foreground: #000000;
-  --color-primary: #ED62FF;
-  --color-secondary: #9479FF;
-  --color-tertiary: #8b5cf6;
+  --color-primary: #d7cdc3;
+  --color-secondary: #e3e2de;
+  --color-tertiary: #5a5a58;
   /* --color-orange-500: #ff7a00; */
 
   --color-custom-gray-1: #F1F0F0; /* card, button background */
@@ -31,39 +30,61 @@
 
   --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
   --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
-  /* --font-display: 'Raleway', sans-serif; */
+  --font-sans: var(--font-instrument-serif), serif;
+}
 
-  
+@layer utilities {
+  .font-button {
+    font-family: var(--font-roboto), sans-serif;
+  }
+
+  .font-button::placeholder {
+    font-family: var(--font-roboto), sans-serif;
+  }
 }
 
 /* custom bg-background, foreground, primary, secondary, tertiary etc.. */
 @layer base {
   [data-theme="light"] {
-    --color-background: #b1b1b1;
+    --color-background: #ebe8e8;
     --color-foreground: #000000;
-    --color-primary: #3b82f6;
-    --color-secondary: #10b981;
-    --color-tertiary: #8b5cf6;
+    --color-primary: #d7cdc3;
+    --color-secondary: #e3e2de;
+    --color-tertiary: #5a5a58;
   }
   [data-theme="dark"] {
     --color-background: #000000;
     --color-foreground: #ffffff;
-    --color-primary: #4c1472;
-    --color-secondary: #34d399;
-    --color-tertiary: #a78bfa;
+    --color-primary: #DFC3AD;
+    --color-secondary: #e3e2de;
+    --color-tertiary: #5a5a58;
   }
   [data-theme="custom"] {
     --color-background: #14144d;
     --color-foreground: #9b1414;
-    --color-primary: #00ffbf;
-    --color-secondary: #ff00ff;
-    --color-tertiary: #ffff00;
+    --color-primary: #DFC3AD;
+    --color-secondary: #e3e2de;
+    --color-tertiary: #5a5a58;
   }
 }
 
 @layer base {
   body {
-    /* @apply bg-background text-foreground */
+    @apply bg-background text-foreground;
+    font-family: var(--font-instrument-serif), serif;
+  }
+
+  button,
+  input[type='button'],
+  input[type='submit'],
+  input[type='reset'] {
+    font-family: var(--font-roboto), sans-serif;
+  }
+
+  *,
+  *::before,
+  *::after {
+    border-radius: 0;
   }
 }
 
@@ -72,91 +93,43 @@
 
 
 
-.cf1 {
-  @apply font-['font-ogg-reg']
-}
-/* imported font use */
-.cf2 {
-  @apply font-['Raleway']
-}
-
-/* testing border class */
-.tb {
-  /* @apply border border-foreground */
-}
-
-/* smooth css transition  */
-.trans1 {
-  @apply duration-150 ease-linear transition-all
-}
-
-/* put items at center */
-.flex-c-c {
-  @apply flex flex-col items-center justify-center
-}
-
-
-/* /////////////////////////////////////////////////////////////////// */
-/* /////////////////////////////////////////////////////////////////// */
-
-.radius-1 {
-  @apply rounded-lg
-}
-
-.heading1 {
-  @apply text-6xl md:text-8xl xl:text-[7rem] font-medium tracking-tighter
-}
-
-.heading2 {
-  @apply text-5xl md:text-6xl xl:text-[5rem] font-light
-}
-
-.heading3 {
-  @apply text-5xl md:text-6xl xl:text-7xl font-light
-}
-
-.paragraph1 {
-  @apply text-sm md:text-xl font-extralight
-}
-
-.paragraph2 {
-  @apply text-base md:text-base font-extralight
-}
-
-/* used for flow cards */
-.paragraph3 {
-  @apply text-xs md:text-sm text-base
-}
-
-
-.buttonText {
-  @apply text-base md:text-lg font-medium
-}
-
-/* media screen landscape and width less than 900 px and height less than 600 px */
-@media (orientation: landscape) and (max-width: 1024px) and (max-height: 500px) {
-  .Heading1 {
-    @apply text-5xl
+/* Header and shared control styling */
+@layer components {
+  .header-control {
+    @apply inline-flex h-10 items-center justify-center bg-background px-3 text-sm text-foreground transition-colors duration-150 ease-linear;
   }
-  .Heading2 {
-    @apply text-3xl
+
+  .header-control:hover,
+  .header-control:focus-visible {
+    @apply bg-primary;
   }
-  .Heading3 {
-    @apply text-3xl
+
+  .header-icon-control {
+    @apply relative inline-flex h-10 items-center justify-center gap-2 bg-background px-3 text-sm text-foreground transition-colors duration-150 ease-linear rounded;
   }
-  .Paragraph1 {
-    @apply text-sm
+
+  .header-icon-control svg {
+    @apply size-5 stroke-2;
   }
-  .Paragraph2 {
-    @apply text-sm
+
+  .header-assistant-control {
+    @apply inline-flex h-10 items-center justify-center gap-2 bg-foreground px-3 text-primary transition-colors duration-150 ease-linear rounded;
   }
-  .Paragraph3 {
-    @apply text-sm
+
+  .header-assistant-control[data-active='true'],
+  .header-assistant-control:hover,
+  .header-assistant-control:focus-visible {
+    @apply bg-primary text-foreground;
+  }
+
+  .header-assistant-control svg {
+    @apply size-5 stroke-2;
+  }
+
+  .header-cart-badge {
+    @apply absolute -right-1 -top-1 flex size-4 items-center justify-center bg-foreground text-[10px] font-medium leading-none text-primary rounded-full;
   }
 }
-
-/* //////////////////////////////////////////////////////////////////////// */
-
 
 html::-webkit-scrollbar {
   width: 6px;
@@ -168,7 +141,6 @@ html::-webkit-scrollbar-track {
 }
 
 html::-webkit-scrollbar-thumb {
-  /* @apply rounded-lg bg-primary */
 }
 
 /* Shimmer animation for loader text */
@@ -207,4 +179,3 @@ html::-webkit-scrollbar-thumb {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-

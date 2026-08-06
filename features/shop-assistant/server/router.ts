@@ -75,6 +75,14 @@ export async function routeToAgent(
   try {
     logger.classification('query', classification, userQuery);
 
+    // Route structured table requests directly to the artifact-capable
+    // recommendation agent before product classification can treat them as a
+    // simple product-display request.
+    if (/spreadsheet|sheet artifact|table|tabular list|structured list/i.test(userQuery)) {
+      logger.info('Routing structured data request to recommendation artifact agent');
+      return await processRecommendationRequest(request, dataStream);
+    }
+
     if (/price|pricing|cost|trend|historical|past years|price history/i.test(userQuery)) {
       logger.info('Routing to price trend agent');
       return await processPriceTrendRequest({

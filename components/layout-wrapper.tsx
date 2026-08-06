@@ -32,7 +32,7 @@ export const LayoutWrapper = ({ children }: LayoutWrapperProps) => {
       <div className="w-screen min-h-screen flex flex-col text-white overflow-hidden bg-[#f0f0f0]">
       
         <AppHeader />
-        <div className='h-full w-full max-w-7xl mx-auto mt-[70px]'>
+        <div className='h-full w-full mx-auto mt-[70px]'>
 
           {/* Main content */}
           {children}

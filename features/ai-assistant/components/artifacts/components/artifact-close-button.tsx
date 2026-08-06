@@ -40,7 +40,7 @@ function PureArtifactCloseButton() {
     <Button
       variant="outline"
       size="icon"
-      className="absolute top-4 right-4 z-50 h-fit p-2 dark:hover:bg-zinc-700 text-black cursor-pointer bg-background border"
+      className="absolute top-4 right-4 z-50 h-fit p-2 dark:hover:bg-zinc-700 text-black cursor-pointer bg-background"
       onClick={handleClose}
       aria-label="Close artifact panel"
       data-testid="artifact-close-button"

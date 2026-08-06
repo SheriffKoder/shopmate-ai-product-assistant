@@ -1,15 +1,29 @@
 /**
  * Category Nav Widget
  *
- * Purpose: Displays localized category links for server-first catalog pages.
+ * Purpose: Composes the home page category collection.
  * Used in: views/home/ui/home-page.tsx
- * Used for: Lets users navigate from home to category pages without client state.
  */
 
-import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
+import {
+  Camera,
+  Gamepad2,
+  Headphones,
+  Laptop,
+  Monitor,
+  Package,
+  Smartphone,
+  TabletIcon,
+  Tv,
+  Watch,
+  type LucideIcon,
+} from 'lucide-react';
 import type { Category } from '@/entities/category/model/category';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import { CategoryCard } from '@/widgets/category-nav/ui/category-card';
+import { CategoryGrid } from '@/widgets/category-nav/ui/category-grid';
+import { CategoryHeader } from '@/widgets/category-nav/ui/category-header';
 
 type CategoryNavProps = {
   categories: Category[];
@@ -17,12 +31,19 @@ type CategoryNavProps = {
   title: string;
 };
 
-/**
- * Renders linked category cards.
- *
- * @param props - Categories, active locale, and localized heading.
- * @returns A server-rendered category navigation section.
- */
+const categoryIcons: Record<string, LucideIcon> = {
+  camera: Camera,
+  gaming: Gamepad2,
+  headphones: Headphones,
+  laptop: Laptop,
+  monitor: Monitor,
+  smartphone: Smartphone,
+  tv: Tv,
+  watch: Watch,
+  smartwatch: Watch,
+  tablet: TabletIcon,
+};
+
 export function CategoryNav(props: CategoryNavProps) {
   const { categories, locale, title } = props;
 
@@ -31,33 +52,23 @@ export function CategoryNav(props: CategoryNavProps) {
   }
 
   return (
-    <section aria-labelledby="home-categories" className="space-y-4">
-      <h2 id="home-categories" className="text-xl font-semibold text-gray-950">
-        {title}
-      </h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <section aria-labelledby="home-categories" className="flex flex-col gap-2">
+      <CategoryHeader id="home-categories" title={title} />
+      <CategoryGrid>
         {categories.map(function renderCategory(category) {
-          const categoryName = getLocalizedText(category.name, locale);
-          const categoryDescription = category.description
-            ? getLocalizedText(category.description, locale)
-            : null;
+          const name = getLocalizedText(category.name, locale);
+          const Icon = categoryIcons[category.slug.toLowerCase()] ?? Package;
 
           return (
-            <AssistantAwareLink
-              className="rounded-lg border bg-white p-4 shadow-sm transition-colors hover:border-gray-400"
+            <CategoryCard
               href={`/${locale}/categories/${category.slug}`}
+              icon={Icon}
               key={category.id}
-            >
-              <span className="block text-base font-semibold text-gray-950">{categoryName}</span>
-              {categoryDescription ? (
-                <span className="mt-2 line-clamp-2 block text-sm leading-6 text-muted-foreground">
-                  {categoryDescription}
-                </span>
-              ) : null}
-            </AssistantAwareLink>
+              label={name}
+            />
           );
         })}
-      </div>
+      </CategoryGrid>
     </section>
   );
 }

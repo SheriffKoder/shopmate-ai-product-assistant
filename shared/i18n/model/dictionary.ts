@@ -37,6 +37,7 @@ export type AppDictionary = {
     heroAction: string;
     categoriesTitle: string;
     featuredTitle: string;
+    featuredAction: string;
     latestTitle: string;
     emptyState: string;
   };

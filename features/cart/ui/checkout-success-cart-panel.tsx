@@ -46,9 +46,9 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
 
   return (
     <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="rounded-md border bg-white shadow-sm">
-        <div className="border-b px-5 py-4">
-          <h2 className="text-lg font-semibold text-gray-950">{copy.receipt}</h2>
+      <div className="border border-foreground/70 bg-white shadow-sm">
+        <div className="border-b border-foreground/70 bg-foreground px-5 py-4 text-background">
+          <h2 className="text-lg font-semibold">{copy.receipt}</h2>
         </div>
         {cart.items.length > 0 ? (
           <ul className="divide-y">
@@ -75,7 +75,7 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
           </div>
         )}
       </div>
-      <aside className="h-fit rounded-md border bg-white p-5 shadow-sm">
+      <aside className="h-fit border border-foreground/70 bg-white p-5 shadow-sm">
         <dl className="space-y-4 text-sm">
           <div>
             <dt className="text-muted-foreground">{copy.orderNumber}</dt>
@@ -93,7 +93,7 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
             <dt className="text-muted-foreground">{copy.deliveryEstimate}</dt>
             <dd className="mt-1 font-semibold text-gray-950">{order.deliveryEstimate}</dd>
           </div>
-          <div className="border-t pt-4">
+          <div className="border-t border-foreground/70 pt-4">
             <dt className="text-muted-foreground">{copy.totalPaid}</dt>
             <dd className="mt-1 text-xl font-semibold text-gray-950">${cart.totalPrice.toFixed(2)}</dd>
           </div>

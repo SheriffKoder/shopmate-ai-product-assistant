@@ -12,6 +12,7 @@ import { LucideIcon } from 'lucide-react';
 
 interface HeaderIconButtonProps {
   icon: LucideIcon;
+  label?: string;
   onClick?: () => void;
   badgeCount?: number;
   className?: string;
@@ -23,26 +24,28 @@ interface HeaderIconButtonProps {
 
 export const HeaderIconButton = ({
   icon: Icon,
+  label,
   onClick,
   badgeCount,
   className = '',
   tooltip,
   isActive = false,
-  activeClassName = 'bg-black/10 text-primary',
-  inactiveClassName = 'bg-black/10 text-black/90',
+  activeClassName = 'bg-primary text-foreground',
+  inactiveClassName = 'bg-background text-foreground',
 }: HeaderIconButtonProps) => {
   return (
     <button
       type="button"
       onClick={onClick}
       title={tooltip}
-      className={`h-full px-3 py-2 rounded-sm cursor-pointer
-      transition-all duration-300 text-md relative ${className}
+      className={`header-icon-control cursor-pointer
+      ${className}
       ${isActive ? activeClassName : inactiveClassName}`}
     >
-      <Icon className="w-5 h-5 stroke-2" />
+      {label ? <span className="font-button hidden md:block">{label}</span> : null}
+      <Icon aria-hidden="true" />
       {badgeCount !== undefined && badgeCount > 0 && (
-        <span className="absolute top-0 right-0 bg-primary text-white text-[10px] font-medium rounded-full w-4 h-4 flex items-center justify-center">
+        <span className="header-cart-badge bg-primary text-foreground">
           {badgeCount > 9 ? '9+' : badgeCount}
         </span>
       )}

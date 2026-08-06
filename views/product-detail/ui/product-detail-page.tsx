@@ -7,13 +7,16 @@
  */
 
 import Image from 'next/image';
+import { ArrowLeft } from 'lucide-react';
 import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { AppDictionary } from '@/shared/i18n/model/dictionary';
+import type { Product as CartProduct } from '@/features/catalog/model/product';
+import { ProductCartAction } from '@/widgets/product-highlight-cards/ui/product-cart-action';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
 import { getLocalizedList } from '@/views/product-detail/lib/get-localized-list';
 import type { ProductDetailPageData } from '@/views/product-detail/queries/get-product-detail-page-data';
-import { ProductGrid } from '@/widgets/product-grid/ui/product-grid';
+import { ProductHighlightCards } from '@/widgets/product-highlight-cards/ui/product-highlight-cards';
 
 type ProductDetailPageProps = {
   data: ProductDetailPageData;
@@ -41,18 +44,19 @@ export function ProductDetailPage(props: ProductDetailPageProps) {
   const features = getLocalizedList(product.features, locale);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
-      <AssistantAwareLink className="text-sm font-medium text-muted-foreground hover:text-gray-950" href={`/${locale}/products`}>
+    <main className="flex min-h-screen w-full flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
+      <AssistantAwareLink className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-gray-950" href={`/${locale}/products`}>
+        <ArrowLeft aria-hidden="true" className="size-4 stroke-2" />
         {dictionary.productDetail.backToProducts}
       </AssistantAwareLink>
 
-      <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
+      <section className="grid gap-8 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="relative aspect-square overflow-hidden rounded-lg border bg-white">
+          <div className="relative aspect-square overflow-hidden bg-white">
             {product.imageUrl ? (
               <Image
                 alt={productName}
-                className="object-contain p-8"
+                className="object-cover"
                 fill
                 priority
                 sizes="(max-width: 1024px) 92vw, 52vw"
@@ -70,10 +74,10 @@ export function ProductDetailPage(props: ProductDetailPageProps) {
             <div className="grid grid-cols-4 gap-3">
               {product.imageUrlVariations.map(function renderProductImage(imageUrl, index) {
                 return (
-                  <div key={imageUrl} className="relative aspect-square overflow-hidden rounded-lg border bg-white">
+                  <div key={imageUrl} className="relative aspect-square overflow-hidden bg-white">
                     <Image
                       alt={`${productName} ${dictionary.productDetail.viewLabel} ${index + 1}`}
-                      className="object-contain p-3"
+                      className="object-cover"
                       fill
                       sizes="(max-width: 640px) 22vw, 120px"
                       src={imageUrl}
@@ -86,68 +90,56 @@ export function ProductDetailPage(props: ProductDetailPageProps) {
           ) : null}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-              {dictionary.productDetail.eyebrow}
-            </p>
             <h1 className="text-3xl font-semibold text-gray-950 sm:text-4xl">{productName}</h1>
             <p className="text-lg leading-7 text-muted-foreground">{shortDescription}</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 border-y py-5">
-            <p className="text-3xl font-semibold text-gray-950">${product.price.toFixed(2)}</p>
-            <p className="text-sm text-muted-foreground">
-              {dictionary.productDetail.ratingLabel
-                .replace('{rating}', product.rating.toFixed(1))
-                .replace('{count}', String(product.reviewsCount))}
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-gray-950">{dictionary.productDetail.descriptionTitle}</h2>
             <p className="leading-7 text-muted-foreground">{description}</p>
           </div>
 
-          {product.colors.length > 0 ? (
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-gray-950">{dictionary.productDetail.colorsTitle}</h2>
-              <div className="flex flex-wrap gap-2">
-                {product.colors.map(function renderColor(color) {
-                  return (
-                    <span key={color} className="rounded-md border bg-white px-3 py-1 text-sm text-gray-700">
-                      {color}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
+          <div className="divide-y divide-foreground/10">
+            <DetailRow label={dictionary.productDetail.featuresTitle} value={features.join(', ') || '—'} />
+            <DetailRow label={dictionary.productDetail.colorsTitle} value={product.colors.join(', ') || '—'} />
+            <DetailRow label="Ratings" value={product.rating.toFixed(1)} />
+            <DetailRow label="Reviews" value={product.reviewsCount.toLocaleString()} />
+            <DetailRow label="Price" value={`$${product.price.toFixed(2)}`} />
+          </div>
 
-          {features.length > 0 ? (
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-gray-950">{dictionary.productDetail.featuresTitle}</h2>
-              <ul className="space-y-2">
-                {features.map(function renderFeature(feature) {
-                  return (
-                    <li key={feature} className="flex gap-2 text-sm leading-6 text-muted-foreground">
-                      <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-950" />
-                      <span>{feature}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ) : null}
+          <ProductCartAction cartProduct={createCartProduct(product, locale)} name={productName} size="large" />
         </div>
       </section>
 
-      <ProductGrid
-        emptyState={dictionary.productDetail.relatedEmptyState}
-        locale={locale}
-        products={data.relatedProducts}
-        title={dictionary.productDetail.relatedTitle}
-      />
+      <div className="border-t border-foreground/10 pt-8">
+        <ProductHighlightCards locale={locale} products={data.relatedProducts} title={dictionary.productDetail.relatedTitle} />
+      </div>
     </main>
+  );
+}
+
+function createCartProduct(product: ProductDetailPageData['product'] & {}, locale: AppLocale): CartProduct {
+  return {
+    id: product.id,
+    name: getLocalizedText(product.name, locale),
+    category: product.categorySlug,
+    rating: product.rating,
+    shortDescription: getLocalizedText(product.shortDescription, locale),
+    description: getLocalizedText(product.description, locale),
+    price: product.price,
+    reviewsCount: product.reviewsCount,
+    features: product.features[locale],
+    image_url: product.imageUrl,
+    image_url_variations: product.imageUrlVariations,
+    featured: product.isFeatured,
+    keywords: product.keywords,
+    colors: product.colors,
+  };
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid grid-cols-2 gap-4 py-4 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right font-semibold text-foreground">{value}</span>
+    </div>
   );
 }

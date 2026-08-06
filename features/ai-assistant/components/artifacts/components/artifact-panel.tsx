@@ -102,7 +102,7 @@ export function ArtifactPanel({
         {/* Left Side: Chat Messages (50% width) */}
         <motion.div
           animate={{ width: '50%' }}
-          className="flex h-full flex-col border-r bg-background"
+          className="flex h-full flex-col border-r bg-background p-2 pt-4"
           exit={{ width: '100%' }}
           initial={{ width: '100%' }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}

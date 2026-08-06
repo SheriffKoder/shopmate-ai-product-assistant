@@ -26,12 +26,12 @@ export const IntroSuggestions = ({ onSuggestionClick, suggestions = defaultIntro
       {suggestions.map((set: SuggestionSet, setIndex: number) => (
         <div key={setIndex} className="space-y-3">
           {/* Set Header */}
-          <h3 className="text-sm font-semibold text-black/70 uppercase tracking-wide">
+          <h3 className="text-left text-sm font-semibold text-black/70 uppercase tracking-wide">
             {set.header}
           </h3>
           
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {set.cards.map((card, cardIndex: number) => (
               <ItemTypeCard
                 key={cardIndex}
