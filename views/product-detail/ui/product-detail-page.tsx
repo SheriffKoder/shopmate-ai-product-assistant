@@ -61,7 +61,6 @@ export function ProductDetailPage(props: ProductDetailPageProps) {
                 priority
                 sizes="(max-width: 1024px) 92vw, 52vw"
                 src={product.imageUrl}
-                unoptimized
               />
             ) : (
               <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
@@ -81,7 +80,6 @@ export function ProductDetailPage(props: ProductDetailPageProps) {
                       fill
                       sizes="(max-width: 640px) 22vw, 120px"
                       src={imageUrl}
-                      unoptimized
                     />
                   </div>
                 );

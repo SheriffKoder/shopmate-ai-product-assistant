@@ -61,11 +61,11 @@ export function FeaturedProductMedia({ priority = false, product, sizes }: Featu
           onError={function handleVideoError() { setVideoAvailable(false); }}
           playsInline
           poster={imageSrc}
-          preload="metadata"
+          preload="none"
           src={videoSrc}
         />
       ) : (
-        <Image alt={product.name.en} className="object-cover" fill priority={priority} sizes={sizes} src={imageSrc} unoptimized />
+        <Image alt={product.name.en} className="object-cover" fill priority={priority} sizes={sizes} src={imageSrc} />
       )}
       {videoSrc && videoAvailable ? (
         <button

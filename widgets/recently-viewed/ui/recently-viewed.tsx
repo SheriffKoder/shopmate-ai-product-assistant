@@ -6,7 +6,9 @@
  * Used for: Providing a lightweight closing discovery row until view history is available.
  */
 
+import Image from 'next/image';
 import type { Product } from '@/entities/product/model/product';
+import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
 
@@ -38,11 +40,25 @@ export function RecentlyViewed({ locale, products }: RecentlyViewedProps) {
           }
 
           return (
-            <article key={product.id} className="w-28 shrink-0 space-y-3 sm:w-32">
-              <img alt={name} className="block aspect-square h-auto w-full object-cover" src={imageUrl} />
+            <article key={product.id} className="w-28 shrink-0 sm:w-32">
+              <AssistantAwareLink
+                aria-label={`View ${name}`}
+                className="block space-y-3 cursor-pointer hover:opacity-80"
+                href={`/${locale}/products/${product.slug}`}
+              >
+                <Image
+                  alt={name}
+                  className="block aspect-square h-auto w-full object-cover"
+                  height={128}
+                  loading="lazy"
+                  sizes="(max-width: 640px) 112px, 128px"
+                  src={imageUrl}
+                  width={128}
+                />
               <p className="line-clamp-2 text-center font-button text-xs font-medium text-foreground">
                 {name}
               </p>
+              </AssistantAwareLink>
             </article>
           );
         })}

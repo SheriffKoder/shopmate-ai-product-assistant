@@ -23,7 +23,7 @@ export function FeaturedProductsMobile(props: Props) {
               onClick={function handleClick() { onSelect(product.id); }}
               type="button"
             >
-              {product.imageUrl ? <Image alt={getLocalizedText(product.name, locale)} className="object-cover" fill sizes="80px" src={product.imageUrl} unoptimized /> : null}
+              {product.imageUrl ? <Image alt={getLocalizedText(product.name, locale)} className="object-cover" fill loading="lazy" sizes="80px" src={product.imageUrl} /> : null}
             </button>
           );
         })}

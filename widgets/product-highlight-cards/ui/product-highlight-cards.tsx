@@ -7,6 +7,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { Star } from 'lucide-react';
 
 import type { Product as EntityProduct } from '@/entities/product/model/product';
@@ -65,13 +66,26 @@ function ProductHighlightCard({ locale, product }: ProductHighlightCardProps) {
   return (
     <article className="relative h-fit self-start overflow-hidden">
       <div className="relative">
-        {gallery[0] ? 
-        <AssistantAwareLink href={`/${locale}/products/${product.slug}`}>
-        <img alt={name} className="block h-auto w-full object-cover" src={gallery[0]} />
-        </AssistantAwareLink> : null}
+        {gallery[0] ? (
+        <AssistantAwareLink
+          className="block cursor-pointer"
+          href={`/${locale}/products/${product.slug}`}
+        >
+        <div className="relative w-full">
+          <Image
+            alt={name}
+            className="block h-auto w-full object-cover"
+            height={0}
+            loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            src={gallery[0]}
+            style={{ height: 'auto', width: '100%' }}
+            width={0}
+          />
+        </div>
 
-      <div className="absolute h-[30%] left-0 right-0 bottom-0 bg-gradient-to-t from-foreground via-foreground to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 px-4 pb-4 pt-24 text-background sm:px-5 sm:pb-5">
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-foreground via-foreground to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-4 pt-24 text-background sm:px-5 sm:pb-5">
         <h3 className="text-xl">{name}</h3>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -101,6 +115,8 @@ function ProductHighlightCard({ locale, product }: ProductHighlightCardProps) {
         </p>
 
       </div>
+        </AssistantAwareLink>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 pl-1 pb-4 pt-2 text-background">
