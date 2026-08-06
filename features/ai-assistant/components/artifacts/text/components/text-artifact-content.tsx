@@ -25,6 +25,7 @@ import { useVersionHistoryNavigation } from '../../hooks/version-history-navigat
 import { VersionHistoryHeader } from '../../components/version-history-header';
 import { VersionHistoryManagementButtons } from '../../components/version-history-management-buttons';
 import { ArtifactCopyButton } from '../../components/artifact-copy-button';
+import { ArtifactDownloadButton } from '../../components/artifact-download-button';
 import { EditableContent } from './version-history-editable-content';
 import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-text';
 import { useEffect, useState, useRef } from 'react';
@@ -320,6 +321,11 @@ export function TextArtifactContent() {
               content={displayContent}
               kind={artifact.kind || 'text'}
             />
+            <ArtifactDownloadButton
+              content={displayContent}
+              kind={artifact.kind || 'text'}
+              title={localTitle}
+            />
           </div>
         )}
 
@@ -348,4 +354,3 @@ export function TextArtifactContent() {
     </div>
   );
 }
-

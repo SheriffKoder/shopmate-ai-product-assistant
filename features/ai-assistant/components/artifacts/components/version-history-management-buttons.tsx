@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Undo2, Redo2, Scissors } from 'lucide-react';
 import { useVersionHistoryKeep } from '../hooks/version-history-keep';
 import { logger } from '@/features/ai-assistant/lib/logger';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import type { DocumentKind } from '@/features/ai-assistant/model/artifact-document';
 
 interface VersionHistoryManagementButtonsProps {
@@ -127,11 +127,12 @@ export function VersionHistoryManagementButtons({
       <div className="flex items-center gap-2 flex-shrink-0">
         {/* Undo Button */}
         <Button
+          id="artifact-version-undo"
           variant="outline"
           size="sm"
           onClick={onUndo}
           disabled={!canUndo}
-          className="gap-2"
+          className="gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background"
           aria-label="Undo (previous version)"
           title="Previous version"
         >
@@ -141,11 +142,12 @@ export function VersionHistoryManagementButtons({
 
         {/* Redo Button */}
         <Button
+          id="artifact-version-redo"
           variant="outline"
           size="sm"
           onClick={onRedo}
           disabled={!canRedo}
-          className="gap-2"
+          className="gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background"
           aria-label="Redo (next version)"
           title="Next version"
         >
@@ -156,11 +158,12 @@ export function VersionHistoryManagementButtons({
         {/* Keep Button - Only show if not at latest version */}
         {!isAtLatest && (
           <Button
+            id="artifact-version-keep"
             variant="outline"
             size="sm"
             onClick={handleKeep}
             disabled={isKeeping || !currentVersionTimestamp}
-            className="gap-2"
+            className="gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background"
             aria-label="Keep this version and delete all after it"
             title="Keep this version (delete all versions after this)"
           >

@@ -12,7 +12,7 @@ interface AssistantShellContextValue {
 const AssistantShellContext = createContext<AssistantShellContextValue | undefined>(undefined);
 
 export function AssistantShellProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const value = useMemo(() => ({
     isOpen,
     openAssistant: function openAssistant() { setIsOpen(true); },

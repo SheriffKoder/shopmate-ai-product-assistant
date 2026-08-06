@@ -17,7 +17,7 @@
 
 import { handleAssistantRequest } from '@/features/ai-assistant/server/handle-assistant-request';
 import { shopAssistantRuntime } from '@/features/shop-assistant/server/shop-assistant-runtime';
-import { assistantChatPersistence } from '@/app/infrastructure/assistant/supabase/assistant-persistence';
+import { assistantChatPersistence } from '@/features/ai-assistant/message-persistence/server/supabase-assistant-persistence';
 
 // Allow streaming responses up to 30 seconds.
 export const maxDuration = 30;

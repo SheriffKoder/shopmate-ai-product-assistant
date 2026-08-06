@@ -148,12 +148,12 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 ### Step 1.3: Create Database Types
 
-**File**: `lib/supabase/types.ts`
+**File**: `shared/infrastructure/supabase/types.ts`
 
 **Purpose**: TypeScript types for document table and related operations
 
 **Files Created**:
-- `lib/supabase/types.ts` - Complete type definitions
+- `shared/infrastructure/supabase/types.ts` - Complete type definitions
 
 **Types Included**:
 - `DocumentKind` - Artifact type union ('text' | 'code' | 'sheet')
@@ -538,8 +538,10 @@ const documentData = {
    const result = streamText({
      tools: dataStream ? {
        createDocument: createDocumentTool(
-         dataStream, 
-         () => sharedDocumentId, 
+         dataStream,
+
+         () => sharedDocumentId,
+
          (id: string) => { sharedDocumentId = id; }
        ),
      } : undefined,
@@ -551,15 +553,18 @@ const documentData = {
          sharedDocumentId = generateUUID();
          logger.warn('[Agent] Shared documentId was not set by tool, generated fallback');
        }
-       
+
+
        const documentId = sharedDocumentId;
-       
+
+
        await createTextDocument({
          title,
          dataStream,
          documentId, // Use synced documentId for Supabase persistence
        });
-       
+
+
        // Reset shared ID for next tool call
        sharedDocumentId = null;
      }
@@ -628,7 +633,8 @@ export function DocumentPreview({
   args,
 }: DocumentPreviewProps) {
   const { artifact, setArtifact } = useArtifact();
-  
+
+
   // ✅ Fetch document from Supabase when result.id is available
   // Note: Only fetches when NOT streaming (for performance)
   const { document: fetchedDocument, isLoading: isFetching } = useDocument(

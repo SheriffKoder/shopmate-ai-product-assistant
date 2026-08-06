@@ -12,7 +12,7 @@ import { useArtifact } from '../hooks/use-artifact';
 import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-text';
 import { Table } from '../sheet/components/table-non-edit';
 import { ChartRenderer } from '../chart/components/chart-renderer';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface DocumentContentProps {
   document: {
@@ -32,7 +32,7 @@ export function DocumentContent({ document }: DocumentContentProps) {
   const { artifact } = useArtifact();
 
   const containerClassName = cn(
-    'h-[257px] rounded-b-2xl border border-t-0 dark:border-zinc-700 dark:bg-muted',
+    'h-[257px] artifact-content border border-foreground/20 border-t-0',
     {
       'p-4 sm:px-14 sm:py-16': document.kind === 'text',
       'p-0': document.kind === 'code' || document.kind === 'sheet' || document.kind === 'chart',

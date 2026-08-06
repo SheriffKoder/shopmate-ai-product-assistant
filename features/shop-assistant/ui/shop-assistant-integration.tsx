@@ -39,6 +39,18 @@ export function ShopAssistantDataStreamHandler() {
       case 'data-artifactClear':
         setArtifact((current) => ({ ...current, content: '' }));
         break;
+      case 'data-artifactContent':
+        if (part.data && typeof part.data === 'object' && 'content' in part.data) {
+          setArtifact((current) => ({
+            ...current,
+            content: String((part.data as { content: unknown }).content),
+          }));
+        }
+        break;
+      case 'data-textDelta':
+      case 'data-sheetDelta':
+        setArtifact((current) => ({ ...current, content: `${current.content}${String(part.data)}` }));
+        break;
       case 'data-chartDelta':
         setArtifact((current) => ({ ...current, content: String(part.data) }));
         break;

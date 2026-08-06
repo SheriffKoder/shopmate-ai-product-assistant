@@ -1,7 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useAssistantAwareRouter } from '@/features/ai-assistant/navigation';
+import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
 import type { CartDropdownItem } from './cart-dropdown.types';
 
 interface CartDropdownSummaryProps {
@@ -10,18 +12,19 @@ interface CartDropdownSummaryProps {
 }
 
 export function CartDropdownSummary({ items, onClose }: CartDropdownSummaryProps) {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
+  const locale = getLocaleFromPathname(usePathname());
   if (items.length === 0) return null;
 
   const totalPrice = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
 
   function goToCheckout() {
-    router.push('/checkout');
+    router.push(`/${locale}/checkout`);
     onClose();
   }
 
   function goToCart() {
-    router.push('/cart');
+    router.push(`/${locale}/products`);
     onClose();
   }
 
@@ -31,11 +34,11 @@ export function CartDropdownSummary({ items, onClose }: CartDropdownSummaryProps
         <span className="text-black font-semibold text-lg">Total:</span>
         <span className="text-black font-bold text-xl">${totalPrice.toFixed(2)}</span>
       </div>
-      <Button className="cursor-pointer w-full bg-gradient-to-r from-primary to-secondary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors" onClick={goToCheckout}>
+      <Button className="cursor-pointer w-full bg-foreground text-background font-semibold py-2 px-4 transition-colors rounded-none" onClick={goToCheckout}>
         Checkout
       </Button>
-      <Button variant="outline" className="cursor-pointer w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-2 px-4 rounded-lg transition-colors" onClick={goToCart}>
-        Go to Cart
+      <Button variant="outline" className="cursor-pointer w-full border-none border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-2 px-4 transition-colors rounded-none" onClick={goToCart}>
+        Keep Shopping
       </Button>
     </div>
   );

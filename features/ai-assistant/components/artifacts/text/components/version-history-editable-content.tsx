@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-text';
 import { Button } from '@/components/ui/button';
 import { Eye, Edit } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface EditableContentProps {
   content: string;

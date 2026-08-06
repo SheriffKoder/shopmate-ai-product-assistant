@@ -15,6 +15,7 @@ import { createSheetDocument } from '@/features/ai-assistant/components/artifact
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -23,6 +24,7 @@ interface TechnicalDiscussionRequest {
   messages: UIMessage[];
   dataStream?: UIMessageStreamWriter<any>;
   models: AssistantResolvedModels;
+  persistenceMode: PersistenceMode;
 }
 
 /**
@@ -33,7 +35,7 @@ interface TechnicalDiscussionRequest {
 export async function processTechnicalDiscussionRequest(
   request: TechnicalDiscussionRequest
 ) {
-  const { messages, dataStream, models } = request;
+  const { messages, dataStream, models, persistenceMode } = request;
 
   // Get system prompt
   const systemPrompt = getTechnicalDiscussionPrompt();
@@ -134,6 +136,7 @@ export async function processTechnicalDiscussionRequest(
               title,
               dataStream,
               documentId, // Use synced documentId for Supabase persistence
+              persistenceMode,
             });
             logger.debug('[Technical Discussion Agent] createTextDocument completed');
           } else if (kind === 'sheet') {
@@ -145,6 +148,7 @@ export async function processTechnicalDiscussionRequest(
               title,
               dataStream,
               documentId, // Use synced documentId for Supabase persistence
+              persistenceMode,
             });
             logger.debug('[Technical Discussion Agent] createSheetDocument completed');
           } else {

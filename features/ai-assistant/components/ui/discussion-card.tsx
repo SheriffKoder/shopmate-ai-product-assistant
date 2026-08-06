@@ -40,7 +40,7 @@ export const DiscussionCard = ({ text, topic, className, sendMessage }: Discussi
       </MarkdownText>
       <Button
         variant="outline"
-        className="mt-3 bg-gradient-to-r from-primary to-secondary hover:bg-[#e0e0e0] cursor-pointer text-left text-white"
+        className="mt-3 bg-primary text-foreground border-none rounded-none font-normal cursor-pointer text-left"
         onClick={handleButtonClick}
       >
         Search {topic}

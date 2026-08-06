@@ -17,7 +17,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { parse, unparse } from 'papaparse';
 import type { DocumentKind } from '@/features/ai-assistant/model/artifact-document';
 
@@ -129,11 +129,12 @@ export function ArtifactCopyButton({
 
   return (
     <Button
+      id={`artifact-copy-${kind}`}
       variant={variant}
       size={size}
       onClick={handleCopy}
       disabled={!content || !content.trim()}
-      className={cn('gap-2', className)}
+      className={cn('gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background', className)}
       aria-label={`Copy ${kind} content to clipboard`}
       title={`Copy ${kind} content`}
     >

@@ -11,7 +11,7 @@
 import { ShopAssistantDataStreamHandler, ShopAssistantIntegration } from '@/features/shop-assistant/ui/shop-assistant-integration';
 import ToastContainer from '@/shared/toast-success/toast-container';
 import { ToastPosition, ToastStacking } from '@/shared/toast-success/toast';
-import { MainHeader } from './main-header/main-header';
+import { AppHeader } from '@/widgets/app-header/ui/app-header';
 import Footer from './footer';
 import { AssistantRootProvider } from '@/features/ai-assistant/providers/assistant-root-provider';
 
@@ -31,8 +31,8 @@ export const LayoutWrapper = ({ children }: LayoutWrapperProps) => {
       
       <div className="w-screen min-h-screen flex flex-col text-white overflow-hidden bg-[#f0f0f0]">
       
-        <MainHeader />
-        <div className='h-full w-full max-w-7xl mx-auto mt-[70px]'>
+        <AppHeader />
+        <div className='h-full w-full mx-auto mt-[70px]'>
 
           {/* Main content */}
           {children}

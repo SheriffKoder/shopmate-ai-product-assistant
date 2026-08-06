@@ -8,7 +8,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronDown, ChevronUp, FileClock, FileXCorner, Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 interface AssistantShellHeaderProps {
   isCollapsed: boolean;
@@ -50,36 +50,42 @@ export function AssistantShellHeader({
       onClick={isFullScreen ? undefined : onToggleCollapsed}
       className={`p-4 font-semibold flex flex-row items-center justify-between gap-2 transition-colors
         ${isFullScreen ? 'cursor-default' : 'cursor-pointer'}
-        ${isCollapsed ? 'bg-gradient-to-r from-primary to-secondary' : 'bg-gradient-to-r from-black to-black'}`}
+        ${isCollapsed ? 'bg-foreground text-background' : 'bg-foreground text-background'}`}
       role="button"
       tabIndex={0}
       aria-label={isCollapsed ? 'Expand chat' : 'Collapse chat'}
       onKeyDown={handleHeaderKeyDown}
     >
       <div className="flex flex-row items-center gap-2">
-        <Image src="/images/icon.png" alt="AI Assistant" width={24} height={24} />
-        <span className="text-white">AI Assistant</span>
+        <Image src="/images/icon.png" alt="AI Assistant" className='p-1 bg-white rounded h-6 w-12' width={60} height={24} />
+        <span className="text-white">Shop Assistant</span>
       </div>
 
       <div className="flex flex-row items-center gap-2">
         <button
+          id="assistant-sidebar-toggle"
           type="button"
           onClick={handleSidebarClick}
-          className="p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+          className={`p-1 rounded bg-foreground text-background hover:bg-foreground/90 cursor-pointer ${
+            isCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100 delay-200'
+          }`}
+          aria-hidden={isCollapsed}
           aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          tabIndex={isCollapsed ? -1 : 0}
           title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
-          {isSidebarOpen ? <FileXCorner className="w-5 h-5 text-white" /> : <FileClock className="w-5 h-5 text-white" />}
+          {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
         </button>
 
         <button
+          id="assistant-fullscreen-toggle"
           type="button"
           onClick={handleFullscreenClick}
-          className="p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+          className="p-1 rounded bg-foreground text-background hover:bg-foreground/90 transition-colors cursor-pointer"
           aria-label={isFullScreen ? 'Exit compact mode' : 'Enter full screen'}
           title={isFullScreen ? 'Exit compact mode' : 'Enter full screen'}
         >
-          {isFullScreen ? <Minimize2 className="w-5 h-5 text-white" /> : <Maximize2 className="w-5 h-5 text-white" />}
+          {isFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
         </button>
 
         {!isFullScreen && (

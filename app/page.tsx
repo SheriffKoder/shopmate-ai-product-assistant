@@ -1,14 +1,16 @@
 /**
- * Home Page
- * 
- * Purpose: Main entry point for the home page
- * Used in: Next.js routing
- * Why: Simple wrapper for the Home component
+ * Root Locale Fallback
+ *
+ * Purpose: Redirects bare root visits to the default localized storefront.
+ * Used in: Next.js routing at /
+ * Used for: Keeps direct route rendering aligned with the proxy locale redirect.
  */
 
-import { Home } from '@/views/home/index';
+import { redirect } from 'next/navigation';
 
-export default function HomePage() {
-    return <Home />;
+/**
+ * Redirects to the default English storefront when proxy is not involved.
+ */
+export default function RootPage() {
+  redirect('/en');
 }
-

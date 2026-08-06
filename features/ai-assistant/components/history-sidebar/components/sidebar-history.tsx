@@ -15,6 +15,8 @@ import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
 import { assistantHttpHistoryClient } from '@/features/ai-assistant/client/assistant-history-client';
 import { getChatHistoryPaginationKey, groupChatsByDate, useCurrentChatId, useClearChat, type ChatHistory } from '../utils';
 import { ChatItem } from './chat-item';
+import { MessageSavingOrchestrator } from '@/features/ai-assistant/message-persistence/saving-orchestrator';
+import { useMessagePersistenceSync } from '@/features/ai-assistant/message-persistence/hooks/use-message-persistence-sync';
 
 /**
  * Fetcher function for SWR
@@ -49,6 +51,11 @@ interface SidebarHistoryProps {
 
 export function SidebarHistory({ refreshTrigger, triggerRefresh }: SidebarHistoryProps) {
   const { user } = useUserSession();
+  const savingOrchestrator = new MessageSavingOrchestrator(user ? 'database' : 'local');
+  const localChats = savingOrchestrator.getLocalChats();
+  const { isMerging } = useMessagePersistenceSync(() => {
+    void mutate();
+  });
   // Get current chatId from URL search params
   const currentChatId = useCurrentChatId();
   // Hook to clear chat selection (start new chat)
@@ -129,16 +136,20 @@ export function SidebarHistory({ refreshTrigger, triggerRefresh }: SidebarHistor
   // Compute States: Determine UI states
   // Why: Need to show appropriate UI (loading, empty, has more, etc.)
   //////////////////////////////////
-  const hasReachedEnd = paginatedChatHistories
-    ? paginatedChatHistories.some((page) => page.hasMore === false)
-    : false;
+  const hasReachedEnd = user
+    ? paginatedChatHistories?.some((page) => page.hasMore === false) ?? false
+    : true;
 
-  const hasEmptyChatHistory = paginatedChatHistories
+  const hasEmptyChatHistory = !user
+    ? localChats.length === 0
+    : paginatedChatHistories
     ? paginatedChatHistories.every((page) => page.chats.length === 0)
     : true;
 
   // Flatten all chats from all pages
-  const allChats = paginatedChatHistories
+  const allChats = !user
+    ? localChats
+    : paginatedChatHistories
     ? paginatedChatHistories.flatMap((page) => page.chats)
     : [];
 
@@ -184,22 +195,6 @@ export function SidebarHistory({ refreshTrigger, triggerRefresh }: SidebarHistor
               />
             </div>
           ))}
-        </div>
-      </div>
-    );
-  }
-
-  //////////////////////////////////
-  // No User State: Show message if user not loaded
-  //////////////////////////////////
-  if (!user) {
-    return (
-      <div className="flex flex-col gap-4 p-4">
-        <div className="flex flex-row items-center justify-between px-2 pb-2 border-b border-gray-200 dark:border-gray-800">
-          <h3 className="text-sm font-semibold text-foreground">Chat History</h3>
-        </div>
-        <div className="flex w-full flex-row items-center justify-center gap-2 px-4 py-8 text-sm text-foreground/60">
-          Login to save and revisit previous chats!
         </div>
       </div>
     );

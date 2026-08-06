@@ -25,8 +25,8 @@ export const EmptyState = ({ onSuggestionClick, content, suggestions }: EmptySta
       <div className="w-full space-y-4">
         {content ?? (
           <div className="text-center">
-            <p className="text-lg font-semibold mb-2 text-black">AI Assistant</p>
-            <p className="text-sm text-black/70">How can I help?</p>
+            <p className="text-sm font-semibold mb-2 text-black">AI Assistant</p>
+            <p className="text-xl text-black/70">Ask about products, orders, or your cart.</p>
           </div>
         )}
         <IntroSuggestions onSuggestionClick={onSuggestionClick} suggestions={suggestions} />

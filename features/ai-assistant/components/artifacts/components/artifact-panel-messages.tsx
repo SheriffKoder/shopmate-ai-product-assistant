@@ -13,6 +13,7 @@ import { MessageList } from '@/features/ai-assistant/components/message-list';
 import { PromptInput } from '@/features/ai-assistant/components/prompt-input';
 import { useAssistantModelSelection } from '@/features/ai-assistant/hooks/use-assistant-model-selection';
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
+import { getDictationConfig } from '@/features/ai-assistant/dictation/model/dictation-config';
 
 interface ArtifactMessagesProps {
   chatId: string;
@@ -52,6 +53,9 @@ export function ArtifactMessages({
     dispatchCartAction,
   };
   const { selectedModelId, modelOptions, setSelectedModelId } = useAssistantModelSelection();
+
+  // Dictation integration: reuses the isolated browser provider in the artifact prompt surface.
+  const dictationConfig = getDictationConfig();
 
   return (
     <div
@@ -95,6 +99,7 @@ export function ArtifactMessages({
           selectedModelId={selectedModelId}
           modelOptions={modelOptions}
           onModelChange={setSelectedModelId}
+          dictationConfig={dictationConfig}
         />
       </div>
     </div>

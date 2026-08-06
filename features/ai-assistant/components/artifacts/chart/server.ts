@@ -21,9 +21,13 @@ import { streamObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { getSupabaseTableNames } from '@/shared/config/table-names';
+import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
+
+const tableNames = getSupabaseTableNames();
 
 /**
  * Parameters for creating a chart document
@@ -35,6 +39,7 @@ interface CreateChartDocumentParams {
   dataStream: UIMessageStreamWriter<any>;
   /** Document ID (optional, will be generated if not provided) */
   documentId?: string;
+  persistenceMode?: PersistenceMode;
   /** Dashboard data context (optional, for dashboard-related queries) */
   dashboardData?: any[];
 }
@@ -66,6 +71,7 @@ export async function createChartDocument({
   title,
   dataStream,
   documentId,
+  persistenceMode = 'database',
   dashboardData,
 }: CreateChartDocumentParams): Promise<string> {
   logger.debug('[Chart Artifact] createChartDocument called', {
@@ -330,6 +336,10 @@ CRITICAL INSTRUCTIONS:
     data: 'complete',
     transient: true,
   });
+  dataStream.write({
+    type: 'data-artifactContent',
+    data: { documentId, title, kind: 'chart', content: fullContent },
+  });
   
   logger.debug('[Chart Artifact] Completion status sent', {
     timestamp: new Date().toISOString(),
@@ -345,7 +355,7 @@ CRITICAL INSTRUCTIONS:
     fullContentPreview: fullContent.substring(0, 100),
   });
 
-  if (documentId) {
+  if (documentId && persistenceMode === 'database') {
     // Validate fullContent before saving
     if (!fullContent || fullContent.trim().length === 0) {
       logger.error('[Chart Artifact] Cannot save: fullContent is empty', {
@@ -385,7 +395,7 @@ CRITICAL INSTRUCTIONS:
       });
 
       const { data, error } = await supabaseAdmin
-        .from('Document')
+        .from(tableNames.documents)
         .insert(documentData as any)
         .select();
 

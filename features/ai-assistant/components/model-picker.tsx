@@ -7,24 +7,17 @@
  * Used for: Letting users switch between configured assistant models beside the input.
  *
  * Function Index:
- * ModelPicker: Keyboard-accessible select control for allowed assistant models.
+ * ModelPicker: Keyboard-accessible custom dropdown for allowed assistant models.
  *
  * Steps:
  * 1. Render nothing when only one model is configured.
- * 2. Display allowed model options in a visible Radix select.
+ * 2. Display allowed model options in a custom dropdown that always opens upward.
  * 3. Notify the parent hook when the user picks a model.
  */
 
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Bot } from 'lucide-react';
+import { CustomDropdown } from '@/shared/ui/custom-dropdown';
 import type { AssistantModelOption } from '../model/assistant-model-config';
 
 interface ModelPickerProps {
@@ -36,6 +29,8 @@ interface ModelPickerProps {
   onModelChange: (modelId: string) => void;
   /** Whether the picker should be disabled during active generation. */
   disabled?: boolean;
+  /** Class name for the trigger button. */
+  triggerClassName?: string;
 }
 
 /**
@@ -46,29 +41,30 @@ export function ModelPicker({
   modelOptions,
   onModelChange,
   disabled = false,
+  triggerClassName = '',
 }: ModelPickerProps) {
   // 1. Hide the control when there is nothing meaningful to switch.
   if (modelOptions.length <= 1) {
     return null;
   }
 
+  const modelItems = modelOptions.map(function mapModelOption(modelOption) {
+    return {
+      id: modelOption.id,
+      label: modelOption.label,
+    };
+  });
+
   return (
-    <Select value={selectedModelId} onValueChange={onModelChange} disabled={disabled}>
-      <SelectTrigger
-        aria-label="Assistant model"
-        size="sm"
-        className="h-9 min-w-[8.75rem] max-w-[10.5rem] shrink-0 border-[#d0d0d0] bg-white px-2 text-xs font-medium text-black shadow-sm hover:bg-[#f7f7f7] focus-visible:ring-2"
-      >
-        <Bot className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
-        <SelectValue placeholder="Model" />
-      </SelectTrigger>
-      <SelectContent align="end" className="z-[200] bg-white text-black">
-        {modelOptions.map((modelOption) => (
-          <SelectItem key={modelOption.id} value={modelOption.id}>
-            {modelOption.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <CustomDropdown
+      triggerClassName={triggerClassName}
+      ariaLabel="Assistant model"
+      direction="up"
+      disabled={disabled}
+      items={modelItems}
+      onItemSelect={onModelChange}
+      placeholder="Model"
+      selectedItemId={selectedModelId}
+    />
   );
 }

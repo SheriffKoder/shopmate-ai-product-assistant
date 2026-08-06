@@ -17,6 +17,7 @@
  */
 
 import type { UIMessage, UIMessageStreamWriter } from 'ai';
+import type { PersistenceMode } from '../message-persistence/model/persistence-mode';
 
 /**
  * Parsed assistant request passed to runtime implementations.
@@ -32,6 +33,7 @@ export interface AssistantRuntimeRequest<TBusinessContext = Record<string, unkno
   businessContext: TBusinessContext;
   /** Selected model id when the client provides one. */
   modelId?: string;
+  persistenceMode: PersistenceMode;
 }
 
 /**

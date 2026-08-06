@@ -13,7 +13,7 @@ interface CartDropdownItemsProps {
 
 export function CartDropdownItems({ items, removeItem, decreaseQuantity, increaseQuantity }: CartDropdownItemsProps) {
   if (items.length === 0) {
-    return <div className="px-4 py-8 text-center text-white/60 text-sm">Your cart is empty</div>;
+    return <div className="px-4 py-8 text-center text-foreground text-sm">Your cart is empty</div>;
   }
 
   return (

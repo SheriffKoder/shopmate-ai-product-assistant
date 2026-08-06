@@ -21,7 +21,7 @@
 
 import { createUIMessageStream, JsonToSseTransformStream, type UIMessage } from 'ai';
 import type { AssistantRuntime } from '../model/assistant-runtime';
-import type { AssistantPersistence } from '../model/assistant-persistence';
+import type { AssistantPersistence } from '../message-persistence/model/assistant-persistence';
 import { handleApiError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { extractUserQuery, generateUUID } from '../lib/utils';
@@ -64,16 +64,14 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
     const parsedRequest = await parseAssistantRequest<TBusinessContext>(req);
 
     // 2. Resolve chat persistence before streaming so history has a stable parent row.
-    const chat = await persistence.loadOrCreateChat({
-      chatId: parsedRequest.chatId,
-      messages: parsedRequest.messages,
-    });
+    const chat = parsedRequest.persistenceMode === 'database'
+      ? await persistence.loadOrCreateChat({ chatId: parsedRequest.chatId, messages: parsedRequest.messages })
+      : { chatId: parsedRequest.chatId || generateUUID() };
 
     // 3. Persist the latest user message without blocking the runtime boundary with database details.
-    await persistence.saveLatestUserMessage({
-      chatId: chat.chatId,
-      messages: parsedRequest.messages,
-    });
+    if (parsedRequest.persistenceMode === 'database') {
+      await persistence.saveLatestUserMessage({ chatId: chat.chatId, messages: parsedRequest.messages });
+    }
 
     // 4. Extract the routeable user query from the parsed AI SDK messages.
     const userQuery = extractUserQuery(parsedRequest.messages);
@@ -89,6 +87,7 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
       userQuery,
       businessContext: parsedRequest.businessContext,
       modelId: parsedRequest.modelId,
+      persistenceMode: parsedRequest.persistenceMode,
     };
 
     // 6. Create one UI message stream that can merge model output and business tool data.
@@ -135,10 +134,9 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
         );
 
         // 9. Persist assistant messages after streaming so response delivery stays responsive.
-        await persistence.saveAssistantMessages({
-          chatId: chat.chatId,
-          messages: persistedMessages,
-        });
+        if (parsedRequest.persistenceMode === 'database') {
+          await persistence.saveAssistantMessages({ chatId: chat.chatId, messages: persistedMessages });
+        }
 
         // 10. Let the business runtime perform optional finish-time work after core persistence.
         await runtime.onFinish?.({

@@ -15,7 +15,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface AddColumnButtonProps {
   /** Callback when button is clicked */

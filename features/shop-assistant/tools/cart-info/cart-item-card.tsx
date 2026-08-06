@@ -9,9 +9,11 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Package, Plus, Minus, Trash2 } from 'lucide-react';
+import { useAssistantAwareRouter } from '@/features/ai-assistant/navigation';
+import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
 import type { ShopAssistantCommand } from '../../model/shop-assistant-command-handler';
 
 interface CartItemCardProps {
@@ -37,11 +39,12 @@ export const CartItemCard = ({
   productId,
   onCommand,
 }: CartItemCardProps) => {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
+  const locale = getLocaleFromPathname(usePathname());
 
   const handleCardClick = () => {
     if (productId) {
-      router.push(`/products/${productId}`);
+      router.push(`/${locale}/products/${productId}`);
     }
   };
 
@@ -97,9 +100,9 @@ export const CartItemCard = ({
         </div>
 
         {/* Product Info */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 leading-tight tracking-wide">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="text-sm font-medium text-white truncate">{title}</h4>
+            <h4 className="text-sm font-semibold text-white truncate">{title}</h4>
             {badge && (
               <span className="text-[10px] px-2 py-0.5 bg-[#3b82f6]/20 text-white rounded-full flex-shrink-0">
                 {badge}
@@ -107,10 +110,10 @@ export const CartItemCard = ({
             )}
           </div>
           {description && (
-            <p className="text-xs text-white/60 line-clamp-2 mb-1">{description}</p>
+            <p className="font-semibold text-white/60 line-clamp-2 mb-1">{description}</p>
           )}
           {price !== undefined && (
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-white tracking-wider">
               ${(price * (quantity || 1)).toFixed(2)}
               {quantity && quantity > 1 && (
                 <span className="text-xs text-white/60 ml-1">

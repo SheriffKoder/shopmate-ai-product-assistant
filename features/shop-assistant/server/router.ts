@@ -36,6 +36,7 @@ import {
 import { processProductAssistantRequest } from './agents/products-cart/agent';
 import type { QueryClassification } from './agents';
 import { writeAssistantStep } from './assistant-step';
+import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
 
 /**
  * Agent request type - matches what agents expect
@@ -48,6 +49,7 @@ export type AgentRequest = {
   catalogSource: CatalogSource;
   cartSource?: CartSource;
   userQuery: string;
+  persistenceMode: PersistenceMode;
 };
 
 /**
@@ -75,6 +77,14 @@ export async function routeToAgent(
   try {
     logger.classification('query', classification, userQuery);
 
+    // Route structured table requests directly to the artifact-capable
+    // recommendation agent before product classification can treat them as a
+    // simple product-display request.
+    if (/spreadsheet|sheet artifact|table|tabular list|structured list/i.test(userQuery)) {
+      logger.info('Routing structured data request to recommendation artifact agent');
+      return await processRecommendationRequest(request, dataStream);
+    }
+
     if (/price|pricing|cost|trend|historical|past years|price history/i.test(userQuery)) {
       logger.info('Routing to price trend agent');
       return await processPriceTrendRequest({
@@ -101,6 +111,7 @@ export async function routeToAgent(
           messages: request.messages,
           dataStream,
           models: request.models,
+          persistenceMode: request.persistenceMode,
         });
 
       case 'notrelated':

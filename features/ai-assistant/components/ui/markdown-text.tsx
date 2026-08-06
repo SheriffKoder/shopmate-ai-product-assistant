@@ -10,7 +10,7 @@
 // npm install remark-gfm @types/remark-gfm react-markdown
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface MarkdownTextProps {
   children: string;

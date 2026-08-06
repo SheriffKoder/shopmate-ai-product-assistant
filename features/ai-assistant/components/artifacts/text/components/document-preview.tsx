@@ -50,7 +50,9 @@ export function DocumentPreview({
 }: DocumentPreviewProps) {
   // ALL HOOKS MUST BE CALLED FIRST (before any conditional returns)
   const { artifact, setArtifact } = useArtifact();
+  const { setIsFullScreen } = useFullscreen();
   const hitboxRef = useRef<HTMLDivElement>(null);
+  const pendingArtifactRef = useRef(false);
 
   // Track bounding box for animation transitions
   useEffect(() => {
@@ -80,6 +82,41 @@ export function DocumentPreview({
   const { document: fetchedDocument } = useDocument(
     previewDocumentId && artifact.status !== 'streaming' ? previewDocumentId : null
   );
+
+  // Automatically promote a newly completed artifact into the full assistant view.
+  // This keeps the ready document visible without requiring a second click or a prior fullscreen toggle.
+  useEffect(function openCompletedArtifact() {
+    if (args || artifact.status === 'streaming') {
+      pendingArtifactRef.current = true;
+    }
+
+    if (
+      !pendingArtifactRef.current ||
+      !result ||
+      artifact.status !== 'complete' ||
+      artifact.documentId !== result.id ||
+      artifact.isVisible
+    ) {
+      return;
+    }
+
+    const boundingBox = hitboxRef.current?.getBoundingClientRect();
+
+    setIsFullScreen(true);
+    setArtifact((currentArtifact) => ({
+      ...currentArtifact,
+      isVisible: true,
+      boundingBox: boundingBox
+        ? {
+            left: boundingBox.x,
+            top: boundingBox.y,
+            width: boundingBox.width,
+            height: boundingBox.height,
+          }
+        : currentArtifact.boundingBox,
+    }));
+    pendingArtifactRef.current = false;
+  }, [args, artifact.documentId, artifact.isVisible, artifact.status, result, setArtifact, setIsFullScreen]);
 
   // When artifact panel is CLOSED: show preview card
   // Use artifact state ONLY if it matches this preview's document ID
@@ -222,19 +259,17 @@ const PureHitboxLayer = ({
   args?: any;
   setArtifact: any;
 }) => {
-  const { isFullScreen } = useFullscreen();
+  const { setIsFullScreen } = useFullscreen();
   
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault();
       event.stopPropagation();
       
-      // Only open artifact panel if in fullscreen mode
-      if (!isFullScreen) {
-        return;
-      }
-      
       const boundingBox = event.currentTarget.getBoundingClientRect();
+
+      // Promote the assistant before opening the panel so one click works from any shell state.
+      setIsFullScreen(true);
 
       setArtifact((artifact: any) => {
         // Preserve existing artifact state, just make it visible
@@ -255,7 +290,7 @@ const PureHitboxLayer = ({
         return updatedArtifact;
       });
     },
-    [setArtifact, result, args, isFullScreen]
+    [setArtifact, setIsFullScreen, result, args]
   );
 
   return (

@@ -1,26 +1,31 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import localFont from 'next/font/local';
+import { Instrument_Serif, Roboto } from 'next/font/google';
 import { LayoutWrapper } from '@/components/layout-wrapper';
+import { SEO_SITE_DESCRIPTION, SEO_SITE_NAME, SEO_SITE_URL } from '@/shared/seo/config';
 
-// Local Fonts  
-// 1. import, 2. add to body, 3. add to tailwind config
-// 4. use as a className as. font-ogg-reg
-const OggRegular = localFont({
-  src: [
-    {
-      path: '../public/fonts/Ogg-Regular-BF646c18fc465e5.ttf',
-    },
-  ],
-  variable: '--font-ogg-reg'
-})
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-instrument-serif',
+});
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
-  title: "ShopMate AI - Your Intelligent Shopping Assistant",
-  description: "Discover the best electronic products with ShopMate AI. Get personalized product recommendations, compare features, and shop smart with our AI-powered shopping assistant.",
-  keywords: ["electronics", "shopping", "AI assistant", "product recommendations", "online store"],
-  authors: [{ name: "ShopMate AI" }],
-  viewport: "width=device-width, initial-scale=1",
+  metadataBase: new URL(SEO_SITE_URL),
+  title: SEO_SITE_NAME,
+  description: SEO_SITE_DESCRIPTION,
+  authors: [{ name: SEO_SITE_NAME }],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -30,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${OggRegular.variable} relative min-h-[100vh] cf2`}>
+      <body className={`${instrumentSerif.variable} ${roboto.variable} relative min-h-[100vh]`}>
         <LayoutWrapper>
           {children}
         </LayoutWrapper>

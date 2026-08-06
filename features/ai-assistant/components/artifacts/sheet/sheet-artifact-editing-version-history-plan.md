@@ -82,7 +82,7 @@ This plan outlines the implementation of editing functionality for sheet artifac
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { parse, unparse } from 'papaparse';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface EditableTableProps {
   /** CSV string to render */
@@ -97,10 +97,12 @@ interface EditableTableProps {
 
 /**
  * Editable Table Component
- * 
+ *
+
  * Renders CSV data as an editable HTML table.
  * Allows inline cell editing with automatic CSV serialization.
- * 
+ *
+
  * Features:
  * - Click cell to edit
  * - Enter to save, Escape to cancel
@@ -119,7 +121,8 @@ export function EditableTable({
     if (!csvContent || !csvContent.trim()) {
       return [['Column 1', 'Column 2', 'Column 3', 'Column 4']]; // Placeholder headers
     }
-    
+
+
     try {
       const result = parse<string[]>(csvContent, {
         skipEmptyLines: false,
@@ -149,7 +152,8 @@ export function EditableTable({
         header: false,
       });
       const newData = result.data || [];
-      
+
+
       // Only update if data actually changed (avoid overwriting user edits)
       const currentCsv = unparse(tableData);
       if (currentCsv !== csvContent) {
@@ -173,7 +177,8 @@ export function EditableTable({
   // Start editing a cell
   const startEditing = useCallback((row: number, col: number) => {
     if (isReadonly) return;
-    
+
+
     setEditingCell({ row, col });
     setEditValue(tableData[row]?.[col] || '');
   }, [tableData, isReadonly]);
@@ -184,28 +189,33 @@ export function EditableTable({
 
     const { row, col } = editingCell;
     const newData = [...tableData];
-    
+
+
     // Ensure row exists
     if (!newData[row]) {
       newData[row] = [];
     }
-    
+
+
     // Ensure column exists (pad with empty strings if needed)
     const maxCols = Math.max(
       ...newData.map(r => r.length),
       col + 1
     );
-    
+
+
     // Pad all rows to maxCols
     newData.forEach((r, idx) => {
       while (r.length < maxCols) {
         r.push('');
       }
     });
-    
+
+
     // Update cell value
     newData[row][col] = editValue;
-    
+
+
     setTableData(newData);
     setEditingCell(null);
     serializeAndNotify(newData);
@@ -234,12 +244,14 @@ export function EditableTable({
           setTimeout(() => startEditing(row + 1, col), 0);
         }
         break;
-      
+
+
       case 'Escape':
         e.preventDefault();
         cancelEdit();
         break;
-      
+
+
       case 'Tab':
         e.preventDefault();
         saveCell();
@@ -250,7 +262,8 @@ export function EditableTable({
           setTimeout(() => startEditing(row + 1, 0), 0);
         }
         break;
-      
+
+
       case 'ArrowUp':
         e.preventDefault();
         saveCell();
@@ -258,7 +271,8 @@ export function EditableTable({
           setTimeout(() => startEditing(row - 1, col), 0);
         }
         break;
-      
+
+
       case 'ArrowDown':
         e.preventDefault();
         saveCell();
@@ -266,7 +280,8 @@ export function EditableTable({
           setTimeout(() => startEditing(row + 1, col), 0);
         }
         break;
-      
+
+
       case 'ArrowLeft':
         e.preventDefault();
         if (inputRef.current?.selectionStart === 0 && col > 0) {
@@ -274,7 +289,8 @@ export function EditableTable({
           setTimeout(() => startEditing(row, col - 1), 0);
         }
         break;
-      
+
+
       case 'ArrowRight':
         e.preventDefault();
         const input = inputRef.current;
@@ -426,9 +442,11 @@ import { logger } from '@/features/ai-assistant/lib/logger';
 
 /**
  * Sheet Artifact Content Component
- * 
+ *
+
  * Displays the sheet artifact content with table editing support.
- * 
+ *
+
  * Features:
  * - Editable title (via EditableTitle)
  * - Editable table cells (via EditableTable)
@@ -436,7 +454,8 @@ import { logger } from '@/features/ai-assistant/lib/logger';
  * - Version history tracking
  * - Streaming support (editing disabled during streaming)
  * - Smart content priority: streaming > fetched > artifact state
- * 
+ *
+
  * Editing Flow:
  * 1. User edits cell or title
  * 2. Changes trigger debounce timer (5 seconds)
@@ -483,7 +502,8 @@ export function SheetArtifactContent() {
   // Use refs to store latest values to avoid closure stale values
   const latestTitleRef = useRef(localTitle);
   const latestCsvRef = useRef(localCsv);
-  
+
+
   // Keep refs in sync with state
   useEffect(() => {
     latestTitleRef.current = localTitle;
@@ -528,31 +548,37 @@ export function SheetArtifactContent() {
           // Use refs to get the absolute latest values (avoid closure stale values)
           const titleToSave = latestTitleRef.current;
           const csvToSave = latestCsvRef.current;
-          
+
+
           logger.debug('[Sheet Artifact] Saving with values', {
             titleLength: titleToSave.length,
             csvLength: csvToSave.length,
             title: titleToSave,
             csvPreview: csvToSave.substring(0, 100),
           });
-          
+
+
           // Mark that we're saving to prevent sync race condition
           justSavedRef.current = true;
-          
+
+
           await saveVersion({
             documentId,
             title: titleToSave,
             content: csvToSave,
             kind: 'sheet',
           });
-          
+
+
           // Wait for SWR to refetch and update documents array
           await mutateDocuments(undefined, { revalidate: true });
           await new Promise(resolve => setTimeout(resolve, 300)); // Wait for refetch
-          
+
+
           // Reset to latest version
           resetToLatest();
-          
+
+
           // Clear the flag after a delay
           setTimeout(() => {
             justSavedRef.current = false;
@@ -570,7 +596,8 @@ export function SheetArtifactContent() {
     setLocalTitle(newTitle);
     setArtifact((prev) => ({ ...prev, title: newTitle }));
     triggerDebounce();
-    
+
+
     setTimeout(() => {
       isUserEditingRef.current = false;
     }, 500);
@@ -582,7 +609,8 @@ export function SheetArtifactContent() {
     setLocalCsv(newCsv);
     setArtifact((prev) => ({ ...prev, content: newCsv }));
     triggerDebounce();
-    
+
+
     setTimeout(() => {
       isUserEditingRef.current = false;
     }, 500);
@@ -767,12 +795,14 @@ features/ai-assistant/artifacts/
 
 ## Key Design Decisions
 
-1. **Reuse Existing Infrastructure**: 
+1. **Reuse Existing Infrastructure**:
+
    - All version history hooks are reusable
    - EditableTitle component can be reused
    - Only need to create EditableTable component
 
-2. **CSV Format**: 
+2. **CSV Format**:
+
    - Sheets stored as CSV strings in database
    - EditableTable handles CSV ↔ 2D array conversion
    - papaparse for robust parsing/serialization
@@ -784,12 +814,14 @@ features/ai-assistant/artifacts/
    - Escape to cancel
    - Arrow keys for navigation
 
-4. **Debounce Strategy**: 
+4. **Debounce Strategy**:
+
    - Same 5-second delay as text artifacts
    - Triggers on any cell change
    - Timer resets on each edit
 
-5. **Version History**: 
+5. **Version History**:
+
    - Same pattern as text artifacts
    - Same ID, different createdAt
    - Only latest version editable

@@ -20,7 +20,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useDocument } from '../hooks/use-document-swr';
 import { Clock, CheckCircle2, Loader2, Pencil } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface VersionHistoryHeaderProps {
   documentId: string | null;

@@ -21,10 +21,15 @@
 import { streamObject } from 'ai';
 import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
-import { supabaseAdmin } from '@/app/infrastructure/assistant/supabase/artifact-database';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import { writeAssistantStep } from '@/features/ai-assistant/server/assistant-step';
+import { getSupabaseTableNames } from '@/shared/config/table-names';
+import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
+
+const tableNames = getSupabaseTableNames();
 
 /**
  * Parameters for creating a sheet document
@@ -36,6 +41,7 @@ interface CreateSheetDocumentParams {
   dataStream: UIMessageStreamWriter<any>;
   /** Document ID (optional, will be generated if not provided) */
   documentId?: string;
+  persistenceMode?: PersistenceMode;
 }
 
 /**
@@ -62,6 +68,7 @@ export async function createSheetDocument({
   title,
   dataStream,
   documentId,
+  persistenceMode = 'database',
 }: CreateSheetDocumentParams): Promise<string> {
   logger.debug('[Sheet Artifact] createSheetDocument called', {
     title,
@@ -124,11 +131,21 @@ Use commas as delimiters and newlines for rows.`,
     data: 'complete',
     transient: true,
   });
+  dataStream.write({
+    type: 'data-artifactContent',
+    data: { documentId, title, kind: 'sheet', content: fullContent },
+  });
+  writeAssistantStep(dataStream, {
+    id: `artifact:${title}`,
+    label: 'Creating artifact',
+    summary: title,
+    status: 'done',
+  });
 
   // ✅ PERSISTENCE PHASE: Save to Supabase AFTER streaming completes
   // Note: This happens after streaming, so it doesn't block the UI
   // If documentId is provided, use it; otherwise skip saving (will be saved in agent)
-  if (documentId) {
+  if (documentId && persistenceMode === 'database') {
     try {
       logger.info(`[Sheet Artifact] Starting Supabase save operation`, {
         documentId,
@@ -160,7 +177,7 @@ Use commas as delimiters and newlines for rows.`,
       });
 
       const { data, error } = await supabaseAdmin
-        .from('Document')
+        .from(tableNames.documents)
         .insert(documentData)
         .select();
 

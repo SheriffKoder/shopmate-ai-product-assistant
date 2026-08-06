@@ -12,8 +12,9 @@
  * 4. Updates URL without full page navigation
  */
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
+import { useAssistantAwareRouter } from '@/features/ai-assistant/navigation';
 
 /**
  * Get current chatId from URL search params
@@ -42,25 +43,26 @@ export function useCurrentChatId(): string | null {
  * ```typescript
  * const navigateToChat = useNavigateToChat();
  * navigateToChat('abc-123');
- * // URL becomes: /?chatId=abc-123
+ * // URL becomes: /current-page?chatId=abc-123
  * ```
  */
 export function useNavigateToChat() {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   return useCallback(
-    (chatId: string) => {
+    function navigateToChat(chatId: string) {
       // Create new URLSearchParams with current params
       const params = new URLSearchParams(searchParams.toString());
       
       // Set chatId param
       params.set('chatId', chatId);
       
-      // Update URL without scrolling or full navigation
-      router.push(`/?${params.toString()}`, { scroll: false });
+      // Update URL without scrolling or full navigation.
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [pathname, router, searchParams]
   );
 }
 
@@ -77,20 +79,22 @@ export function useNavigateToChat() {
  * ```
  */
 export function useClearChat() {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  return useCallback(() => {
+  return useCallback(function clearChat() {
     // Create new URLSearchParams with current params
     const params = new URLSearchParams(searchParams.toString());
     
     // Remove chatId param
     params.delete('chatId');
     
-    // Update URL
-    const newUrl = params.toString() ? `/?${params.toString()}` : '/';
-    router.push(newUrl, { scroll: false });
-  }, [router, searchParams]);
+    // Update URL while keeping the active page path.
+    const nextHref = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+
+    router.push(nextHref, { preserveAssistantUrlState: false, scroll: false });
+  }, [pathname, router, searchParams]);
 }
 
 /**
@@ -105,15 +109,16 @@ export function useClearChat() {
  * ```typescript
  * const updateChatIdInUrl = useUpdateChatIdInUrl();
  * updateChatIdInUrl('abc-123');
- * // URL becomes: /?chatId=abc-123 (only if different from current)
+ * // URL becomes: /current-page?chatId=abc-123 (only if different from current)
  * ```
  */
 export function useUpdateChatIdInUrl() {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   return useCallback(
-    (chatId: string) => {
+    function updateChatIdInUrl(chatId: string) {
       const currentChatId = searchParams.get('chatId');
       
       // Only update if chatId is different from current
@@ -130,9 +135,8 @@ export function useUpdateChatIdInUrl() {
       
       // Use replace instead of push to avoid adding to history
       // scroll: false prevents scrolling
-      router.replace(`/?${params.toString()}`, { scroll: false });
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [pathname, router, searchParams]
   );
 }
-

@@ -18,7 +18,7 @@
 
 import { useMemo, useEffect, useState } from 'react';
 import { LineChart } from '@/components/line-chart/LineChart';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface ChartRendererProps {
   jsonContent: string;

@@ -55,6 +55,7 @@ export const assistantRequestSchema = z.object({
   id: z.string().optional(),
   messages: z.array(uiMessageSchema).min(1, 'At least one message is required'),
   modelId: z.string().optional(),
+  persistenceMode: z.enum(['local', 'database']).default('local'),
 }).passthrough();
 
 export type AssistantRequestBody = z.infer<typeof assistantRequestSchema>;

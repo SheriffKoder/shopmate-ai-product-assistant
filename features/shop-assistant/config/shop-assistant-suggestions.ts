@@ -6,8 +6,10 @@
  * Why: Centralized configuration for suggestion cards with icons, colors, and prompts
  */
 
+import { Bot, FileSpreadsheet, Laptop, Search, ShoppingCart } from 'lucide-react';
+
 export interface SuggestionCard {
-  icon: string; // Image URL
+  icon: typeof Bot; // Lucide icon component
   backgroundColor: string; // Background color for the card
   textColor: string; // Text color for the card
   header: string; // Header text (used as prompt when clicked)
@@ -21,63 +23,41 @@ export interface SuggestionSet {
 
 export const introSuggestions: SuggestionSet[] = [
   {
-    header: 'Discover Products',
+    header: 'Try tools',
     cards: [
       {
-        icon: '/images/intro/smartphone.png',
-        backgroundColor: '#00578E',
-        textColor: '#ffffff',
-        header: 'Show me the best smartphones',
-        description: 'Explore top-rated smartphones with latest features',
+        icon: Search,
+        backgroundColor: 'var(--color-foreground)',
+        textColor: 'var(--color-foreground)',
+        header: 'Show me smart phones',
+        description: '',
       },
       {
-        icon: '/images/intro/laptop.png',
-        backgroundColor: '#60263D',
-        textColor: '#ffffff',
-        header: 'What are your top-rated laptops?',
-        description: 'Find powerful laptops for work and creativity',
-      },
-      {
-        icon: '/images/intro/tablet.png',
-        backgroundColor: '#372D80',
-        textColor: '#ffffff',
-        header: 'Show me tablets',
-        description: 'Discover tablets for productivity and entertainment',
-      },
-      {
-        icon: '/images/intro/headphones.png',
-        backgroundColor: '#3A6F5A',
-        textColor: '#ffffff',
-        header: 'Best headphones and earbuds',
-        description: 'Find premium audio devices for music and calls',
+        icon: ShoppingCart,
+        backgroundColor: 'var(--color-foreground)',
+        textColor: 'var(--color-foreground)',
+        header: 'Edit my cart',
+        description: '',
       },
     ],
   },
   {
-    header: 'Get Recommendations',
+    header: 'Artifacts',
     cards: [
       {
-        icon: '/images/intro/budget.png',
-        backgroundColor: '#004BAE',
-        textColor: '#ffffff',
-        header: 'What\'s the best product under $500?',
-        description: 'Get recommendations based on your budget',
+        icon: FileSpreadsheet,
+        backgroundColor: 'var(--color-foreground)',
+        textColor: 'var(--color-foreground)',
+        header: 'All products table',
+        description: '',
       },
       {
-        icon: '/images/intro/compare.png',
-        backgroundColor: '#8B4513',
-        textColor: '#ffffff',
-        header: 'Compare gaming laptops',
-        description: 'Compare features and prices of gaming laptops',
-      },
-      {
-        icon: '/images/intro/latest.png',
-        backgroundColor: '#C71585',
-        textColor: '#ffffff',
-        header: 'Tell me about your latest products',
-        description: 'Discover our newest and most innovative products',
+        icon: Laptop,
+        backgroundColor: 'var(--color-foreground)',
+        textColor: 'var(--color-foreground)',
+        header: 'Windows vs Mac laptops',
+        description: '',
       },
     ],
   },
 ];
-

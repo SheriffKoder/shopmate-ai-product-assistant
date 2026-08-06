@@ -1,7 +1,8 @@
 # Step 1: User Initialization & Message Persistence
 
 > **Purpose**: Implement basic user management and message persistence for chat
-> 
+>
+
 > **Status**: Planning Phase
 > **Priority**: High - Foundation for chat persistence
 
@@ -46,7 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_user_created_at ON "User"(createdAt);
 
 ### 1.2 TypeScript Types
 
-**File**: `features/ai-assistant/lib/supabase/types.ts` (add to existing)
+**File**: `features/ai-assistant/shared/infrastructure/supabase/types.ts` (add to existing)
 
 ```typescript
 // Add to existing types
@@ -63,28 +64,31 @@ export type User = {
 
 ### 1.3 Database Queries: User Operations
 
-**File**: `features/ai-assistant/lib/supabase/queries/user-queries.ts` (new file)
+**File**: `features/ai-assistant/shared/infrastructure/supabase/queries/user-queries.ts` (new file)
 
 ```typescript
 /**
  * User Database Queries
- * 
+ *
+
  * Purpose: Database operations for user management
  * Used in: User initialization and session management
  * Why: Centralized database queries for user operations
  */
 
 import { createClient } from '@/features/ai-assistant/lib/supabase/client';
-import type { User } from '@/features/ai-assistant/lib/supabase/types';
+import type { User } from '@/features/ai-assistant/shared/infrastructure/supabase/types';
 
 /**
  * Create a new user in the database
- * 
+ *
+
  * Steps:
  * 1. Connect to Supabase client
  * 2. Insert user record with email and name
  * 3. Return created user or null if error
- * 
+ *
+
  * @param email - User email address
  * @param name - User name (optional)
  * @returns Created user object or null
@@ -98,7 +102,8 @@ export async function createUser({
 }): Promise<User | null> {
   try {
     const supabase = createClient();
-    
+
+
     const { data, error } = await supabase
       .from('User')
       .insert({
@@ -107,12 +112,14 @@ export async function createUser({
       })
       .select()
       .single();
-    
+
+
     if (error) {
       console.error('[createUser] Error:', error);
       return null;
     }
-    
+
+
     return data as User;
   } catch (error) {
     console.error('[createUser] Exception:', error);
@@ -122,12 +129,14 @@ export async function createUser({
 
 /**
  * Get user by email
- * 
+ *
+
  * Steps:
  * 1. Connect to Supabase client
  * 2. Query User table by email
  * 3. Return first matching user or null
- * 
+ *
+
  * @param email - User email address
  * @returns User object or null if not found
  */
@@ -138,13 +147,15 @@ export async function getUserByEmail({
 }): Promise<User | null> {
   try {
     const supabase = createClient();
-    
+
+
     const { data, error } = await supabase
       .from('User')
       .select('*')
       .eq('email', email)
       .single();
-    
+
+
     if (error) {
       // User not found is not an error - return null
       if (error.code === 'PGRST116') {
@@ -153,7 +164,8 @@ export async function getUserByEmail({
       console.error('[getUserByEmail] Error:', error);
       return null;
     }
-    
+
+
     return data as User;
   } catch (error) {
     console.error('[getUserByEmail] Exception:', error);
@@ -163,12 +175,14 @@ export async function getUserByEmail({
 
 /**
  * Get user by ID
- * 
+ *
+
  * Steps:
  * 1. Connect to Supabase client
  * 2. Query User table by ID
  * 3. Return user or null if not found
- * 
+ *
+
  * @param id - User ID (UUID)
  * @returns User object or null if not found
  */
@@ -179,13 +193,15 @@ export async function getUserById({
 }): Promise<User | null> {
   try {
     const supabase = createClient();
-    
+
+
     const { data, error } = await supabase
       .from('User')
       .select('*')
       .eq('id', id)
       .single();
-    
+
+
     if (error) {
       if (error.code === 'PGRST116') {
         return null;
@@ -193,7 +209,8 @@ export async function getUserById({
       console.error('[getUserById] Error:', error);
       return null;
     }
-    
+
+
     return data as User;
   } catch (error) {
     console.error('[getUserById] Exception:', error);
@@ -203,25 +220,30 @@ export async function getUserById({
 
 /**
  * Get or create a constant user (for demo purposes)
- * 
+ *
+
  * Steps:
  * 1. Try to get existing user with constant email
  * 2. If not found, create new user
  * 3. Return user object
- * 
+ *
+
  * @returns User object (existing or newly created)
  */
 export async function getOrCreateConstantUser(): Promise<User | null> {
   const CONSTANT_USER_EMAIL = 'shopmate-user@example.com';
   const CONSTANT_USER_NAME = 'ShopMate User';
-  
+
+
   // Try to get existing user
   const existingUser = await getUserByEmail({ email: CONSTANT_USER_EMAIL });
-  
+
+
   if (existingUser) {
     return existingUser;
   }
-  
+
+
   // Create new user
   return await createUser({
     email: CONSTANT_USER_EMAIL,
@@ -239,18 +261,20 @@ export async function getOrCreateConstantUser(): Promise<User | null> {
 ```typescript
 /**
  * User API Route
- * 
+ *
+
  * Purpose: Handle user creation and retrieval
  * Used in: Chat header buttons (cloud-upload, cloud-download)
  * Why: Server-side API for user operations
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createUser, getUserByEmail, getOrCreateConstantUser } from '@/features/ai-assistant/lib/supabase/queries/user-queries';
+import { createUser, getUserByEmail, getOrCreateConstantUser } from '@/features/ai-assistant/shared/infrastructure/supabase/queries/user-queries';
 
 /**
  * POST /api/user - Create a new user
- * 
+ *
+
  * Body: { email: string, name?: string }
  * Returns: { user: User } or { error: string }
  */
@@ -258,14 +282,16 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, name } = body;
-    
+
+
     if (!email) {
       return NextResponse.json(
         { error: 'Email is required' },
         { status: 400 }
       );
     }
-    
+
+
     // Check if user already exists
     const existingUser = await getUserByEmail({ email });
     if (existingUser) {
@@ -274,17 +300,20 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    
+
+
     // Create new user
     const user = await createUser({ email, name });
-    
+
+
     if (!user) {
       return NextResponse.json(
         { error: 'Failed to create user' },
         { status: 500 }
       );
     }
-    
+
+
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {
     console.error('[POST /api/user] Error:', error);
@@ -297,11 +326,13 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/user - Get user by email or get/create constant user
- * 
+ *
+
  * Query params:
  *   - email: Get user by email
  *   - constant: Get or create constant user (no params needed)
- * 
+ *
+
  * Returns: { user: User } or { error: string }
  */
 export async function GET(request: NextRequest) {
@@ -309,35 +340,42 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
     const constant = searchParams.get('constant');
-    
+
+
     // Get or create constant user
     if (constant === 'true') {
       const user = await getOrCreateConstantUser();
-      
+
+
       if (!user) {
         return NextResponse.json(
           { error: 'Failed to get or create constant user' },
           { status: 500 }
         );
       }
-      
+
+
       return NextResponse.json({ user });
     }
-    
+
+
     // Get user by email
     if (email) {
       const user = await getUserByEmail({ email });
-      
+
+
       if (!user) {
         return NextResponse.json(
           { error: 'User not found' },
           { status: 404 }
         );
       }
-      
+
+
       return NextResponse.json({ user });
     }
-    
+
+
     return NextResponse.json(
       { error: 'Email or constant parameter required' },
       { status: 400 }
@@ -361,11 +399,13 @@ export async function GET(request: NextRequest) {
 ```typescript
 /**
  * User Session Hook
- * 
+ *
+
  * Purpose: Manage user session state (client-side)
  * Used in: Chat components, user initialization
  * Why: Centralized user state management
- * 
+ *
+
  * How it works:
  * 1. Stores user in localStorage
  * 2. Provides functions to create/load user
@@ -375,13 +415,14 @@ export async function GET(request: NextRequest) {
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { User } from '@/features/ai-assistant/lib/supabase/types';
+import type { User } from '@/features/ai-assistant/shared/infrastructure/supabase/types';
 
 const USER_STORAGE_KEY = 'shopmate-user';
 
 /**
  * Hook to manage user session
- * 
+ *
+
  * Returns:
  * - user: Current user object or null
  * - isLoading: Whether user is being loaded
@@ -392,7 +433,8 @@ const USER_STORAGE_KEY = 'shopmate-user';
 export function useUserSession() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
+
   // Load user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem(USER_STORAGE_KEY);
@@ -406,7 +448,8 @@ export function useUserSession() {
     }
     setIsLoading(false);
   }, []);
-  
+
+
   // Save user to localStorage when it changes
   useEffect(() => {
     if (user) {
@@ -415,10 +458,12 @@ export function useUserSession() {
       localStorage.removeItem(USER_STORAGE_KEY);
     }
   }, [user]);
-  
+
+
   /**
    * Create constant user (cloud-upload action)
-   * 
+   *
+
    * Steps:
    * 1. Call API to get or create constant user
    * 2. Update local state
@@ -427,15 +472,18 @@ export function useUserSession() {
   const createUser = useCallback(async (): Promise<User | null> => {
     try {
       setIsLoading(true);
-      
+
+
       const response = await fetch('/api/user?constant=true');
       const data = await response.json();
-      
+
+
       if (!response.ok) {
         console.error('[createUser] API error:', data.error);
         return null;
       }
-      
+
+
       setUser(data.user);
       return data.user;
     } catch (error) {
@@ -445,10 +493,12 @@ export function useUserSession() {
       setIsLoading(false);
     }
   }, []);
-  
+
+
   /**
    * Load user from API (cloud-download action)
-   * 
+   *
+
    * Steps:
    * 1. Call API to get constant user
    * 2. Update local state
@@ -457,15 +507,18 @@ export function useUserSession() {
   const loadUser = useCallback(async (): Promise<User | null> => {
     try {
       setIsLoading(true);
-      
+
+
       const response = await fetch('/api/user?constant=true');
       const data = await response.json();
-      
+
+
       if (!response.ok) {
         console.error('[loadUser] API error:', data.error);
         return null;
       }
-      
+
+
       setUser(data.user);
       return data.user;
     } catch (error) {
@@ -475,7 +528,8 @@ export function useUserSession() {
       setIsLoading(false);
     }
   }, []);
-  
+
+
   /**
    * Clear user session
    */
@@ -483,7 +537,8 @@ export function useUserSession() {
     setUser(null);
     localStorage.removeItem(USER_STORAGE_KEY);
   }, []);
-  
+
+
   return {
     user,
     isLoading,
@@ -527,7 +582,8 @@ import { toast } from 'sonner'; // or your toast library
     <Image src="/images/icon.png" alt="Liora AI Assistant" width={24} height={24} />
     <span className="text-white">ShopMate AI</span>
   </div>
-  
+
+
   {/* Add user action buttons */}
   <div className="flex flex-row items-center gap-2">
     {/* Cloud Upload: Create user */}
@@ -542,7 +598,8 @@ import { toast } from 'sonner'; // or your toast library
     >
       <CloudUpload className="w-4 h-4 text-white" />
     </button>
-    
+
+
     {/* Cloud Download: Load user */}
     <button
       onClick={(e) => {
@@ -555,7 +612,8 @@ import { toast } from 'sonner'; // or your toast library
     >
       <CloudDownload className="w-4 h-4 text-white" />
     </button>
-    
+
+
     {/* Chevron: Collapse/Expand */}
     <div className="p-1">
       {isChatCollapsed ? (
@@ -630,7 +688,7 @@ CREATE INDEX IF NOT EXISTS idx_message_created_at ON "Message"("createdAt");
 
 ### 2.2 TypeScript Types
 
-**File**: `features/ai-assistant/lib/supabase/types.ts` (add to existing)
+**File**: `features/ai-assistant/shared/infrastructure/supabase/types.ts` (add to existing)
 
 ```typescript
 // Add to existing types
@@ -656,19 +714,20 @@ export type Message = {
 
 ### 2.3 Database Queries: Chat and Message Operations
 
-**File**: `features/ai-assistant/lib/supabase/queries/chat-queries.ts` (new file)
+**File**: `features/ai-assistant/shared/infrastructure/supabase/queries/chat-queries.ts` (new file)
 
 ```typescript
 /**
  * Chat Database Queries
- * 
+ *
+
  * Purpose: Database operations for chat and message management
  * Used in: Chat API route, message persistence
  * Why: Centralized database queries for chat operations
  */
 
 import { createClient } from '@/features/ai-assistant/lib/supabase/client';
-import type { Chat, Message } from '@/features/ai-assistant/lib/supabase/types';
+import type { Chat, Message } from '@/features/ai-assistant/shared/infrastructure/supabase/types';
 
 /**
  * Create a new chat
@@ -684,7 +743,8 @@ export async function createChat({
 }): Promise<Chat | null> {
   try {
     const supabase = createClient();
-    
+
+
     const { data, error } = await supabase
       .from('Chat')
       .insert({
@@ -694,12 +754,14 @@ export async function createChat({
       })
       .select()
       .single();
-    
+
+
     if (error) {
       console.error('[createChat] Error:', error);
       return null;
     }
-    
+
+
     return data as Chat;
   } catch (error) {
     console.error('[createChat] Exception:', error);
@@ -717,13 +779,15 @@ export async function getChatById({
 }): Promise<Chat | null> {
   try {
     const supabase = createClient();
-    
+
+
     const { data, error } = await supabase
       .from('Chat')
       .select('*')
       .eq('id', id)
       .single();
-    
+
+
     if (error) {
       if (error.code === 'PGRST116') {
         return null;
@@ -731,7 +795,8 @@ export async function getChatById({
       console.error('[getChatById] Error:', error);
       return null;
     }
-    
+
+
     return data as Chat;
   } catch (error) {
     console.error('[getChatById] Exception:', error);
@@ -749,17 +814,20 @@ export async function saveMessages({
 }): Promise<Message[] | null> {
   try {
     const supabase = createClient();
-    
+
+
     const { data, error } = await supabase
       .from('Message')
       .insert(messages)
       .select();
-    
+
+
     if (error) {
       console.error('[saveMessages] Error:', error);
       return null;
     }
-    
+
+
     return data as Message[];
   } catch (error) {
     console.error('[saveMessages] Exception:', error);
@@ -777,18 +845,21 @@ export async function getMessagesByChatId({
 }): Promise<Message[]> {
   try {
     const supabase = createClient();
-    
+
+
     const { data, error } = await supabase
       .from('Message')
       .select('*')
       .eq('chatId', chatId)
       .order('createdAt', { ascending: true });
-    
+
+
     if (error) {
       console.error('[getMessagesByChatId] Error:', error);
       return [];
     }
-    
+
+
     return (data || []) as Message[];
   } catch (error) {
     console.error('[getMessagesByChatId] Exception:', error);
@@ -807,13 +878,14 @@ Add message saving logic:
 
 ```typescript
 // Add imports at top
-import { createChat, getChatById, saveMessages } from '@/features/ai-assistant/lib/supabase/queries/chat-queries';
-import { getOrCreateConstantUser } from '@/features/ai-assistant/lib/supabase/queries/user-queries';
+import { createChat, getChatById, saveMessages } from '@/features/ai-assistant/shared/infrastructure/supabase/queries/chat-queries';
+import { getOrCreateConstantUser } from '@/features/ai-assistant/shared/infrastructure/supabase/queries/user-queries';
 
 // Inside POST handler, after receiving request:
 export async function POST(request: Request) {
   // ... existing code ...
-  
+
+
   // Get or create constant user
   const user = await getOrCreateConstantUser();
   if (!user) {
@@ -822,19 +894,22 @@ export async function POST(request: Request) {
       { status: 401 }
     );
   }
-  
+
+
   // Check if chat exists, create if not
   let chat = await getChatById({ id: chatId });
   if (!chat) {
     // Generate title from first user message
     const title = extractTitleFromMessage(body.messages?.[0] || 'New Chat');
-    
+
+
     chat = await createChat({
       id: chatId,
       userId: user.id,
       title,
     });
-    
+
+
     if (!chat) {
       return NextResponse.json(
         { error: 'Failed to create chat' },
@@ -842,7 +917,8 @@ export async function POST(request: Request) {
       );
     }
   }
-  
+
+
   // Save user message immediately
   const userMessage = body.messages?.find(m => m.role === 'user');
   if (userMessage) {
@@ -856,9 +932,11 @@ export async function POST(request: Request) {
       }],
     });
   }
-  
+
+
   // ... existing streaming code ...
-  
+
+
   // In onFinish callback, save AI messages:
   onFinish: async ({ messages }) => {
     // Save AI messages
@@ -871,12 +949,14 @@ export async function POST(request: Request) {
         parts: m.parts || [],
         attachments: m.attachments || [],
       }));
-    
+
+
     if (aiMessages.length > 0) {
       await saveMessages({ messages: aiMessages });
     }
   },
-  
+
+
   // ... rest of existing code ...
 }
 

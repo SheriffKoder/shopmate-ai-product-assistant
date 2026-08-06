@@ -7,8 +7,8 @@
  */
 
 import { NextRequest } from 'next/server';
-import { deleteChatById, getChatById } from '@/lib/supabase/queries/chat-queries';
-import { getOrCreateConstantUser } from '@/lib/supabase/queries/user-queries';
+import { deleteChatById, getChatById } from '@/shared/infrastructure/supabase/queries/chat-queries';
+import { getOrCreateConstantUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 import { AssistantError, handleApiError } from '@/features/ai-assistant/lib/errors';
 import { logger } from '@/features/ai-assistant/lib/logger';
 

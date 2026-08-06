@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { getFooterConfig } from '@/views/home/config/footer'
+import { getFooterConfig } from './footer-config'
 import Image from 'next/image'
 
 const Footer = () => {
@@ -13,7 +13,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-2  bg-white/5 rounded-md p-2 md:p-4">
             <h3 className="text-xl font-bold text-secondary mb-3 flex flex-row items-center gap-2">
-              <Image src='/images/icon.png' alt='ShopMate AI' width={30} height={30} />
+              <Image src='/images/icon.png' alt='ShopMate AI' className='invert' width={120} height={30} />
               {footer_content.company.name}
             </h3>
             <p className="text-gray-400 text-sm mb-4 max-w-xs">{footer_content.company.description}</p>
