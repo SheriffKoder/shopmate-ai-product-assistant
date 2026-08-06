@@ -129,11 +129,12 @@ export function ArtifactCopyButton({
 
   return (
     <Button
+      id={`artifact-copy-${kind}`}
       variant={variant}
       size={size}
       onClick={handleCopy}
       disabled={!content || !content.trim()}
-      className={cn('gap-2', className)}
+      className={cn('gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background', className)}
       aria-label={`Copy ${kind} content to clipboard`}
       title={`Copy ${kind} content`}
     >

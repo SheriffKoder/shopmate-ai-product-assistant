@@ -20,12 +20,16 @@ import type { UIMessage } from 'ai';
 import { convertMessagesToUIMessages } from '@/features/ai-assistant/components/history-sidebar/utils/message-conversion';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { assistantApiEndpoints } from '@/features/ai-assistant/model/api-endpoints';
+import type { UIArtifact } from '@/features/ai-assistant/components/artifacts/hooks/use-artifact';
+import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
+import { readLocalChatHistory } from '@/features/ai-assistant/message-persistence/lib/local-chat-history';
 
 interface UseChatMessagesOptions {
   chatId: string | null; // URL chatId (null when cleared for new chat)
   setMessages: (messages: UIMessage[]) => void;
   currentChatId?: string; // Current chatId from useChat (to detect if we're already on this chat)
   hasMessages?: boolean; // Whether messages already exist in useChat (to skip fetch if already loaded)
+  setArtifact?: (updater: (artifact: UIArtifact) => UIArtifact) => void;
 }
 
 interface UseChatMessagesReturn {
@@ -59,7 +63,9 @@ export function useChatMessages({
   setMessages,
   currentChatId,
   hasMessages = false,
+  setArtifact,
 }: UseChatMessagesOptions): UseChatMessagesReturn {
+  const { user } = useUserSession();
   // Track last loaded chatId to prevent re-fetching
   const lastLoadedChatIdRef = useRef<string | null>(null);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -102,6 +108,42 @@ export function useChatMessages({
     const loadMessages = async () => {
       setIsLoadingMessages(true);
       try {
+        // Guest conversations live in localStorage, so restore them without calling the database API.
+        if (!user) {
+          const localChat = readLocalChatHistory().chats.find((chat) => chat.id === chatId);
+
+          if (localChat) {
+            setMessages(localChat.messages);
+
+            const persistedArtifact = localChat.messages
+              .flatMap((message) => message.parts || [])
+              .find((part) => part.type === 'data-artifactContent');
+            const persistedArtifactData = (persistedArtifact as { data?: unknown } | undefined)?.data;
+
+            if (setArtifact && persistedArtifactData && typeof persistedArtifactData === 'object') {
+              const artifactData = persistedArtifactData as {
+                documentId?: string;
+                title?: string;
+                kind?: UIArtifact['kind'];
+                content?: string;
+              };
+
+              setArtifact((currentArtifact) => ({
+                ...currentArtifact,
+                documentId: artifactData.documentId || currentArtifact.documentId,
+                title: artifactData.title || currentArtifact.title,
+                kind: artifactData.kind || currentArtifact.kind,
+                content: artifactData.content || currentArtifact.content,
+                status: 'complete',
+              }));
+            }
+
+            lastLoadedChatIdRef.current = chatId;
+            logger.info(`[useChatMessages] Restored local chat: ${chatId}`);
+            return;
+          }
+        }
+
         logger.info(`[useChatMessages] Fetching messages for chat: ${chatId}`);
         
         const response = await fetch(`${assistantApiEndpoints.chat}/${chatId}/messages`);
@@ -122,6 +164,30 @@ export function useChatMessages({
         
         // Convert database messages to UIMessage format
         const uiMessages = convertMessagesToUIMessages(dbMessages);
+
+        const persistedArtifact = uiMessages
+          .flatMap((message) => message.parts || [])
+          .find((part) => part.type === 'data-artifactContent');
+
+        const persistedArtifactData = (persistedArtifact as { data?: unknown } | undefined)?.data;
+
+        if (setArtifact && persistedArtifactData && typeof persistedArtifactData === 'object') {
+          const artifactData = persistedArtifactData as {
+            documentId?: string;
+            title?: string;
+            kind?: UIArtifact['kind'];
+            content?: string;
+          };
+
+          setArtifact((currentArtifact) => ({
+            ...currentArtifact,
+            documentId: artifactData.documentId || currentArtifact.documentId,
+            title: artifactData.title || currentArtifact.title,
+            kind: artifactData.kind || currentArtifact.kind,
+            content: artifactData.content || currentArtifact.content,
+            status: 'complete',
+          }));
+        }
         
         // Load messages into useChat
         setMessages(uiMessages);
@@ -142,7 +208,7 @@ export function useChatMessages({
     };
 
     loadMessages();
-  }, [chatId, setMessages, currentChatId, hasMessages]);
+  }, [chatId, setMessages, currentChatId, hasMessages, setArtifact, user]);
 
   return {
     isLoadingMessages,

@@ -25,6 +25,7 @@ import { useVersionHistoryNavigation } from '../../hooks/version-history-navigat
 import { VersionHistoryHeader } from '../../components/version-history-header';
 import { VersionHistoryManagementButtons } from '../../components/version-history-management-buttons';
 import { ArtifactCopyButton } from '../../components/artifact-copy-button';
+import { ArtifactDownloadButton } from '../../components/artifact-download-button';
 import { ChartRenderer } from './chart-renderer';
 import { useEffect, useState, useRef } from 'react';
 import { logger } from '@/features/ai-assistant/lib/logger';
@@ -270,6 +271,11 @@ export function ChartArtifactContent() {
             <ArtifactCopyButton
               content={displayJson}
               kind={artifact.kind || 'chart'}
+            />
+            <ArtifactDownloadButton
+              content={displayJson}
+              kind={artifact.kind || 'chart'}
+              title={localTitle}
             />
           </div>
         )}

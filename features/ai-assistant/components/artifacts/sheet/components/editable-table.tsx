@@ -333,8 +333,8 @@ export function EditableTable({
   const dataRows = tableData.slice(1);
 
   return (
-    <div className={cn('w-full overflow-auto', className)}>
-      <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-700">
+    <div className={cn('w-full overflow-x-auto', className)}>
+      <table className="w-full min-w-max border-collapse border border-gray-300 dark:border-gray-700">
         {/* Header Row */}
         {headerRow.length > 0 && (
           <thead>
@@ -421,4 +421,3 @@ export function EditableTable({
     </div>
   );
 }
-

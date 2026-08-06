@@ -60,13 +60,14 @@ const PureDocumentToolCall = ({
 
   return (
     <Button
+      id="artifact-open-call"
       variant="outline"
-      className="flex w-fit cursor-pointer flex-row items-start gap-3 rounded-xl px-3 py-2"
+      className="flex w-fit cursor-pointer flex-row items-start gap-3 rounded bg-foreground text-background px-3 py-2 hover:bg-foreground/90"
       onClick={handleClick}
       type="button"
       disabled={isReadonly}
     >
-      <div className="mt-1 text-muted-foreground">
+      <div className="mt-1 text-background/70">
         {args.kind === 'sheet' ? (
           <FileSpreadsheet size={16} />
         ) : (

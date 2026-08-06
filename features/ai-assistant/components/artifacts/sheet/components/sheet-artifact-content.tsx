@@ -24,6 +24,7 @@ import { useVersionHistoryNavigation } from '../../hooks/version-history-navigat
 import { VersionHistoryHeader } from '../../components/version-history-header';
 import { VersionHistoryManagementButtons } from '../../components/version-history-management-buttons';
 import { ArtifactCopyButton } from '../../components/artifact-copy-button';
+import { ArtifactDownloadButton } from '../../components/artifact-download-button';
 import { EditableTable } from './editable-table';
 import { Table } from './table-non-edit';
 import { useEffect, useState, useRef } from 'react';
@@ -284,6 +285,11 @@ export function SheetArtifactContent() {
               content={displayCsv}
               kind={artifact.kind || 'sheet'}
             />
+            <ArtifactDownloadButton
+              content={displayCsv}
+              kind={artifact.kind || 'sheet'}
+              title={localTitle}
+            />
           </div>
         )}
 
@@ -314,4 +320,3 @@ export function SheetArtifactContent() {
     </div>
   );
 }
-
