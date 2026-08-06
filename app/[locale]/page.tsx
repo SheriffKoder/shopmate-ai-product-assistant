@@ -8,8 +8,18 @@
 
 import { HomeView } from '@/views/home';
 import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
+import { getDictionary } from '@/shared/i18n/lib/get-dictionary';
+import { createPageMetadata } from '@/shared/seo/metadata';
+import type { Metadata } from 'next';
 
 export const revalidate = 864000;
+
+export async function generateMetadata({ params }: HomePageProps): Promise<Metadata> {
+  const locale = assertAppLocale((await params).locale);
+  const dictionary = getDictionary(locale);
+
+  return createPageMetadata({ locale, title: 'Shop electronics', description: dictionary.home.description });
+}
 
 type HomePageProps = {
   params: Promise<{

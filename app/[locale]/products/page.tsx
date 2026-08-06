@@ -8,6 +8,9 @@
 
 import { ProductsView } from '@/views/products';
 import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
+import { getDictionary } from '@/shared/i18n/lib/get-dictionary';
+import { createPageMetadata } from '@/shared/seo/metadata';
+import type { Metadata } from 'next';
 
 type ProductsPageProps = {
   params: Promise<{
@@ -16,6 +19,13 @@ type ProductsPageProps = {
 };
 
 export const revalidate = 864000; // 10 days
+
+export async function generateMetadata({ params }: ProductsPageProps): Promise<Metadata> {
+  const locale = assertAppLocale((await params).locale);
+  const dictionary = getDictionary(locale);
+
+  return createPageMetadata({ locale, pathname: '/products', title: dictionary.products.title, description: dictionary.products.description });
+}
 
 /**
  * Renders the products listing page.

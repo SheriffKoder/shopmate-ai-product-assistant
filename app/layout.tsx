@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Instrument_Serif, Roboto } from 'next/font/google';
 import { LayoutWrapper } from '@/components/layout-wrapper';
+import { SEO_SITE_DESCRIPTION, SEO_SITE_NAME, SEO_SITE_URL } from '@/shared/seo/config';
 
 const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
@@ -16,10 +17,10 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "ShopMate AI - Your Intelligent Shopping Assistant",
-  description: "Discover the best electronic products with ShopMate AI. Get personalized product recommendations, compare features, and shop smart with our AI-powered shopping assistant.",
-  keywords: ["electronics", "shopping", "AI assistant", "product recommendations", "online store"],
-  authors: [{ name: "ShopMate AI" }],
+  metadataBase: new URL(SEO_SITE_URL),
+  title: SEO_SITE_NAME,
+  description: SEO_SITE_DESCRIPTION,
+  authors: [{ name: SEO_SITE_NAME }],
 };
 
 export const viewport: Viewport = {

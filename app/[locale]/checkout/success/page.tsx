@@ -8,6 +8,9 @@
 
 import { CheckoutSuccessView } from '@/views/checkout-success';
 import { assertAppLocale } from '@/shared/i18n/lib/assert-locale';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 type CheckoutSuccessPageProps = {
   params: Promise<{
