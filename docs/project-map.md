@@ -42,8 +42,8 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/locale-switcher/`: the small client-only locale dropdown island and pure href builder.
 - `shared/i18n/`: EN/AR locale config, typed dictionaries, locale assertion, dictionary loading, and localized catalog text helpers.
 - `shared/config/`: cache constants, environment validation, and `SHADOW_SUPABASE_TABLE_PREFIX`-driven table names.
-- `shared/supabase/server/create-service-client.ts`: server-only Supabase service client boundary for catalog reads and dev writes.
-- `shadow/development/initial-data/products.ts`: seed data consumed only by `/dev`.
+- `shared/infrastructure/supabase/server/create-service-client.ts`: server-only Supabase service client boundary for catalog reads and dev writes.
+- `views/dev/model/initial-catalog-data.ts`: seed data consumed only by `/dev`.
 - `shadow/development/migrations/032_create_shadow_catalog.sql`: active catalog migration for prefixed catalog tables. Other copied migration files in this folder are external compatibility history and should not be read unless the user explicitly asks.
 
 ## API Routes
@@ -94,7 +94,7 @@ Use this as the first repo read when you need orientation. It is intentionally c
 
 - `entities/category/` and `entities/product/` read public catalog data from prefixed Supabase tables through the server-only service client.
 - `features/cart/store/cart-store.ts` is the central local-only client cart store used by the header and assistant integration.
-- `lib/storage/session-storage.ts` is the development storage abstraction for products/cart/user data.
+- `features/catalog/storage/session-storage.ts` is the development storage abstraction for products/cart/user data.
 - `lib/supabase/client.ts`, `types.ts`, `queries/chat-queries.ts`, and `queries/user-queries.ts` provide Supabase persistence for users, chats, messages, and documents.
 - `lib/supabase/migrations/` contains SQL migrations for documents, users, chats, and messages.
 - Product images and fonts live under `public/images/` and `public/fonts/`.
