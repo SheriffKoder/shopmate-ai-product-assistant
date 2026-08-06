@@ -12,7 +12,7 @@ import { useArtifact } from '../hooks/use-artifact';
 import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-text';
 import { Table } from '../sheet/components/table-non-edit';
 import { ChartRenderer } from '../chart/components/chart-renderer';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface DocumentContentProps {
   document: {

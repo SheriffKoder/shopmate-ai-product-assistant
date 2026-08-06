@@ -33,7 +33,7 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
 
   if (!isHydrated) {
     return (
-      <section className="rounded-md border bg-white p-6 shadow-sm" aria-live="polite">
+      <section className="border border-foreground/20 bg-white p-6" aria-live="polite">
         <div className="h-4 w-36 rounded bg-gray-200" />
         <div className="mt-6 space-y-3">
           <div className="h-14 rounded bg-gray-100" />
@@ -46,7 +46,7 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
 
   return (
     <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="border border-foreground/70 bg-white shadow-sm">
+      <div className="border border-foreground/20 bg-white">
         <div className="border-b border-foreground/70 bg-foreground px-5 py-4 text-background">
           <h2 className="text-lg font-semibold">{copy.receipt}</h2>
         </div>
@@ -75,7 +75,7 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
           </div>
         )}
       </div>
-      <aside className="h-fit border border-foreground/70 bg-white p-5 shadow-sm">
+      <aside className="h-fit border border-foreground/20 bg-white p-5">
         <dl className="space-y-4 text-sm">
           <div>
             <dt className="text-muted-foreground">{copy.orderNumber}</dt>
@@ -98,7 +98,7 @@ export function CheckoutSuccessCartPanel(props: CheckoutSuccessCartPanelProps) {
             <dd className="mt-1 text-xl font-semibold text-gray-950">${cart.totalPrice.toFixed(2)}</dd>
           </div>
         </dl>
-        <Button asChild className="mt-6 w-full">
+        <Button asChild className="mt-6 w-full bg-primary text-foreground hover:bg-primary/90">
           <AssistantAwareLink href={`/${locale}/products`}>{copy.continueShopping}</AssistantAwareLink>
         </Button>
       </aside>

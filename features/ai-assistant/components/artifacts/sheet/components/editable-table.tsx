@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { parse, unparse } from 'papaparse';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { AddColumnButton } from './add-column-button';
 import { AddRowButton } from './add-row-button';
 

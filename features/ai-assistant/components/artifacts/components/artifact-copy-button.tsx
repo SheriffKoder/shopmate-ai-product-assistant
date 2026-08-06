@@ -17,7 +17,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { parse, unparse } from 'papaparse';
 import type { DocumentKind } from '@/features/ai-assistant/model/artifact-document';
 

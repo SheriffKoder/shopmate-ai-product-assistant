@@ -12,7 +12,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createUser, getUserByEmail, getOrCreateConstantUser } from '@/lib/supabase/queries/user-queries';
+import { createUser, getUserByEmail, getOrCreateConstantUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 import { logger } from '@/features/ai-assistant/lib/logger';
 
 /**

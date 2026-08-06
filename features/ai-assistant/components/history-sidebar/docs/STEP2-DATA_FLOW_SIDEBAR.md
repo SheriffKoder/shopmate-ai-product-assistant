@@ -1,7 +1,8 @@
 # Data Flow: Sidebar Chat History
 
 > **Purpose**: Documents the data flow for displaying chat history in the sidebar
-> 
+>
+
 > **Status**: Implementation in progress
 
 ---
@@ -62,7 +63,7 @@ The sidebar displays a user's chat history, grouped by date (Today, Yesterday, L
 
 ### Step 3: Database Query for User's Chats
 
-**File**: `features/ai-assistant/lib/supabase/queries/chat-queries.ts`
+**File**: `features/ai-assistant/shared/infrastructure/supabase/queries/chat-queries.ts`
 
 **Function**: `getChatsByUserId()`
 
@@ -534,7 +535,8 @@ SWR should only fetch when a user exists, and it should revalidate when the user
 Add the sidebar to be next the ChatContainer in the ChatWrapper
 
 ## Navigation enhancement
-- when we sync the messages on finish with the sidebar, i would like also to update the params but 
+- when we sync the messages on finish with the sidebar, i would like also to update the params but
+
 on finish use the updateChatIdInUrl hook and
 in useChatMEssages (fetches based on new chatID from the params from the chat-wrapper)
 Skip fetch if URL chatId matches current chatId and messages already exist

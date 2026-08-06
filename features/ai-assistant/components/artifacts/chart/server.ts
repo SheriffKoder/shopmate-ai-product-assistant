@@ -21,7 +21,7 @@ import { streamObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
-import { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { getSupabaseTableNames } from '@/shared/config/table-names';

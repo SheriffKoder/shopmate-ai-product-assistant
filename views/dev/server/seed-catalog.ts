@@ -8,9 +8,9 @@
 
 'use server';
 
-import { initialCategories, initialProducts } from '@/shadow/development/initial-data/products';
+import { initialCategories, initialProducts } from '@/views/dev/model/initial-catalog-data';
 import { getCatalogTableNames } from '@/shared/config/table-names';
-import { createSupabaseServiceClient } from '@/shared/supabase/server/create-service-client';
+import { createSupabaseServiceClient } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { redirectDevActionResult } from '@/views/dev/lib/redirect-dev-action-result';
 import { revalidatePublicPages } from '@/views/dev/server/revalidate-public-pages';
 

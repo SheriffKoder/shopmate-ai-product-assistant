@@ -86,17 +86,20 @@ interface UseDebounceReturn {
 
 /**
  * Reusable debounce hook with countdown indicator
- * 
+ *
+
  * @param options - Debounce configuration
  * @returns Debounce state and controls
- * 
+ *
+
  * Usage:
  * ```typescript
  * const { isDebouncing, countdown, resetDebounce, triggerDebounce } = useDebounce({
  *   delay: 5000,
  *   onDebounceComplete: () => saveDocument(),
  * });
- * 
+ *
+
  * // Call triggerDebounce() when user edits content
  * // Hook will automatically call onDebounceComplete after delay
  * ```
@@ -121,7 +124,8 @@ export function useVersionHistoryDebounce({
       clearInterval(countdownIntervalRef.current);
       countdownIntervalRef.current = null;
     }
-    
+
+
     setIsDebouncing(false);
     setCountdown(0);
     startTimeRef.current = null;
@@ -155,7 +159,8 @@ export function useVersionHistoryDebounce({
       setIsDebouncing(false);
       setCountdown(0);
       startTimeRef.current = null;
-      
+
+
       if (onDebounceComplete) {
         onDebounceComplete();
       }
@@ -218,7 +223,7 @@ export function useVersionHistoryDebounce({
 
 import { useState, useCallback } from 'react';
 import { useDocument } from './use-document';
-import type { DocumentKind } from '@/lib/supabase/types';
+import type { DocumentKind } from '@/shared/infrastructure/supabase/types';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { buildArtifactApiUrl } from '../utils/artifact-api-endpoint';
 
@@ -238,17 +243,21 @@ interface UseVersionHistorySaveReturn {
 
 /**
  * Reusable hook for saving artifact versions
- * 
+ *
+
  * Creates a new version of the document (same ID, new createdAt)
  * and invalidates SWR cache to refresh version count.
- * 
+ *
+
  * @param documentId - Document ID to save
  * @returns Save function and state
- * 
+ *
+
  * Usage:
  * ```typescript
  * const { saveVersion, isSaving, error } = useVersionHistorySave();
- * 
+ *
+
  * await saveVersion({
  *   documentId: 'abc-123',
  *   title: 'My Document',
@@ -306,7 +315,8 @@ export function useVersionHistorySave(documentId: string | null): UseVersionHist
       }
 
       const savedDocument = await response.json();
-      
+
+
       logger.info('[Version History Save] Successfully saved document version', {
         documentId: id,
         createdAt: savedDocument.createdAt,
@@ -363,7 +373,7 @@ export function useVersionHistorySave(documentId: string | null): UseVersionHist
 
 import { useDocument } from '../hooks/use-document';
 import { Clock, CheckCircle2, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface VersionHistoryHeaderProps {
   documentId: string | null;
@@ -376,7 +386,8 @@ interface VersionHistoryHeaderProps {
 
 /**
  * Version History Header Component
- * 
+ *
+
  * Displays:
  * - Version count (from fetched documents)
  * - Countdown indicator (during debounce)
@@ -439,10 +450,12 @@ function formatLastSaved(date: Date): string {
   if (diffSec < 10) return 'just now';
   if (diffSec < 60) return `${diffSec}s ago`;
   if (diffMin < 60) return `${diffMin}m ago`;
-  
+
+
   const diffHour = Math.floor(diffMin / 60);
   if (diffHour < 24) return `${diffHour}h ago`;
-  
+
+
   return date.toLocaleDateString();
 }
 ```
@@ -479,7 +492,8 @@ interface EditableTitleProps {
 
 /**
  * Editable Title Component
- * 
+ *
+
  * Allows inline editing of document title.
  * Triggers onTitleChange callback when title changes.
  */
@@ -579,7 +593,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-text';
 import { Button } from '@/components/ui/button';
 import { Eye, Edit } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface EditableContentProps {
   content: string;
@@ -589,7 +603,8 @@ interface EditableContentProps {
 
 /**
  * Editable Content Component
- * 
+ *
+
  * Allows editing of markdown content with optional preview mode.
  * Triggers onContentChange callback when content changes.
  */
@@ -720,7 +735,8 @@ export function TextArtifactContent() {
   // Use refs to store latest values to avoid closure stale values
   const latestTitleRef = useRef(localTitle);
   const latestContentRef = useRef(localContent);
-  
+
+
   // Keep refs in sync with state
   useEffect(() => {
     latestTitleRef.current = localTitle;
@@ -750,25 +766,29 @@ export function TextArtifactContent() {
           // Use refs to get the absolute latest values (avoid closure stale values)
           const titleToSave = latestTitleRef.current;
           const contentToSave = latestContentRef.current;
-          
+
+
           logger.debug('[Text Artifact] Saving with values', {
             titleLength: titleToSave.length,
             contentLength: contentToSave.length,
             titlePreview: titleToSave.substring(0, 30),
             contentPreview: contentToSave.substring(0, 50),
           });
-          
+
+
           await saveVersion({
             documentId,
             title: titleToSave,
             content: contentToSave,
             kind: 'text',
           });
-          
+
+
           // Wait for SWR to refetch and update documents array
           await mutateDocuments(undefined, { revalidate: true });
           await new Promise(resolve => setTimeout(resolve, 300)); // Wait for refetch
-          
+
+
           // Reset to latest version to show the newly saved version
           resetToLatest();
         } catch (err) {
@@ -1189,7 +1209,8 @@ export function buildArtifactApiUrl(
 ```
 
 **Updated Files**:
-1. **`version-history-save.ts`**: 
+1. **`version-history-save.ts`**:
+
    - Uses `buildArtifactApiUrl(kind, { id })` instead of hardcoded `/api/document?id=${id}`
    - Automatically uses correct endpoint based on artifact kind
 

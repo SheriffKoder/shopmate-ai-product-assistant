@@ -11,8 +11,8 @@ import {
   getChatById,
   getMessagesByChatId,
   saveMessages,
-} from '@/lib/supabase/queries/chat-queries';
-import { getOrCreateConstantUser } from '@/lib/supabase/queries/user-queries';
+} from '@/shared/infrastructure/supabase/queries/chat-queries';
+import { getOrCreateConstantUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import {
   extractTitleFromMessage,

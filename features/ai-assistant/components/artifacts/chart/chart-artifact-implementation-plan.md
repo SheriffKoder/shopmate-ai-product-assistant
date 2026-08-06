@@ -13,7 +13,8 @@ This plan outlines the implementation of chart artifacts in the AI assistant, al
 - ✅ SWR-based fetching for client-side data management
 - ✅ Uses existing `LineChart` component from `app/development/dashboard-grid/sections/line-chart/components/LineChart.tsx`
 
-**Related Documentation**: 
+**Related Documentation**:
+
 - See `text-artifact-implementation-plan.md` for the foundational pattern
 - See `sheet-artifact-implementation-plan.md` for the sheet-specific pattern (this builds on both)
 - See `artifact-database-swr-supabase-implementation.md` for database integration details
@@ -157,12 +158,15 @@ interface ChartData {
 **Migration SQL**:
 ```sql
 -- Drop the existing constraint
-ALTER TABLE "Document" 
+ALTER TABLE "Document"
+
   DROP CONSTRAINT IF EXISTS "Document_kind_check";
 
 -- Add new constraint that includes 'chart'
-ALTER TABLE "Document" 
-  ADD CONSTRAINT "Document_kind_check" 
+ALTER TABLE "Document"
+
+  ADD CONSTRAINT "Document_kind_check"
+
   CHECK ("kind" IN ('text', 'code', 'sheet', 'chart'));
 
 -- Update comment to reflect chart support
@@ -189,7 +193,8 @@ COMMENT ON COLUMN "Document"."kind" IS 'Artifact type: text, code, sheet, or cha
 ```typescript
 export type ShopMateUIDataTypes = {
   // ... existing types ...
-  
+
+
   // Artifact types
   textDelta: string;              // Text content chunks
   sheetDelta: string;              // CSV content chunks
@@ -245,8 +250,10 @@ export interface UIArtifact {
 
 ```typescript
 case "data-chartDelta":
-  setArtifact(prev => ({ 
-    ...prev, 
+  setArtifact(prev => ({
+
+    ...prev,
+
     content: prev.content + delta.data, // JSON content accumulates
     status: "streaming",
   }));
@@ -300,7 +307,7 @@ import { streamObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 
@@ -326,7 +333,8 @@ export async function createChartDocument({
   // ✅ PHASE 1: Get labels/ticks first and initialize with zeros
   // This allows the chart to render immediately with structure, then fill in data
   logger.debug('[Chart Artifact] Phase 1: Getting labels and structure...');
-  
+
+
   const labelsSchema = z.object({
     labels: z.array(z.string()).describe('Array of labels for the x-axis (e.g., ["Jan", "Feb", "Mar"])'),
     datasetLabels: z.array(z.string()).optional().describe('Array of dataset labels (e.g., ["RTC Payments", "Other Payments"])'),
@@ -356,7 +364,8 @@ No explanations or markdown formatting.`,
       if (object) {
         labels = object.labels || [];
         datasetLabels = object.datasetLabels || ['Data'];
-        
+
+
         // Create initial chart data with zeros
         initialChartData = {
           labels: labels,
@@ -384,7 +393,8 @@ No explanations or markdown formatting.`,
 
   // ✅ PHASE 2: Stream actual data values incrementally
   logger.debug('[Chart Artifact] Phase 2: Streaming data values...');
-  
+
+
   const dataSchema = z.object({
     values: z.array(z.number()).describe('Array of numeric values for the current dataset. Length should match labels array.'),
     datasetIndex: z.number().optional().describe('Index of the dataset being updated (0-based). If not provided, updates first dataset.'),
@@ -412,7 +422,8 @@ Important:
   for await (const delta of valuesStream) {
     if (delta.type === 'object') {
       const { object } = delta;
-      
+
+
       if (object && object.values && Array.isArray(object.values)) {
         const datasetIndex = object.datasetIndex ?? 0;
         const newValues = object.values;
@@ -521,7 +532,8 @@ Important:
 }
 ```
 
-**Why**: 
+**Why**:
+
 - **Two-phase streaming**: First gets labels/ticks and renders chart with zeros, then streams actual values
 - **Better UX**: Chart structure appears immediately, then data fills in progressively
 - Handles the actual chart data generation and streaming (data only, no styling)
@@ -534,7 +546,8 @@ Important:
 
 **⚠️ Implementation Notes**:
 
-1. **Two-Phase Approach**: 
+1. **Two-Phase Approach**:
+
    - Phase 1 gets labels first and initializes chart with zeros
    - Phase 2 streams actual values incrementally
    - This provides better UX as chart structure appears immediately
@@ -560,7 +573,8 @@ Important:
 
 **File**: `features/ai-assistant/agents/dashboard-static-message/agent.ts` (or relevant agent)
 
-**Changes**: 
+**Changes**:
+
 - Import `createChartDocument`
 - Handle `kind === 'chart'` in `onStepFinish` callback
 - Pass `documentId` to `createChartDocument` for Supabase persistence
@@ -580,10 +594,12 @@ for (const toolCall of toolCalls) {
     if (!input) continue;
 
     const { title, kind } = input as { title: string; kind?: 'text' | 'code' | 'sheet' | 'chart' };
-    
+
+
     // Use shared ID that tool set (ensures sync)
     const documentId = sharedDocumentId || generateUUID();
-    
+
+
     if (kind === 'chart') {
       await createChartDocument({
         title,
@@ -595,13 +611,15 @@ for (const toolCall of toolCalls) {
     } else if (kind === 'text' || !kind) {
       // ... existing text handler ...
     }
-    
+
+
     sharedDocumentId = null; // Reset for next call
   }
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Makes the chart handler available when AI creates chart artifacts
 - **Ensures ID sync** between tool and agent
 - **Enables persistence** by passing documentId to handler
@@ -633,7 +651,7 @@ for (const toolCall of toolCalls) {
 
 import { useMemo } from 'react';
 import { LineChart } from '@/app/development/dashboard-grid/sections/line-chart/components/LineChart';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface ChartRendererProps {
   jsonContent: string;
@@ -643,10 +661,12 @@ interface ChartRendererProps {
 
 /**
  * Chart Renderer Component
- * 
+ *
+
  * Renders a line chart from JSON data with theme-aware styling.
  * Used in both preview card and artifact panel.
- * 
+ *
+
  * @param jsonContent - JSON string containing chart data (data only, no styling)
  * @param isPreview - If true, applies preview styling (smaller height)
  * @param className - Additional CSS classes
@@ -665,18 +685,21 @@ export function ChartRenderer({ jsonContent, isPreview = false, className }: Cha
 
     try {
       const parsed = JSON.parse(jsonContent);
-      
+
+
       // Validate required fields
       if (!parsed.datasets || !Array.isArray(parsed.datasets) || parsed.datasets.length === 0) {
         console.warn('[Chart Renderer] Invalid chart data: missing or empty datasets');
         return null;
       }
-      
+
+
       if (!parsed.labels || !Array.isArray(parsed.labels) || parsed.labels.length === 0) {
         console.warn('[Chart Renderer] Invalid chart data: missing or empty labels');
         return null;
       }
-      
+
+
       return parsed;
     } catch (error) {
       console.error('[Chart Renderer] Error parsing JSON:', error);
@@ -752,7 +775,8 @@ export function ChartRenderer({ jsonContent, isPreview = false, className }: Cha
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Reusable component for both preview and panel
 - Handles JSON parsing and validation
 - **Applies theme-aware styling** using foreground color from CSS variables
@@ -804,7 +828,8 @@ export function DocumentContent({ document }: DocumentContentProps) {
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Adds chart rendering to preview card
 - Uses reusable `ChartRenderer` component with `isPreview={true}` for smaller size
 
@@ -836,9 +861,11 @@ import { ChartRenderer } from './chart-renderer';
 
 /**
  * Chart Artifact Content Component
- * 
+ *
+
  * Displays the chart artifact content with line chart rendering.
- * 
+ *
+
  * Features:
  * - Fetches document from Supabase via SWR
  * - Falls back to streaming content during streaming or if fetch fails
@@ -887,7 +914,8 @@ export function ChartArtifactContent() {
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Displays the chart artifact content with line chart rendering
 - **Fetches from Supabase** via SWR for persistence
 - **Falls back to streaming content** during streaming or if fetch fails
@@ -1053,7 +1081,8 @@ features/ai-assistant/artifacts/
 
 ## Key Design Decisions
 
-1. **JSON Format**: 
+1. **JSON Format**:
+
    - Charts are stored as JSON strings in the database
    - **Contains only data** (datasets with data/labels, x-axis labels)
    - **No styling** - all styling applied in component code
@@ -1117,11 +1146,13 @@ features/ai-assistant/artifacts/
 
 1. **Version History**: Add version tracking for charts (same as text/sheet artifacts)
 2. **Chart Editing**: Allow users to edit chart configuration
-3. **Advanced Features**: 
+3. **Advanced Features**:
+
    - Multiple chart types (bar, pie, etc.)
    - Chart export (PNG, SVG, PDF)
    - Chart sharing
-4. **Better Data Handling**: 
+4. **Better Data Handling**:
+
    - Support for larger datasets
    - Data aggregation options
    - Real-time data updates

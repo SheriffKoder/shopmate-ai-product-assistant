@@ -50,9 +50,6 @@ These files must remain provider-neutral:
   - Uses assistant HTTP endpoints, not database clients.
 - `features/ai-assistant/components/history-sidebar/`
   - Displays assistant DTOs and calls client operations.
-- `features/ai-assistant/test/in-memory-assistant-persistence.ts`
-  - Provider-free adapter for tests and assistant-only development.
-
 ### Application composition
 
 These files select the current provider:
@@ -63,10 +60,6 @@ These files select the current provider:
 - `app/infrastructure/assistant/supabase/assistant-persistence.ts`
   - Supabase implementation of `AssistantPersistence`.
   - Converts assistant messages into the current database row shape.
-- `app/infrastructure/assistant/supabase/artifact-database.ts`
-  - Temporary composition boundary for server-side artifact database access.
-  - This should later be replaced by a provider-neutral document adapter.
-
 ### Supabase infrastructure
 
 These files initialize and access the current provider:
@@ -74,11 +67,11 @@ These files initialize and access the current provider:
 - `lib/supabase/client.ts`
   - Reads Supabase environment variables and creates the admin client.
   - Never import this from a client component.
-- `lib/supabase/queries/chat-queries.ts`
+- `shared/infrastructure/supabase/queries/chat-queries.ts`
   - Chat and message query operations.
-- `lib/supabase/queries/user-queries.ts`
+- `shared/infrastructure/supabase/queries/user-queries.ts`
   - Current development user resolution.
-- `lib/supabase/types.ts`
+- `shared/infrastructure/supabase/types.ts`
   - Database row types. These should stay outside the generic assistant feature.
 - `lib/supabase/migrations/002_create_user_table.sql`
   - User table schema.
@@ -127,8 +120,7 @@ The search should return no provider imports in TypeScript or TSX files under th
 For a project that does not need persistence or ShopMate agents, compose the generic assistant with:
 
 - `features/ai-assistant/server/default-assistant-runtime.ts`
-- `features/ai-assistant/test/in-memory-assistant-persistence.ts`
-- a route that injects the in-memory adapter
+- a provider-specific persistence adapter or a test double
 
 This mode should not import `lib/supabase`, require Supabase environment variables, or initialize a database client. It still supports normal chat rendering and assistant streaming; it simply uses the selected persistence lifetime.
 
@@ -155,7 +147,7 @@ Map database rows to assistant DTOs at the adapter or API boundary. Components s
 
 ### Treating the in-memory adapter as production persistence
 
-The in-memory adapter is isolated and useful for tests or local assistant-only mode. It is process-local and does not survive restarts or scale across instances.
+Test doubles should remain isolated from production persistence and should not be expected to survive restarts or scale across instances.
 
 ## Verification references
 
@@ -163,5 +155,4 @@ The in-memory adapter is isolated and useful for tests or local assistant-only m
 - Route composition: `app/api/ai-assistant/route.ts`
 - Generic handler: `features/ai-assistant/server/handle-assistant-request.ts`
 - Contracts: `features/ai-assistant/model/assistant-persistence.ts`
-- Provider-free adapter: `features/ai-assistant/test/in-memory-assistant-persistence.ts`
 - Current Supabase adapter: `app/infrastructure/assistant/supabase/assistant-persistence.ts`

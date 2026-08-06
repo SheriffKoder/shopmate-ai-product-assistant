@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { getSupabaseTableNames } from '@/shared/config/table-names';
 import type { LocalChatHistoryItem } from '../model/local-chat-history';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';

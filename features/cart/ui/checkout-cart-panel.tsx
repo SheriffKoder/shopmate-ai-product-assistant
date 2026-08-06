@@ -44,7 +44,7 @@ export function CheckoutCartPanel(props: CheckoutCartPanelProps) {
 
   if (cart.items.length === 0) {
     return (
-      <section className="rounded-md border bg-white p-8 text-center shadow-sm">
+      <section className="border border-foreground/20 bg-white p-8 text-center">
         <h2 className="text-2xl font-semibold text-gray-950">{copy.emptyTitle}</h2>
         <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
           {copy.emptyDescription}
@@ -58,7 +58,7 @@ export function CheckoutCartPanel(props: CheckoutCartPanelProps) {
 
   return (
     <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="border border-foreground/70 bg-white shadow-sm">
+      <div className="border border-foreground/20 bg-white">
         <div className="border-b border-foreground/70 bg-foreground px-5 py-4 text-background">
           <h2 className="text-lg font-semibold">{copy.orderSummary}</h2>
         </div>
@@ -94,7 +94,7 @@ export function CheckoutCartPanel(props: CheckoutCartPanelProps) {
           })}
         </ul>
       </div>
-      <aside className="h-fit border border-foreground/70 bg-white p-5 shadow-sm">
+      <aside className="h-fit border border-foreground/20 bg-white p-5">
         <h2 className="text-lg font-semibold text-gray-950">{copy.estimatedTotal}</h2>
         <div className="mt-5 space-y-3 text-sm">
           <div className="flex items-center justify-between text-muted-foreground">
@@ -106,7 +106,7 @@ export function CheckoutCartPanel(props: CheckoutCartPanelProps) {
             <span>${cart.totalPrice.toFixed(2)}</span>
           </div>
         </div>
-        <Button asChild className="mt-6 w-full">
+        <Button asChild className="mt-6 w-full bg-primary text-foreground hover:bg-primary/90">
           <AssistantAwareLink href={`/${locale}/checkout/success`}>{copy.actionLabel}</AssistantAwareLink>
         </Button>
       </aside>

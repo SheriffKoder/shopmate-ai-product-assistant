@@ -41,7 +41,7 @@ export const HeaderIconButton = ({
       onClick={onClick}
       disabled={disabled}
       title={tooltip}
-      className={`header-icon-control cursor-pointer
+      className={`header-icon-control cursor-pointer rounded-none
       ${className}
       ${isActive ? activeClassName : inactiveClassName}
       ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}

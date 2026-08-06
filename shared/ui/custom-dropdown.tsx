@@ -20,7 +20,7 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 export type CustomDropdownDirection = 'up' | 'down';
 

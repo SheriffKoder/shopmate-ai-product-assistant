@@ -57,7 +57,7 @@ export function AssistantShellHeader({
       onKeyDown={handleHeaderKeyDown}
     >
       <div className="flex flex-row items-center gap-2">
-        <Image src="/images/icon.png" alt="AI Assistant" className='p-1 bg-white rounded h-6 w-9' width={52} height={24} />
+        <Image src="/images/icon.png" alt="AI Assistant" className='p-1 bg-white rounded h-6 w-12' width={60} height={24} />
         <span className="text-white">Shop Assistant</span>
       </div>
 

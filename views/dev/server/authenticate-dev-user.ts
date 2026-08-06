@@ -8,10 +8,10 @@
 
 'use server';
 
-import { createSupabaseServiceClient } from '@/shared/supabase/server/create-service-client';
+import { createSupabaseServiceClient } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { getAppEnv } from '@/shared/config/env';
 import { redirectDevActionResult } from '@/views/dev/lib/redirect-dev-action-result';
-import { upsertUserForAuthUser } from '@/lib/supabase/queries/user-queries';
+import { upsertUserForAuthUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 
 /**
  * Ensures the configured development user exists in Supabase Auth.

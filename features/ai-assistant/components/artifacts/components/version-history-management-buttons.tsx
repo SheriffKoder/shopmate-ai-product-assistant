@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Undo2, Redo2, Scissors } from 'lucide-react';
 import { useVersionHistoryKeep } from '../hooks/version-history-keep';
 import { logger } from '@/features/ai-assistant/lib/logger';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import type { DocumentKind } from '@/features/ai-assistant/model/artifact-document';
 
 interface VersionHistoryManagementButtonsProps {

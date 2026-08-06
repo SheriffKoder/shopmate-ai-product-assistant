@@ -7,7 +7,7 @@
  */
 
 import { NextRequest } from 'next/server';
-import { getMessagesByChatId } from '@/lib/supabase/queries/chat-queries';
+import { getMessagesByChatId } from '@/shared/infrastructure/supabase/queries/chat-queries';
 import { handleApiError } from '@/features/ai-assistant/lib/errors';
 import { logger } from '@/features/ai-assistant/lib/logger';
 

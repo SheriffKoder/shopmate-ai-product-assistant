@@ -1,7 +1,8 @@
 # History Sidebar
 
 > **Purpose**: Sidebar component for displaying and navigating chat history
-> 
+>
+
 > **Status**: Ready for integration
 
 ---
@@ -61,8 +62,10 @@ Individual chat item that:
 ```tsx
 import { ChatItem } from '@/features/ai-assistant/history-sidebar';
 
-<ChatItem 
-  chat={chat} 
+<ChatItem
+
+  chat={chat}
+
   isActive={chat.id === currentChatId}
 />
 ```
@@ -100,7 +103,7 @@ See `app/api/history/route.ts` for API implementation.
 ## Database Integration
 
 Uses `getChatsByUserId()` from:
-- `lib/supabase/queries/chat-queries.ts`
+- `shared/infrastructure/supabase/queries/chat-queries.ts`
 
 ---
 

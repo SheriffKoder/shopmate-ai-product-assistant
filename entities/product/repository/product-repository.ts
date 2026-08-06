@@ -8,7 +8,7 @@
 
 import 'server-only';
 
-import { createSupabaseServiceClient } from '@/shared/supabase/server/create-service-client';
+import { createSupabaseServiceClient } from '@/shared/infrastructure/supabase/server/create-service-client';
 import type { Product, ProductRow, ProductSlugParam } from '@/entities/product/model/product';
 import { transformProductRow } from '@/entities/product/transform/product-transform';
 import { getCatalogTableNames } from '@/shared/config/table-names';

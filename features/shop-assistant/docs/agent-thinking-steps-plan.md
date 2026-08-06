@@ -218,7 +218,6 @@ Files:
 - `features/ai-assistant/components/thinking-steps/thinking-steps.test.tsx`
 - `features/ai-assistant/model/assistant-events.test.ts`
 - `features/shop-assistant/server/router.test.ts`
-- [`features/ai-assistant/test/in-memory-assistant-persistence.ts`](../../ai-assistant/test/in-memory-assistant-persistence.ts)
 
 Checklist:
 

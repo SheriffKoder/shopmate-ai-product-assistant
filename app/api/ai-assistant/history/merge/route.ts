@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getOrCreateConstantUser } from '@/lib/supabase/queries/user-queries';
+import { getOrCreateConstantUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 import { mergeLocalChatHistory } from '@/features/ai-assistant/message-persistence/server/merge-local-history';
 import type { LocalChatHistoryItem } from '@/features/ai-assistant/message-persistence/model/local-chat-history';
 

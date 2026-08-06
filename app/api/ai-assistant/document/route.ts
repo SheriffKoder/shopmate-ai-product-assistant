@@ -12,8 +12,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
-import type { Document } from '@/lib/supabase/types';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
+import type { Document } from '@/shared/infrastructure/supabase/types';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { getSupabaseTableNames } from '@/shared/config/table-names';

@@ -17,7 +17,7 @@
 
 import { useMemo } from 'react';
 import { parse } from 'papaparse';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface TableProps {
   /** CSV string to render */

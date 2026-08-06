@@ -2,7 +2,7 @@
  * Environment Config
  *
  * Purpose: Validates environment variables for the parallel architecture.
- * Used in: shared/supabase/server
+ * Used in: shared/infrastructure/supabase/server
  * Used for: Keeps server-first Supabase and development credentials isolated from current app config.
  */
 

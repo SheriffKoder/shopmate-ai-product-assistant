@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import type { ReactNode, ComponentProps } from "react";
 
 export type ModelSelectorProps = ComponentProps<typeof Dialog>;

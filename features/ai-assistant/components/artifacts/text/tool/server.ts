@@ -19,7 +19,7 @@
 
 import { streamText, smoothStream } from 'ai';
 import type { UIMessageStreamWriter } from 'ai';
-import { supabaseAdmin } from '@/shared/supabase/server/create-service-client';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';

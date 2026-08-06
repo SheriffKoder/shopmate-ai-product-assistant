@@ -110,7 +110,8 @@ The artifact system has **three main UI components**:
 ```typescript
 export type ShopMateUIDataTypes = {
   // ... existing types ...
-  
+
+
   // Artifact types
   textDelta: string;              // Text content chunks
   artifactId: string;              // Artifact document ID
@@ -209,37 +210,60 @@ export const createDocumentTool = (
   }),
   execute: async ({ title, kind = "text" }) => {
     const id = generateUUID();
-    
+
+
     // Send artifact metadata to UI
-    dataStream?.write({ 
-      type: "data-artifactId", 
-      data: id, 
-      transient: true 
+    dataStream?.write({
+
+      type: "data-artifactId",
+
+      data: id,
+
+      transient: true
+
     });
-    dataStream?.write({ 
-      type: "data-artifactTitle", 
-      data: title, 
-      transient: true 
+    dataStream?.write({
+
+      type: "data-artifactTitle",
+
+      data: title,
+
+      transient: true
+
     });
-    dataStream?.write({ 
-      type: "data-artifactKind", 
-      data: kind, 
-      transient: true 
+    dataStream?.write({
+
+      type: "data-artifactKind",
+
+      data: kind,
+
+      transient: true
+
     });
-    dataStream?.write({ 
-      type: "data-artifactStatus", 
-      data: "streaming", 
-      transient: true 
+    dataStream?.write({
+
+      type: "data-artifactStatus",
+
+      data: "streaming",
+
+      transient: true
+
     });
-    dataStream?.write({ 
-      type: "data-artifactClear", 
-      data: null, 
-      transient: true 
+    dataStream?.write({
+
+      type: "data-artifactClear",
+
+      data: null,
+
+      transient: true
+
     });
-    
+
+
     // Trigger artifact handler (will be called separately)
     // For now, return success - handler will stream content
-    
+
+
     return {
       id,
       title,
@@ -270,7 +294,7 @@ export const createDocumentTool = (
 import { streamText, smoothStream } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import type { UIMessageStreamWriter } from 'ai';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 
@@ -291,7 +315,8 @@ export async function createTextDocument({
   const { fullStream } = streamText({
     model: openai('o3-mini'),
     system: "Write about the given topic. Markdown is supported. Use headings wherever appropriate. Be clear and concise.",
-    experimental_transform: smoothStream({ 
+    experimental_transform: smoothStream({
+
       chunking: "word",
       delayInMs: 10,
     }),
@@ -342,7 +367,8 @@ export async function createTextDocument({
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Handles the actual content generation and streaming
 - **Saves to database for persistence** (after streaming completes)
 - **Non-blocking**: Database save doesn't affect streaming experience
@@ -393,10 +419,12 @@ const result = streamText({
         if (!input) continue;
 
         const { title, kind } = input as { title: string; kind?: 'text' | 'code' | 'sheet' };
-        
+
+
         // Use shared ID that tool set (ensures sync)
         const documentId = sharedDocumentId || generateUUID();
-        
+
+
         if (kind === 'text' || !kind) {
           await createTextDocument({
             title,
@@ -404,7 +432,8 @@ const result = streamText({
             documentId, // Pass for Supabase persistence
           });
         }
-        
+
+
         sharedDocumentId = null; // Reset for next call
       }
     }
@@ -412,7 +441,8 @@ const result = streamText({
 });
 ```
 
-**Why**: 
+**Why**:
+
 - Makes the tool available to AI during conversations
 - **Ensures ID sync** between tool and agent
 - **Enables persistence** by passing documentId to handler
@@ -439,14 +469,17 @@ export function DataStreamHandler() {
 
   useEffect(() => {
     if (!dataStream?.length) return;
-    
+
+
     const newDeltas = dataStream.slice();
     setDataStream([]);
-    
+
+
     for (const delta of newDeltas) {
       switch (delta.type) {
         // ... existing cases ...
-        
+
+
         // Artifact cases
         case "data-artifactId":
           setArtifact(prev => ({ ...prev, documentId: delta.data }));
@@ -461,8 +494,10 @@ export function DataStreamHandler() {
           setArtifact(prev => ({ ...prev, status: delta.data }));
           break;
         case "data-textDelta":
-          setArtifact(prev => ({ 
-            ...prev, 
+          setArtifact(prev => ({
+
+            ...prev,
+
             content: prev.content + delta.data,
             status: "streaming",
           }));
@@ -480,7 +515,8 @@ export function DataStreamHandler() {
       }
     }
   }, [dataStream, setDataStream, setArtifact]);
-  
+
+
   return null;
 }
 ```
@@ -623,7 +659,8 @@ export function DocumentPreview({
         result={result}
         setArtifact={setArtifact}
       />
-      
+
+
       {/* Preview Card */}
       <DocumentHeader
         isStreaming={artifact.status === 'streaming'}
@@ -730,7 +767,7 @@ export function DocumentHeader({ title, kind, isStreaming }: DocumentHeaderProps
 
 import { useArtifact } from '@/features/ai-assistant/hooks/use-artifact';
 import ReactMarkdown from 'react-markdown';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface DocumentContentProps {
   document: {
@@ -791,9 +828,11 @@ export function DocumentToolCall({ type, args, isReadonly }: DocumentToolCallPro
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (isReadonly) return;
-    
+
+
     const rect = event.currentTarget.getBoundingClientRect();
-    
+
+
     setArtifact((currentArtifact) => ({
       ...currentArtifact,
       isVisible: true,
@@ -818,7 +857,8 @@ export function DocumentToolCall({ type, args, isReadonly }: DocumentToolCallPro
         {type === 'create' ? <FileIcon size={16} /> : <PencilEditIcon size={16} />}
       </div>
       <div className="text-left">
-        {type === 'create' 
+        {type === 'create'
+
           ? `Creating "${args.title || 'document'}"`
           : `Updating "${args.description || 'document'}"`
         }
@@ -857,7 +897,8 @@ export function DocumentToolResult({ type, result, isReadonly }: DocumentToolRes
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (isReadonly) return;
-    
+
+
     const rect = event.currentTarget.getBoundingClientRect();
 
     setArtifact((currentArtifact) => ({
@@ -897,7 +938,8 @@ export function DocumentToolResult({ type, result, isReadonly }: DocumentToolRes
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Preview card shows when panel is closed (with content preview, overflow hidden)
 - Button shows when panel is open (compact view)
 - Entire preview card is clickable to open artifact panel
@@ -965,11 +1007,13 @@ export function ArtifactPanel({ chatId, messages, status, ...chatProps }: Artifa
         >
           <div className="relative h-full overflow-auto">
             <ArtifactCloseButton />
-            
+
+
             {artifact.kind === 'text' && (
               <TextArtifactContent artifact={artifact} />
             )}
-            
+
+
             {/* Future: code, sheet, image artifacts */}
           </div>
         </motion.div>
@@ -1001,11 +1045,15 @@ interface ArtifactMessagesProps {
   // ... other props
 }
 
-export function ArtifactMessages({ 
-  chatId, 
-  messages, 
+export function ArtifactMessages({
+
+  chatId,
+
+  messages,
+
   status,
-  ...props 
+  ...props
+
 }: ArtifactMessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -1084,7 +1132,8 @@ export function TextArtifactContent() {
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Displays the text artifact content with markdown rendering
 - **Fetches from Supabase** via SWR for persistence
 - **Falls back to streaming content** during streaming or if fetch fails
@@ -1138,14 +1187,16 @@ import { ArtifactPanel } from '@/features/ai-assistant/components/artifact/artif
 
 export const ChatContainer = ({ chatId, userType }: ChatContainerProps) => {
   // ... existing code ...
-  
+
+
   return (
     <>
       {/* Existing chat UI */}
       <div className="flex flex-col h-full">
         {/* Messages, input, etc. */}
       </div>
-      
+
+
       {/* Artifact Panel (split-screen) */}
       <ArtifactPanel
         chatId={chatId}
@@ -1183,7 +1234,8 @@ import { DocumentToolResult } from './message/document-tool-result';
       />
     );
   }
-  
+
+
   if (part.type === 'tool-result' && part.toolName === 'createDocument') {
     return (
       <DocumentToolResult
@@ -1193,7 +1245,8 @@ import { DocumentToolResult } from './message/document-tool-result';
       />
     );
   }
-  
+
+
   // ... other part types
 })}
 ```
@@ -1212,8 +1265,10 @@ import { DocumentToolResult } from './message/document-tool-result';
 
 ```typescript
 // In DataStreamHandler or useArtifact:
-if (artifact.status === "streaming" && 
-    artifact.content.length > 400 && 
+if (artifact.status === "streaming" &&
+
+    artifact.content.length > 400 &&
+
     artifact.content.length < 450) {
   setArtifact(prev => ({ ...prev, isVisible: true }));
 }
@@ -1237,13 +1292,15 @@ if (artifact.status === "streaming" &&
 
 **File**: `features/ai-assistant/artifacts/text/server.ts` and `features/ai-assistant/artifacts/hooks/use-document.ts`
 
-**Implementation**: 
+**Implementation**:
+
 - ✅ **Server-side**: Saves to Supabase after streaming completes
 - ✅ **Client-side**: Fetches via SWR using `useDocument` hook
 - ✅ **Automatic**: Persistence happens automatically after streaming
 - ✅ **Fallback**: Components fall back to streaming content if database unavailable
 
-**Why**: 
+**Why**:
+
 - ✅ Persist artifacts across sessions
 - ✅ Version history support (composite primary key)
 - ✅ Better performance for large artifacts
@@ -1279,7 +1336,8 @@ if (artifact.status === "streaming" &&
 15. ⏳ **Step 4.2**: Add editing (future)
 16. ⏳ **Step 4.3**: Add persistence (future)
 
-**Why this order**: 
+**Why this order**:
+
 - Foundation first (types, state)
 - UI components next (preview card, split-screen)
 - Then server-side (tool, handler)
@@ -1347,7 +1405,7 @@ See `artifact-database-swr-supabase-implementation.md` for setup instructions.
 
 ### Database Files:
 15. ✅ `lib/supabase/client.ts` - Supabase admin client
-16. ✅ `lib/supabase/types.ts` - Database types
+16. ✅ `shared/infrastructure/supabase/types.ts` - Database types
 17. ✅ `lib/supabase/migrations/001_create_document_table.sql` - Database schema
 18. ✅ `app/api/document/route.ts` - Document API routes (GET, POST, DELETE)
 

@@ -13,7 +13,8 @@ This plan outlines the implementation of sheet artifacts in ShopMate, allowing t
 - ✅ Database persistence via Supabase
 - ✅ SWR-based fetching for client-side data management
 
-**Related Documentation**: 
+**Related Documentation**:
+
 - See `text-artifact-implementation-plan.md` for the foundational pattern
 - See `artifact-database-swr-supabase-implementation.md` for database integration details
 
@@ -118,7 +119,8 @@ The sheet artifact follows the **same UI architecture as text artifacts**:
 ```typescript
 export type ShopMateUIDataTypes = {
   // ... existing types ...
-  
+
+
   // Artifact types
   textDelta: string;              // Text content chunks
   sheetDelta: string;              // CSV content chunks (NEW)
@@ -144,8 +146,10 @@ export type ShopMateUIDataTypes = {
 
 ```typescript
 case "data-sheetDelta":
-  setArtifact(prev => ({ 
-    ...prev, 
+  setArtifact(prev => ({
+
+    ...prev,
+
     content: prev.content + delta.data, // CSV content accumulates
     status: "streaming",
   }));
@@ -180,7 +184,7 @@ import { streamObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 
@@ -303,7 +307,8 @@ Return only valid CSV data, no explanations or markdown formatting.`,
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Handles the actual CSV generation and streaming
 - **Saves to database for persistence** (after streaming completes)
 - **Non-blocking**: Database save doesn't affect streaming experience
@@ -317,7 +322,8 @@ Return only valid CSV data, no explanations or markdown formatting.`,
 
 **File**: `features/ai-assistant/agents/technical-discussion/agent.ts` and `recommendation/agent.ts`
 
-**Changes**: 
+**Changes**:
+
 - Import `createSheetDocument`
 - Handle `kind === 'sheet'` in `onStepFinish` callback
 - Pass `documentId` to `createSheetDocument` for Supabase persistence
@@ -337,10 +343,12 @@ for (const toolCall of toolCalls) {
     if (!input) continue;
 
     const { title, kind } = input as { title: string; kind?: 'text' | 'code' | 'sheet' };
-    
+
+
     // Use shared ID that tool set (ensures sync)
     const documentId = sharedDocumentId || generateUUID();
-    
+
+
     if (kind === 'sheet') {
       await createSheetDocument({
         title,
@@ -350,13 +358,15 @@ for (const toolCall of toolCalls) {
     } else if (kind === 'text' || !kind) {
       // ... existing text handler ...
     }
-    
+
+
     sharedDocumentId = null; // Reset for next call
   }
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Makes the sheet handler available when AI creates sheet artifacts
 - **Ensures ID sync** between tool and agent
 - **Enables persistence** by passing documentId to handler
@@ -387,7 +397,7 @@ for (const toolCall of toolCalls) {
 
 import { useMemo } from 'react';
 import { parse } from 'papaparse';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface TableProps {
   csvContent: string;
@@ -397,10 +407,12 @@ interface TableProps {
 
 /**
  * Table Component
- * 
+ *
+
  * Renders CSV data as an HTML table.
  * Used in both preview card and artifact panel.
- * 
+ *
+
  * @param csvContent - CSV string to render
  * @param isPreview - If true, applies preview styling (overflow scroll, fixed height)
  * @param className - Additional CSS classes
@@ -482,7 +494,8 @@ export function Table({ csvContent, isPreview = false, className }: TableProps) 
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Reusable component for both preview and panel
 - Handles CSV parsing
 - Responsive and accessible
@@ -529,7 +542,8 @@ export function DocumentContent({ document }: DocumentContentProps) {
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Adds sheet rendering to preview card
 - Uses reusable `Table` component with `isPreview={true}` for overflow scroll
 
@@ -561,9 +575,11 @@ import { Table } from './table';
 
 /**
  * Sheet Artifact Content Component
- * 
+ *
+
  * Displays the sheet artifact content with table rendering.
- * 
+ *
+
  * Features:
  * - Fetches document from Supabase via SWR
  * - Falls back to streaming content during streaming or if fetch fails
@@ -612,7 +628,8 @@ export function SheetArtifactContent() {
 }
 ```
 
-**Why**: 
+**Why**:
+
 - Displays the sheet artifact content with table rendering
 - **Fetches from Supabase** via SWR for persistence
 - **Falls back to streaming content** during streaming or if fetch fails
@@ -781,7 +798,8 @@ npm install --save-dev @types/papaparse
 
 ## Key Design Decisions
 
-1. **CSV Format**: 
+1. **CSV Format**:
+
    - Sheets are stored as CSV strings in the database
    - Simple and portable
    - Easy to parse and render
@@ -829,12 +847,14 @@ npm install --save-dev @types/papaparse
 
 1. **Version History**: Add version tracking for sheets (same as text artifacts)
 2. **Sheet Editing**: Allow users to edit cells directly
-3. **Advanced Features**: 
+3. **Advanced Features**:
+
    - Formula support
    - Cell formatting
    - Column/row resizing
    - Sorting and filtering
-4. **Export Options**: 
+4. **Export Options**:
+
    - Export as CSV
    - Export as Excel
    - Copy to clipboard
