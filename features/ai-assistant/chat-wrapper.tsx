@@ -37,7 +37,7 @@ export const ChatWrapper = ({
   suggestions,
   toolRendererContext,
 }: ChatWrapperProps) => {
-  const [isChatCollapsed, setIsChatCollapsed] = useState(true);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const { isOpen } = useAssistantShell();
   //////////////////////////////////
   // Sidebar Refresh: Hook to manage sidebar refresh trigger
