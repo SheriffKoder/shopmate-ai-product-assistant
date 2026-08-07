@@ -5,12 +5,13 @@
  * Used in: widgets/category-showcase/ui/category-showcase.tsx
  */
 
-import Image from 'next/image';
 import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { Category } from '@/entities/category/model/category';
 import type { Product } from '@/entities/product/model/product';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import { BlurImage } from '@/shared/ui/blur-image';
+import Image from 'next/image';
 
 type Props = {
   category: Category;
@@ -26,7 +27,7 @@ export function CategoryShowcaseMobile({ category, categoryImage, locale, produc
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          {categoryImage ? <Image alt="" className="-scale-x-100 size-10 object-cover" height={40} src={categoryImage} width={40} /> : null}
+          {categoryImage ? <BlurImage alt="" className="-scale-x-100 size-10 object-cover" height={40} priority src={categoryImage} width={40} /> : null}
           <h2 id={`category-${category.id}`} className="text-2xl text-foreground">
             {categoryName}
           </h2>

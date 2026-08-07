@@ -6,7 +6,6 @@
  * Used for: Displays DB-backed product details without cart or assistant behavior.
  */
 
-import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { AppDictionary } from '@/shared/i18n/model/dictionary';
@@ -17,6 +16,8 @@ import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
 import { getLocalizedList } from '@/views/product-detail/lib/get-localized-list';
 import type { ProductDetailPageData } from '@/views/product-detail/queries/get-product-detail-page-data';
 import { ProductHighlightCards } from '@/widgets/product-highlight-cards/ui/product-highlight-cards';
+import { BlurImage } from '@/shared/ui/blur-image';
+import Image from 'next/image';
 
 type ProductDetailPageProps = {
   data: ProductDetailPageData;
@@ -54,7 +55,7 @@ export function ProductDetailPage(props: ProductDetailPageProps) {
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden bg-white">
             {product.imageUrl ? (
-              <Image
+              <BlurImage
                 alt={productName}
                 className="object-cover"
                 fill

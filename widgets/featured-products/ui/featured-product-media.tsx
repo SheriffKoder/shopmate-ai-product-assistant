@@ -5,10 +5,10 @@
 
 'use client';
 
-import Image from 'next/image';
 import { Pause, Play } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { Product } from '@/entities/product/model/product';
+import { BlurImage } from '@/shared/ui/blur-image';
 import { featuredProductVideos } from '@/widgets/featured-products/model/featured-product-videos';
 
 type FeaturedProductMediaProps = {
@@ -25,6 +25,8 @@ export function FeaturedProductMedia({ priority = false, product, sizes }: Featu
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoAvailable, setVideoAvailable] = useState(true);
+  const [shouldPreloadVideo, setShouldPreloadVideo] = useState(false);
+  const [isVideoSharp, setIsVideoSharp] = useState(false);
   const videoSrc = featuredProductVideos[product.slug];
   const imageSrc = product.imageUrl ?? '/images/products/placeholder.png';
 
@@ -33,6 +35,27 @@ export function FeaturedProductMedia({ priority = false, product, sizes }: Featu
     setVideoAvailable(true);
     videoRef.current?.pause();
   }, [product.id]);
+
+  useEffect(function preloadVideoAfterPageLoad() {
+    function beginVideoPreload() {
+      setShouldPreloadVideo(true);
+    }
+
+    if (document.readyState === 'complete') {
+      beginVideoPreload();
+      return;
+    }
+
+    window.addEventListener('load', beginVideoPreload, { once: true });
+
+    return function removePageLoadListener() {
+      window.removeEventListener('load', beginVideoPreload);
+    };
+  }, []);
+
+  useEffect(function resolveVideoBlur() {
+    setIsVideoSharp(true);
+  }, [videoSrc]);
 
   async function togglePlayback() {
     if (!videoRef.current) {
@@ -61,11 +84,16 @@ export function FeaturedProductMedia({ priority = false, product, sizes }: Featu
           onError={function handleVideoError() { setVideoAvailable(false); }}
           playsInline
           poster={imageSrc}
-          preload="none"
+          preload={shouldPreloadVideo ? 'auto' : 'none'}
           src={videoSrc}
+          style={{
+            filter: `blur(${isVideoSharp ? 0 : 12}px)`,
+            transform: isVideoSharp ? 'scale(1)' : 'scale(1.02)',
+            transition: 'filter 500ms ease-out, transform 500ms ease-out',
+          }}
         />
       ) : (
-        <Image alt={product.name.en} className="object-cover" fill priority={priority} sizes={sizes} src={imageSrc} />
+        <BlurImage alt={product.name.en} className="object-cover" fill priority={priority} sizes={sizes} src={imageSrc} />
       )}
       {videoSrc && videoAvailable ? (
         <button

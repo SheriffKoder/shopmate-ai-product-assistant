@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { Product } from '@/entities/product/model/product';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
+import { BlurImage } from '@/shared/ui/blur-image';
 import { FeaturedProductMedia } from '@/widgets/featured-products/ui/featured-product-media';
 
 type Props = { actionLabel: string; locale: AppLocale; onSelect: (id: string) => void; products: Product[]; selectedProduct: Product };
@@ -23,7 +23,7 @@ export function FeaturedProductsMobile(props: Props) {
               onClick={function handleClick() { onSelect(product.id); }}
               type="button"
             >
-              {product.imageUrl ? <Image alt={getLocalizedText(product.name, locale)} className="object-cover" fill loading="lazy" sizes="80px" src={product.imageUrl} /> : null}
+              {product.imageUrl ? <BlurImage alt={getLocalizedText(product.name, locale)} className="object-cover" fill priority sizes="80px" src={product.imageUrl} /> : null}
             </button>
           );
         })}

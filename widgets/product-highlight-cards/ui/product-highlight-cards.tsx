@@ -7,7 +7,6 @@
 
 'use client';
 
-import Image from 'next/image';
 import { Star } from 'lucide-react';
 
 import type { Product as EntityProduct } from '@/entities/product/model/product';
@@ -16,6 +15,7 @@ import type { Product as CartProduct } from '@/features/catalog/model/product';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
 import { ProductCartAction } from '@/widgets/product-highlight-cards/ui/product-cart-action';
+import { BlurImage } from '@/shared/ui/blur-image';
 
 type ProductHighlightCardsProps = {
   locale: AppLocale;
@@ -37,8 +37,8 @@ export function ProductHighlightCards({ locale, products, title }: ProductHighli
         {title}
       </h2>
       <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map(function renderCard(product) {
-          return <ProductHighlightCard key={product.id} locale={locale} product={product} />;
+        {products.map(function renderCard(product, index) {
+          return <ProductHighlightCard key={product.id} locale={locale} priority={index < 3} product={product} />;
         })}
       </div>
     </section>
@@ -47,13 +47,14 @@ export function ProductHighlightCards({ locale, products, title }: ProductHighli
 
 type ProductHighlightCardProps = {
   locale: AppLocale;
+  priority: boolean;
   product: EntityProduct;
 };
 
 /**
  * Renders one product highlight card with cart and detail actions.
  */
-function ProductHighlightCard({ locale, product }: ProductHighlightCardProps) {
+function ProductHighlightCard({ locale, priority, product }: ProductHighlightCardProps) {
   const name = getLocalizedText(product.name, locale);
   const localizedFeatures = product.features[locale];
   const gallery = [product.imageUrl, ...product.imageUrlVariations].filter(
@@ -72,11 +73,12 @@ function ProductHighlightCard({ locale, product }: ProductHighlightCardProps) {
           href={`/${locale}/products/${product.slug}`}
         >
         <div className="relative w-full">
-          <Image
+          <BlurImage
             alt={name}
             className="block h-auto w-full object-cover"
             height={0}
-            loading="lazy"
+            loading={priority ? undefined : 'lazy'}
+            priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             src={gallery[0]}
             style={{ height: 'auto', width: '100%' }}

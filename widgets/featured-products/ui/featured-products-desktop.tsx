@@ -1,9 +1,9 @@
-import Image from 'next/image';
 import { AssistantAwareLink } from '@/features/ai-assistant/navigation';
 import type { Product } from '@/entities/product/model/product';
 import type { AppLocale } from '@/shared/i18n/config';
 import { getLocalizedText } from '@/shared/i18n/lib/get-localized-text';
 import { FeaturedProductMedia } from '@/widgets/featured-products/ui/featured-product-media';
+import { BlurImage } from '@/shared/ui/blur-image';
 
 type Props = { actionLabel: string; locale: AppLocale; onSelect: (id: string) => void; products: Product[]; selectedProduct: Product };
 
@@ -39,7 +39,7 @@ function ProductImage({ product }: { product: Product }) {
 }
 
 function ProductThumbs({ locale, onSelect, products, selectedId }: { locale: AppLocale; onSelect: (id: string) => void; products: Product[]; selectedId: string }) {
-  return <div className="flex gap-4 overflow-x-auto">{products.map(function renderThumb(product) { const productName = getLocalizedText(product.name, locale); return <div className="w-42 flex-none text-center" key={product.id}><button aria-label={`Select ${productName}`} className={`relative aspect-square w-full bg-foreground cursor-pointer hover:opacity-80 ${product.id === selectedId ? 'border border-foreground/20' : ''}`} onClick={function handleClick() { onSelect(product.id); }} type="button"><Image alt={productName} className="object-cover" fill loading="lazy" sizes="112px" src={product.imageUrl ?? '/images/products/placeholder.png'} /></button><span className="mt-2 block line-clamp-2 font-button text-xs font-light opacity-70 text-foreground">{productName}</span></div>; })}</div>;
+  return <div className="flex gap-4 overflow-x-auto">{products.map(function renderThumb(product) { const productName = getLocalizedText(product.name, locale); return <div className="w-42 flex-none text-center" key={product.id}><button aria-label={`Select ${productName}`} className={`relative aspect-square w-full bg-foreground cursor-pointer hover:opacity-80 ${product.id === selectedId ? 'border border-foreground/20' : ''}`} onClick={function handleClick() { onSelect(product.id); }} type="button"><BlurImage alt={productName} className="object-cover" fill priority sizes="112px" src={product.imageUrl ?? '/images/products/placeholder.png'} /></button><span className="mt-2 block line-clamp-2 font-button text-xs font-light opacity-70 text-foreground">{productName}</span></div>; })}</div>;
 }
 
 function ProductDetails({ actionLabel, locale, product }: { actionLabel: string; locale: AppLocale; product: Product }) {
