@@ -9,7 +9,7 @@ import {
 import { cn } from "@/shared/lib/utils";
 import { BrainIcon, ChevronDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
-import { createContext, memo, useContext, useEffect, useState } from "react";
+import { createContext, memo, useContext, useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
 import { Shimmer } from "./shimmer";
 
@@ -38,7 +38,6 @@ export type ReasoningProps = ComponentProps<typeof Collapsible> & {
   duration?: number;
 };
 
-const AUTO_CLOSE_DELAY = 1000;
 const MS_IN_S = 1000;
 
 export const Reasoning = memo(
@@ -46,7 +45,7 @@ export const Reasoning = memo(
     className,
     isStreaming = false,
     open,
-    defaultOpen = true,
+    defaultOpen = false,
     onOpenChange,
     duration: durationProp,
     children,
@@ -62,8 +61,8 @@ export const Reasoning = memo(
       defaultProp: undefined,
     });
 
-    const [hasAutoClosed, setHasAutoClosed] = useState(false);
     const [startTime, setStartTime] = useState<number | null>(null);
+    const wasStreamingRef = useRef(isStreaming);
 
     // Track duration when streaming starts and ends
     useEffect(() => {
@@ -77,18 +76,17 @@ export const Reasoning = memo(
       }
     }, [isStreaming, startTime, setDuration]);
 
-    // Auto-open when streaming starts, auto-close when streaming ends (once only)
-    useEffect(() => {
-      if (defaultOpen && !isStreaming && isOpen && !hasAutoClosed) {
-        // Add a small delay before closing to allow user to see the content
-        const timer = setTimeout(() => {
-          setIsOpen(false);
-          setHasAutoClosed(true);
-        }, AUTO_CLOSE_DELAY);
-
-        return () => clearTimeout(timer);
+    // Keep the dropdown open during streaming, then close it once when streaming completes.
+    // After that transition, the user owns the open/closed state.
+    useEffect(function synchronizeReasoningOpenState() {
+      if (isStreaming) {
+        setIsOpen(true);
+      } else if (wasStreamingRef.current) {
+        setIsOpen(false);
       }
-    }, [isStreaming, isOpen, defaultOpen, setIsOpen, hasAutoClosed]);
+
+      wasStreamingRef.current = isStreaming;
+    }, [isStreaming, setIsOpen]);
 
     const handleOpenChange = (newOpen: boolean) => {
       setIsOpen(newOpen);
@@ -115,7 +113,7 @@ export type ReasoningTriggerProps = ComponentProps<typeof CollapsibleTrigger>;
 
 const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
   if (isStreaming || duration === 0) {
-    return <Shimmer duration={1}>Thinking...</Shimmer>;
+    return <span className="pl-4"><Shimmer duration={1}>Thinking...</Shimmer></span>;
   }
   if (duration === undefined) {
     return <p>Thought for a few seconds</p>;
@@ -130,7 +128,7 @@ export const ReasoningTrigger = memo(
     return (
       <CollapsibleTrigger
         className={cn(
-          "flex w-full items-center gap-2 text-black/70 text-sm transition-colors hover:text-black",
+          "flex w-full items-center gap-2 pl-4 text-black/70 text-xs transition-colors hover:text-black",
           className
         )}
         {...props}

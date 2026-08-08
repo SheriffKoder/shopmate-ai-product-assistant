@@ -13,7 +13,7 @@ import {
   MessageContent,
   MessageActions,
   MessageAction,
-} from '@/components/ai-elements/message';
+} from '@/features/ai-assistant/components/generic/ai-elements/message';
 import { CopyIcon, RefreshCcwIcon } from 'lucide-react';
 import { ItemTypeCard } from './ui/item-type-card';
 import { MessagePartRenderer } from './message-part-orchestrator-renderer';

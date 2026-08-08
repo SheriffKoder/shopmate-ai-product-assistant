@@ -74,7 +74,8 @@ export const PromptInput = ({
             aria-label={dictation.isListening ? 'Stop dictation' : 'Start dictation'}
             aria-pressed={dictation.isListening}
             title={dictation.error ?? undefined}
-            className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
+            hover:bg-foreground hover:text-background"
           >
             {dictation.isListening ? (
               <Square className="h-4 w-4 stroke-red-500" />
@@ -102,6 +103,9 @@ export const PromptInput = ({
       <button
         onClick={handleSubmit}
         disabled={status === 'streaming' || !input.trim()}
+        aria-label="Submit message"
+        aria-pressed={false}
+        title="Submit message"
         className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center
         bg-foreground hover:opacity-90 cursor-pointer transition-all duration-300 text-background"
       >

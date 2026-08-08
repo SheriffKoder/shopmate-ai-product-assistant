@@ -35,6 +35,8 @@ export interface UIArtifact {
   status: 'idle' | 'streaming' | 'complete';
   /** Whether artifact panel is visible */
   isVisible: boolean;
+  /** Whether fullscreen was already active before the artifact opened */
+  wasFullscreenBeforeOpening: boolean;
   /** Bounding box for animation transitions (from preview card to panel) */
   boundingBox: {
     top: number;
@@ -54,6 +56,7 @@ export const initialArtifactData: UIArtifact = {
   kind: 'text',
   status: 'idle',
   isVisible: false,
+  wasFullscreenBeforeOpening: false,
   boundingBox: {
     top: 0,
     left: 0,

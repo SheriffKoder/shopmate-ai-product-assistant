@@ -122,7 +122,7 @@ export function CustomDropdown(props: CustomDropdownProps) {
         aria-haspopup="listbox"
         aria-label={ariaLabel}
         className={cn(
-          'flex h-9 min-w-[8.75rem] max-w-[10.5rem] items-center justify-between gap-2 rounded-none bg-background px-3 text-left font-button text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-9 min-w-[8.75rem] max-w-[10.5rem] items-center cursor-pointer justify-between gap-2 rounded-none bg-background px-3 text-left font-button text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 hover:bg-foreground hover:text-background',
           triggerClassName,
         )}
         disabled={disabled}

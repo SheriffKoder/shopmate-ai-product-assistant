@@ -17,7 +17,7 @@
 'use client';
 
 import { useMemo, useEffect, useState } from 'react';
-import { LineChart } from '@/components/line-chart/LineChart';
+import { LineChart } from '@/features/ai-assistant/components/generic/line-chart/LineChart';
 import { cn } from '@/shared/lib/utils';
 
 interface ChartRendererProps {

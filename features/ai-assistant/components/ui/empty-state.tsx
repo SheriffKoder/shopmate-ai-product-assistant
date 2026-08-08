@@ -8,7 +8,7 @@
 
 'use client';
 
-import { ConversationEmptyState } from '@/components/ai-elements/conversation';
+import { ConversationEmptyState } from '@/features/ai-assistant/components/generic/ai-elements/conversation';
 import { IntroSuggestions } from './intro-suggestions';
 import type { SuggestionSet } from '../../config/intro-suggestions';
 import type { ReactNode } from 'react';

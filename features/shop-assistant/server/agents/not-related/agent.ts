@@ -56,7 +56,10 @@ export async function processNotRelatedRequest(request: { models: AssistantResol
   console.log('Not-related agent result created');
 
   // Send sources and reasoning back to the client
-  return result.toUIMessageStreamResponse({
+  // Return the stream itself because the shared assistant handler merges it
+  // into its own response. Returning a Response here causes that handler to
+  // skip the merge, leaving the user with no assistant message.
+  return result.toUIMessageStream({
     sendSources: true,
     sendReasoning: true,
   });

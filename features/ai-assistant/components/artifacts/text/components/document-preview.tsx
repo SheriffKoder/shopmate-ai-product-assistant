@@ -7,7 +7,7 @@
  * 
  * Key Behavior:
  * - When artifact.isVisible === false: Shows preview card with content (overflow hidden, ~257px height)
- * - When artifact.isVisible === true: Shows small button (DocumentToolResult or DocumentToolCall)
+ * - When artifact.isVisible === true: Still shows the compact preview card; button variants are deferred
  */
 
 'use client';
@@ -15,8 +15,6 @@
 import { useMemo, useRef, useEffect, useCallback, memo } from 'react';
 import { useArtifact } from '../../hooks/use-artifact';
 import { useDocument } from '../../hooks/use-document-swr';
-import { DocumentToolCall } from '../../components/document-tool-call';
-import { DocumentToolResult } from '../../components/document-tool-result';
 import { DocumentHeader } from '../../components/document-header-chat-card';
 import { DocumentContent } from '../../components/document-content-chat-card';
 import { DocumentSkeleton } from '../../components/document-skeleton-chat-card';
@@ -44,13 +42,12 @@ interface DocumentPreviewProps {
  * - Panel CLOSED: Shows preview card (with content)
  */
 export function DocumentPreview({
-  isReadonly = false,
   result,
   args,
 }: DocumentPreviewProps) {
   // ALL HOOKS MUST BE CALLED FIRST (before any conditional returns)
   const { artifact, setArtifact } = useArtifact();
-  const { setIsFullScreen } = useFullscreen();
+  const { isFullScreen } = useFullscreen();
   const hitboxRef = useRef<HTMLDivElement>(null);
   const pendingArtifactRef = useRef(false);
 
@@ -83,8 +80,8 @@ export function DocumentPreview({
     previewDocumentId && artifact.status !== 'streaming' ? previewDocumentId : null
   );
 
-  // Automatically promote a newly completed artifact into the full assistant view.
-  // This keeps the ready document visible without requiring a second click or a prior fullscreen toggle.
+  // Automatically reveal a newly completed artifact only when the assistant is already fullscreen.
+  // Compact mode keeps the preview visible so the user can choose when to expand it.
   useEffect(function openCompletedArtifact() {
     if (args || artifact.status === 'streaming') {
       pendingArtifactRef.current = true;
@@ -95,6 +92,7 @@ export function DocumentPreview({
       !result ||
       artifact.status !== 'complete' ||
       artifact.documentId !== result.id ||
+      !isFullScreen ||
       artifact.isVisible
     ) {
       return;
@@ -102,7 +100,6 @@ export function DocumentPreview({
 
     const boundingBox = hitboxRef.current?.getBoundingClientRect();
 
-    setIsFullScreen(true);
     setArtifact((currentArtifact) => ({
       ...currentArtifact,
       isVisible: true,
@@ -116,7 +113,7 @@ export function DocumentPreview({
         : currentArtifact.boundingBox,
     }));
     pendingArtifactRef.current = false;
-  }, [args, artifact.documentId, artifact.isVisible, artifact.status, result, setArtifact, setIsFullScreen]);
+  }, [args, artifact.documentId, artifact.isVisible, artifact.status, isFullScreen, result, setArtifact]);
 
   // When artifact panel is CLOSED: show preview card
   // Use artifact state ONLY if it matches this preview's document ID
@@ -172,46 +169,8 @@ export function DocumentPreview({
     return null;
   }, [artifact, result, args, previewDocumentId, fetchedDocument]);
 
-  // NOW we can do conditional returns (after all hooks are called)
-  // When artifact panel is OPEN: show button only
-  // When artifact panel is CLOSED: show preview card
-  if (artifact.isVisible) {
-    // Panel is open - show compact button
-    if (result) {
-      return (
-        <DocumentToolResult
-          isReadonly={isReadonly}
-          result={{ id: result.id, title: result.title, kind: result.kind }}
-          type="create"
-        />
-      );
-    }
-
-    if (args) {
-      return (
-        <DocumentToolCall
-          args={{ title: args.title, kind: args.kind }}
-          isReadonly={isReadonly}
-          type="create"
-        />
-      );
-    }
-    
-    // If panel is open but no result/args, still show button with artifact data
-    if (artifact.documentId !== 'init' || artifact.title) {
-      return (
-        <DocumentToolResult
-          isReadonly={isReadonly}
-          result={{
-            id: artifact.documentId !== 'init' ? artifact.documentId : '',
-            title: artifact.title || 'Untitled Document',
-            kind: artifact.kind || 'text',
-          }}
-          type="create"
-        />
-      );
-    }
-  }
+  // Button variants are intentionally disabled for now: the compact preview card below
+  // already provides the artifact click target and fullscreen affordance for every artifact kind.
 
   // Panel is closed - show preview card
   // Show loading skeleton only if we have absolutely no data
@@ -259,7 +218,7 @@ const PureHitboxLayer = ({
   args?: any;
   setArtifact: any;
 }) => {
-  const { setIsFullScreen } = useFullscreen();
+  const { isFullScreen, setIsFullScreen } = useFullscreen();
   
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -280,6 +239,7 @@ const PureHitboxLayer = ({
           documentId: artifact.documentId !== 'init' ? artifact.documentId : (result?.id || artifact.documentId),
           kind: artifact.kind || result?.kind || args?.kind || artifact.kind,
           isVisible: true,
+          wasFullscreenBeforeOpening: isFullScreen,
           boundingBox: {
             left: boundingBox.x,
             top: boundingBox.y,
@@ -290,7 +250,7 @@ const PureHitboxLayer = ({
         return updatedArtifact;
       });
     },
-    [setArtifact, setIsFullScreen, result, args]
+    [isFullScreen, setArtifact, setIsFullScreen, result, args]
   );
 
   return (
@@ -311,7 +271,7 @@ const PureHitboxLayer = ({
       
       {/* Maximize button - separate clickable area */}
       <div 
-        className="absolute top-[13px] right-[9px] z-20 rounded-md p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer"
+        className="absolute top-[8px] right-[8px] z-20 rounded-md p-2 text-background hover:bg-background/20 cursor-pointer"
         onClick={handleClick}
         role="button"
         tabIndex={0}

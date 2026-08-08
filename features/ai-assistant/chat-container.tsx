@@ -12,11 +12,11 @@ import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from '@/components/ai-elements/conversation';
+} from '@/features/ai-assistant/components/generic/ai-elements/conversation';
 import { useEffect, type ReactNode } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { Loader } from '@/components/ai-elements/loader';
+import { Loader } from '@/features/ai-assistant/components/generic/ai-elements/loader';
 import { useChatSubmission } from './hooks/use-chat-submission';
 import { useChatMessages } from './components/history-sidebar/hooks/use-chat-messages';
 import { EmptyState } from './components/ui/empty-state';
@@ -238,6 +238,9 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
 
             {/* Loader: if the status is submitted and no messages are being streamed, show the loader */}
             {(status === 'submitted' || status === 'streaming') && <Loader />}
+
+            {/* Conversation spacing: creates real scrollable room after the final message above the prompt input. */}
+            <div aria-hidden="true" className="h-8 shrink-0" />
 
           </ConversationContent>
 

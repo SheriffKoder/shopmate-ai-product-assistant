@@ -13,9 +13,10 @@
 'use client';
 
 import { memo } from 'react';
-import { useArtifact, initialArtifactData } from '../hooks/use-artifact';
+import { useArtifact } from '../hooks/use-artifact';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 
 /**
  * Artifact Close Button Component
@@ -26,14 +27,20 @@ import { X } from 'lucide-react';
  */
 function PureArtifactCloseButton() {
   const { setArtifact } = useArtifact();
+  const { setIsFullScreen } = useFullscreen();
 
   const handleClose = () => {
-    setArtifact((currentArtifact) => ({
-      ...currentArtifact,
-      isVisible: false,
-      // Preserve all content - don't reset to initial state
-      // This allows the preview card to show content when panel is closed
-    }));
+    setArtifact((currentArtifact) => {
+      // Artifact integration: restore the assistant mode that existed before opening the panel.
+      if (!currentArtifact.wasFullscreenBeforeOpening) setIsFullScreen(false);
+
+      return {
+        ...currentArtifact,
+        isVisible: false,
+        // Preserve all content - don't reset to initial state
+        // This allows the preview card to show content when panel is closed
+      };
+    });
   };
 
   return (

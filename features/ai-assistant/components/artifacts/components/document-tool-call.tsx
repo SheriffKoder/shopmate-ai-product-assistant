@@ -36,10 +36,8 @@ const PureDocumentToolCall = ({
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (isReadonly) return;
     
-    // Only open artifact panel if in fullscreen mode
-    if (!isFullScreen) {
-      return;
-    }
+    // Button rendering is currently disabled in DocumentPreview; retain this guard for legacy callers.
+    if (!isFullScreen) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
 

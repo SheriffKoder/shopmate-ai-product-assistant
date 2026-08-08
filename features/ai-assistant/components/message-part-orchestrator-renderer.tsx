@@ -8,8 +8,8 @@
 
 'use client';
 
-import { MessageResponse } from '@/components/ai-elements/message';
-import { Reasoning, ReasoningTrigger, ReasoningContent } from '@/components/ai-elements/reasoning';
+import { MessageResponse } from '@/features/ai-assistant/components/generic/ai-elements/message';
+import { Reasoning, ReasoningTrigger, ReasoningContent } from '@/features/ai-assistant/components/generic/ai-elements/reasoning';
 import { DefaultToolRenderer } from '../tools/default-tool-renderer';
 import { MarkdownText } from './ui/markdown-text';
 import { DiscussionCard } from './ui/discussion-card';

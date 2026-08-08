@@ -84,7 +84,7 @@ export type LoaderProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
-  <div className="flex flex-row items-center justify-start gap-2 opacity-70">
+  <div className="flex flex-row items-center justify-start gap-2 opacity-70 pl-4">
     <span className="animate-spin">
       <LoaderIcon size={size} />
     </span>

@@ -4,6 +4,162 @@ The reusable assistant feature. It owns chat transport, streaming, message and a
 
 It does not own products, carts, business rules, agents, business prompts, or a database provider.
 
+## Installation
+
+Install the packages used by the assistant feature:
+
+```bash
+npm install \
+  ai \
+  @ai-sdk/react \
+  @ai-sdk/openai \
+  @ai-sdk/google \
+  @ai-sdk/groq \
+  @ai-sdk/mcp \
+  @openrouter/ai-sdk-provider \
+  @supabase/supabase-js \
+  lucide-react \
+  motion \
+  nanoid \
+  papaparse \
+  @types/papaparse \
+  react-markdown \
+  @xyflow/react \
+  react-chartjs-2 \
+  remark-gfm \
+  shiki \
+  streamdown \
+  swr \
+  tokenlens \
+  use-stick-to-bottom \
+  zod
+```
+
+The feature also expects the host application to provide React, Next.js, Tailwind CSS, and the
+shared UI primitives imported from `components/ui` and `shared/ui`.
+
+## Migrating the assistant to a new project
+
+To copy the assistant and shop assistant into a new project, use the following checklist.
+
+### 1. Feature code
+
+Copy both complete feature folders:
+
+- [`features/ai-assistant/`](./)
+- [`features/shop-assistant/`](../shop-assistant/)
+
+The AI assistant feature contains the chat UI, providers, artifacts, history, persistence contracts,
+model contracts, and server handlers. The shop assistant contains the business runtime, agents, tools,
+prompts, and tool renderers.
+
+### 2. API routes
+
+Copy the complete assistant API tree:
+
+- [`app/api/ai-assistant/route.ts`](../../app/api/ai-assistant/route.ts)
+- [`app/api/ai-assistant/chat/[chatId]/route.ts`](../../app/api/ai-assistant/chat/%5BchatId%5D/route.ts)
+- [`app/api/ai-assistant/chat/[chatId]/messages/route.ts`](../../app/api/ai-assistant/chat/%5BchatId%5D/messages/route.ts)
+- [`app/api/ai-assistant/document/route.ts`](../../app/api/ai-assistant/document/route.ts)
+- [`app/api/ai-assistant/history/route.ts`](../../app/api/ai-assistant/history/route.ts)
+- [`app/api/ai-assistant/history/merge/route.ts`](../../app/api/ai-assistant/history/merge/route.ts)
+- [`app/api/ai-assistant/user/route.ts`](../../app/api/ai-assistant/user/route.ts)
+
+The root route handles streaming. The remaining routes support chat history, users, persistence,
+and artifacts.
+
+### 3. Application mounting
+
+Mount the assistant provider and business integration in the new project layout. The relevant files are:
+
+- [`features/ai-assistant/providers/assistant-root-provider.tsx`](./providers/assistant-root-provider.tsx)
+- [`features/shop-assistant/ui/shop-assistant-integration.tsx`](../shop-assistant/ui/shop-assistant-integration.tsx)
+- [`components/layout-wrapper.tsx`](../../components/layout-wrapper.tsx)
+
+Use the equivalent layout wrapper in the new project if its structure differs.
+
+### 4. Shared infrastructure
+
+Copy or recreate the shared dependencies imported by the features:
+
+- [`components/ui/`](../../components/ui/)
+- [`shared/lib/utils.ts`](../../shared/lib/utils.ts)
+- [`shared/config/env.ts`](../../shared/config/env.ts)
+- [`shared/config/table-names.ts`](../../shared/config/table-names.ts)
+- [`shared/infrastructure/supabase/`](../../shared/infrastructure/supabase/)
+
+The Supabase-backed version also needs the server client, queries, and database types under
+[`shared/infrastructure/supabase/`](../../shared/infrastructure/supabase/).
+
+### 5. Database and migrations
+
+For authenticated history and artifact persistence, copy or recreate:
+
+- [`supabase/migrations/`](../../supabase/migrations/)
+- [`shared/infrastructure/supabase/queries/`](../../shared/infrastructure/supabase/queries/)
+- [`shared/infrastructure/supabase/types/`](../../shared/infrastructure/supabase/types/)
+
+The database needs tables equivalent to `sm_users`, `sm_chats`, `sm_messages`, and `documents`.
+
+For a local-only first version, use the local persistence implementation instead:
+
+- [`message-persistence/lib/local-chat-history.ts`](./message-persistence/lib/local-chat-history.ts)
+- [`message-persistence/saving-orchestrator.ts`](./message-persistence/saving-orchestrator.ts)
+
+### 6. Environment variables
+
+Copy the relevant entries from [`.env.example`](../../.env.example):
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_TABLE_PREFIX=sm_
+
+OPENAI_API_KEY=
+
+AI_ASSISTANT_DEFAULT_MODEL=
+AI_ASSISTANT_SEARCH_MODEL=
+AI_ASSISTANT_ALLOWED_MODELS=
+
+NEXT_PUBLIC_AI_ASSISTANT_DICTATION_ENABLED=true
+NEXT_PUBLIC_AI_ASSISTANT_DICTATION_PROVIDER=browser
+NEXT_PUBLIC_AI_ASSISTANT_DICTATION_AUTO_SUBMIT=true
+NEXT_PUBLIC_AI_ASSISTANT_DICTATION_LANGUAGE=en-US
+```
+
+### 7. npm packages
+
+Install the packages listed in the [installation section](#installation) of this README.
+
+### 8. TypeScript alias
+
+The project expects the `@/*` alias to point to the project root in [`tsconfig.json`](../../tsconfig.json):
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+### Recommended migration order
+
+1. Copy [`features/ai-assistant/`](./).
+2. Copy [`features/shop-assistant/`](../shop-assistant/).
+3. Copy [`app/api/ai-assistant/`](../../app/api/ai-assistant/).
+4. Copy shared utilities, UI primitives, and Supabase infrastructure.
+5. Copy or migrate the database tables.
+6. Add the environment variables.
+7. Mount [`AssistantRootProvider`](./providers/assistant-root-provider.tsx) in the application layout.
+8. Install the npm packages.
+9. Run TypeScript and production build checks.
+
+For a new project, start with local persistence to verify the chat flow, then add Supabase persistence
+once the basic assistant integration is working.
+
 ## Operating modes
 
 ### Default mode

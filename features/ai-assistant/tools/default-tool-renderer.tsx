@@ -8,7 +8,7 @@
 
 'use client';
 
-import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/components/ai-elements/tool';
+import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/features/ai-assistant/components/generic/ai-elements/tool';
 import { ToolUIPart } from 'ai';
 
 interface DefaultToolRendererProps {
