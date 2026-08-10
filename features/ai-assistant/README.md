@@ -4,6 +4,18 @@ The reusable assistant feature. It owns chat transport, streaming, message and a
 
 It does not own products, carts, business rules, agents, business prompts, or a database provider.
 
+## Docs
+
+| Doc | What it covers |
+|---|---|
+| [`flow-paths.md`](./flow-paths.md) | Human walkthrough: integration → chat UI → API → runtime → tool cards |
+| [`docs/retrieval-first-business-logic.md`](./docs/retrieval-first-business-logic.md) | Pattern for catalog / Q&A assistants: intent → lookup → answer |
+| [`docs/workflow-hitl-business-logic.md`](./docs/workflow-hitl-business-logic.md) | Pattern for confirm/mutate workflows: command → tool gate → HITL |
+| [`docs/DATABASE-INTEGRATION.md`](./docs/DATABASE-INTEGRATION.md) | Persistence / database integration notes |
+| [`../closer-assistant/docs/architecture.md`](../closer-assistant/docs/architecture.md) | Closer agents, tool gates, and scaling promotions |
+
+**Pick a business pattern by product type:** use retrieval-first when the risk is invented/stale data; use workflow/HITL when the risk is mutating too early. Many products combine both (browse with retrieval, writes with gates).
+
 ## Installation
 
 Install the packages used by the assistant feature:
@@ -17,15 +29,23 @@ npm install \
   @ai-sdk/groq \
   @ai-sdk/mcp \
   @openrouter/ai-sdk-provider \
+  @radix-ui/react-collapsible \
+  @radix-ui/react-dialog \
+  @radix-ui/react-hover-card \
+  @radix-ui/react-progress \
+  @radix-ui/react-scroll-area \
+  @radix-ui/react-select \
+  @radix-ui/react-separator \
+  @radix-ui/react-tooltip \
+  @xyflow/react \
   @supabase/supabase-js \
+  cmdk \
+  embla-carousel-react \
   lucide-react \
   motion \
   nanoid \
   papaparse \
-  @types/papaparse \
   react-markdown \
-  @xyflow/react \
-  react-chartjs-2 \
   remark-gfm \
   shiki \
   streamdown \
@@ -33,10 +53,23 @@ npm install \
   tokenlens \
   use-stick-to-bottom \
   zod
+
+npm install -D \
+  @types/papaparse
 ```
 
-The feature also expects the host application to provide React, Next.js, Tailwind CSS, and the
-shared UI primitives imported from `components/ui` and `shared/ui`.
+The feature also expects the host application to provide React, Next.js, and
+Tailwind CSS. Assistant UI primitives are copied into
+[`components/generic/ui/`](./components/generic/ui/) and assistant files must
+import them from that feature-local path. Do not assume the host project's
+`components/ui/` directory contains these primitives.
+
+Artifact charts additionally require `react-chartjs-2` and the existing
+Chart.js packages:
+
+```bash
+npm install react-chartjs-2 chart.js chartjs-plugin-datalabels
+```
 
 ## Migrating the assistant to a new project
 
