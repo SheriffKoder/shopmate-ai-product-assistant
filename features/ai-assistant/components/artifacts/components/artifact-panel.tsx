@@ -24,6 +24,7 @@ import { ChartArtifactContent } from '../chart/components/chart-artifact-content
 import { ArtifactCloseButton } from './artifact-close-button';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
+import { useAssistantStyleConfig } from '@/features/ai-assistant/providers/assistant-style-context';
 
 interface ArtifactPanelProps {
   chatId: string;
@@ -63,6 +64,7 @@ export function ArtifactPanel({
 }: ArtifactPanelProps) {
   const { artifact, setArtifact } = useArtifact();
   const { isFullScreen } = useFullscreen();
+  const styles = useAssistantStyleConfig();
 
   // Fetch document from Supabase when panel is open and not streaming
   const { document: fetchedDocument, mutate: mutateDocument } = useDocument(
@@ -95,14 +97,14 @@ export function ArtifactPanel({
     <AnimatePresence>
       <motion.div
         animate={{ opacity: 1 }}
-        className="fixed top-0 left-0 z-50 flex h-screen w-screen flex-row bg-background"
+        className={`fixed top-0 left-0 z-50 flex h-screen w-screen flex-row ${styles.artifacts?.panelClassName ?? ''}`}
         exit={{ opacity: 0, transition: { delay: 0.4 } }}
         initial={{ opacity: 1 }}
       >
         {/* Left Side: Chat Messages (50% width) */}
         <motion.div
           animate={{ width: '50%' }}
-          className="flex h-full flex-col border-r bg-background p-2 pt-4"
+          className={`flex h-full flex-col ${styles.artifacts?.panelChatClassName ?? ''}`}
           exit={{ width: '100%' }}
           initial={{ width: '100%' }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -125,12 +127,12 @@ export function ArtifactPanel({
         {/* Right Side: Artifact Content (50% width) */}
         <motion.div
           animate={{ width: '50%' }}
-          className="flex h-full flex-col bg-background"
+          className={`flex h-full flex-col ${styles.artifacts?.panelContentClassName ?? ''}`}
           exit={{ width: 0 }}
           initial={{ width: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          <div className="relative h-full overflow-auto">
+          <div className={styles.artifacts?.panelViewportClassName}>
             <ArtifactCloseButton />
             
             {artifactKind === 'text' && (

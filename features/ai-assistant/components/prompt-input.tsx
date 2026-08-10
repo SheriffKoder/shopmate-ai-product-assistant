@@ -14,6 +14,7 @@ import { ModelPicker } from './model-picker';
 import type { AssistantModelOption } from '../model/assistant-model-config';
 import { useDictation } from '../dictation/hooks/use-dictation';
 import type { AssistantDictationConfig } from '../dictation/model/dictation-config';
+import { useAssistantStyleConfig } from '../providers/assistant-style-context';
 
 interface PromptInputProps {
   input: string;
@@ -36,6 +37,7 @@ export const PromptInput = ({
   onModelChange,
   dictationConfig,
 }: PromptInputProps) => {
+  const styles = useAssistantStyleConfig();
   // Dictation integration: keeps speech-to-text isolated while feeding text into the controlled prompt.
   const dictation = useDictation(dictationConfig, {
     input,
@@ -44,7 +46,7 @@ export const PromptInput = ({
   });
 
   return (
-    <div className="flex items-center gap-1 border-2 m-2 rounded-lg p-1 border-[#dbdbdb] flex-shrink-0">
+    <div className={styles.input?.containerClassName}>
       {/* Input: the input area for the user to enter their message */}
       {/* Dictation integration: advertise the microphone interaction only when the feature is enabled. */}
       <Input
@@ -58,15 +60,15 @@ export const PromptInput = ({
         }}
         placeholder={
           dictationConfig.enabled
-            ? 'Ask about any product, or use the mic button (say stop to end)'
-            : 'Ask about any product...'
+            ? styles.input?.dictationPlaceholder
+            : styles.input?.inputPlaceholder
         }
         disabled={status === 'streaming'}
-        className="flex-1 border-none bg-white/10 focus:bg-white/15 focus-visible:ring-[0px] transition-all duration-300 text-black"
+        className={styles.input?.inputClassName}
       />
 
       {dictationConfig.enabled && (
-        <div className="flex items-center gap-1 text-foreground bg-foreground/10 rounded-md">
+        <div className={styles.input?.toolbarClassName}>
           <button
             type="button"
             onClick={dictation.isListening ? dictation.stop : dictation.start}
@@ -74,8 +76,7 @@ export const PromptInput = ({
             aria-label={dictation.isListening ? 'Stop dictation' : 'Start dictation'}
             aria-pressed={dictation.isListening}
             title={dictation.error ?? undefined}
-            className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
-            hover:bg-foreground hover:text-background"
+            className={`${styles.input?.toolbarButtonClassName ?? ''} ${styles.input?.toolbarButtonHoverClassName ?? ''}`}
           >
             {dictation.isListening ? (
               <Square className="h-4 w-4 stroke-red-500" />
@@ -106,8 +107,7 @@ export const PromptInput = ({
         aria-label="Submit message"
         aria-pressed={false}
         title="Submit message"
-        className="p-2 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center
-        bg-foreground hover:opacity-90 cursor-pointer transition-all duration-300 text-background"
+        className={`${styles.input?.submitButtonClassName ?? ''} ${styles.input?.submitButtonHoverClassName ?? ''}`}
       >
         {status === 'streaming' ? (
           <Loader2 className="h-4 w-4 animate-spin" />

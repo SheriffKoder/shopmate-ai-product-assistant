@@ -8,6 +8,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useAssistantStyleConfig } from '../../providers/assistant-style-context';
 
 interface AssistantShellContentProps {
   isVisible: boolean;
@@ -25,14 +26,15 @@ export function AssistantShellContent({
   sidebar,
   children,
 }: AssistantShellContentProps) {
+  const styles = useAssistantStyleConfig();
   return (
     <div
-      className={`flex-1 w-full min-h-0 overflow-hidden transition-opacity duration-300 bg-[#FFFFFF] relative ${
+      className={`flex-1 w-full min-h-0 overflow-hidden transition-opacity duration-300 relative ${styles.shell?.contentClassName ?? ''} ${
         isVisible ? 'flex' : 'hidden'
       }`}
     >
       <div
-        className={`absolute left-0 top-0 h-full w-64 border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 overflow-y-auto z-20 transition-transform duration-300 ease-in-out ${
+        className={`absolute left-0 top-0 h-full w-64 overflow-y-auto z-20 transition-transform duration-300 ease-in-out ${styles.shell?.sidebarClassName ?? ''} ${styles.shell?.sidebarBorderClassName ?? ''} ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -40,7 +42,7 @@ export function AssistantShellContent({
       </div>
 
       <div
-        className={`flex-1 min-w-0 overflow-hidden bg-[#FFFFFF] flex flex-col transition-all duration-300 ease-in-out ${
+        className={`flex-1 min-w-0 overflow-hidden flex flex-col transition-all duration-300 ease-in-out ${styles.shell?.mainClassName ?? ''} ${
           isSidebarOpen && isFullScreen ? 'pl-64' : ''
         }`}
       >

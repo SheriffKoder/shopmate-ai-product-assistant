@@ -20,6 +20,7 @@ import { MessagePartRenderer } from './message-part-orchestrator-renderer';
 import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
 import type { AssistantStepEvent } from '../model/assistant-events';
 import { ThinkingSteps } from './thinking-steps/thinking-steps';
+import { useAssistantStyleConfig } from '../providers/assistant-style-context';
 
 interface MessageListProps {
   messages: any[];
@@ -42,6 +43,7 @@ export const MessageList = ({
   toolRendererContext,
   assistantSteps = [],
 }: MessageListProps) => {
+  const styles = useAssistantStyleConfig();
   return (
     <>
       {messages.map((message) => {
@@ -76,8 +78,8 @@ export const MessageList = ({
           <MessageContent 
             className={
               message.role === 'assistant' 
-                ? '!bg-[#313131]/0 !text-black rounded-lg px-4 py-3 w-full' // Assistant message background color
-                : '!bg-[#dbdbdb] !text-black rounded-lg px-4 py-3 !ml-auto text-right w-fit' // User message background color
+              ? `${styles.messages?.assistantClassName ?? ''} ${styles.messages?.contentClassName ?? ''}`
+              : `${styles.messages?.userClassName ?? ''} ${styles.messages?.contentClassName ?? ''}`
             }
           >
             {message.role === 'assistant' && (

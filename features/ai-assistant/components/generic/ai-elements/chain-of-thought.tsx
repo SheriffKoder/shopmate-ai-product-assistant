@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { createContext, memo, useContext, useMemo } from "react";
+import { useAssistantStyleConfig } from "../../../providers/assistant-style-context";
 
 type ChainOfThoughtContextValue = {
   isOpen: boolean;
@@ -51,6 +52,7 @@ export const ChainOfThought = memo(
     children,
     ...props
   }: ChainOfThoughtProps) => {
+    const styles = useAssistantStyleConfig();
     const [isOpen, setIsOpen] = useControllableState({
       prop: open,
       defaultProp: defaultOpen,
@@ -65,7 +67,7 @@ export const ChainOfThought = memo(
     return (
       <ChainOfThoughtContext.Provider value={chainOfThoughtContext}>
         <div
-          className={cn("not-prose max-w-prose space-y-4", className)}
+          className={cn(styles.chainOfThought?.containerClassName, className)}
           {...props}
         >
           {children}
@@ -82,12 +84,13 @@ export type ChainOfThoughtHeaderProps = ComponentProps<
 export const ChainOfThoughtHeader = memo(
   ({ className, children, ...props }: ChainOfThoughtHeaderProps) => {
     const { isOpen, setIsOpen } = useChainOfThought();
+    const styles = useAssistantStyleConfig();
 
     return (
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground",
+            styles.chainOfThought?.headerClassName,
             className
           )}
           {...props}
@@ -125,6 +128,7 @@ export const ChainOfThoughtStep = memo(
     children,
     ...props
   }: ChainOfThoughtStepProps) => {
+    const styles = useAssistantStyleConfig();
     const statusStyles = {
       complete: "text-muted-foreground",
       active: "text-foreground",
@@ -134,7 +138,7 @@ export const ChainOfThoughtStep = memo(
     return (
       <div
         className={cn(
-          "flex gap-2 text-sm",
+          styles.chainOfThought?.stepClassName,
           statusStyles[status],
           "fade-in-0 slide-in-from-top-2 animate-in",
           className
@@ -143,12 +147,12 @@ export const ChainOfThoughtStep = memo(
       >
         <div className="relative mt-0.5">
           <Icon className="size-4" />
-          <div className="-mx-px absolute top-7 bottom-0 left-1/2 w-px bg-border" />
+          <div className={styles.chainOfThought?.connectorClassName} />
         </div>
         <div className="flex-1 space-y-2">
           <div>{label}</div>
           {description && (
-            <div className="text-muted-foreground text-xs">{description}</div>
+            <div className={styles.chainOfThought?.descriptionClassName}>{description}</div>
           )}
           {children}
         </div>

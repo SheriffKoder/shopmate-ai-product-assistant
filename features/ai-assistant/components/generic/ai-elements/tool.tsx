@@ -19,15 +19,19 @@ import {
 import type { ComponentProps, ReactNode } from "react";
 import { isValidElement } from "react";
 import { CodeBlock } from "./code-block";
+import { useAssistantStyleConfig } from "../../../providers/assistant-style-context";
 
 export type ToolProps = ComponentProps<typeof Collapsible>;
 
-export const Tool = ({ className, ...props }: ToolProps) => (
+export const Tool = ({ className, ...props }: ToolProps) => {
+  const styles = useAssistantStyleConfig();
+  return (
   <Collapsible
-    className={cn("not-prose mb-4 w-full rounded-md border", className)}
+    className={cn(styles.tools?.containerClassName, className)}
     {...props}
   />
-);
+  );
+};
 
 export type ToolHeaderProps = {
   title?: string;
@@ -71,10 +75,12 @@ export const ToolHeader = ({
   type,
   state,
   ...props
-}: ToolHeaderProps) => (
+}: ToolHeaderProps) => {
+  const styles = useAssistantStyleConfig();
+  return (
   <CollapsibleTrigger
     className={cn(
-      "flex w-full items-center justify-between gap-4 p-3",
+      styles.tools?.headerClassName,
       className
     )}
     {...props}
@@ -88,19 +94,24 @@ export const ToolHeader = ({
     </div>
     <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
   </CollapsibleTrigger>
-);
+  );
+};
 
 export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 
-export const ToolContent = ({ className, ...props }: ToolContentProps) => (
+export const ToolContent = ({ className, ...props }: ToolContentProps) => {
+  const styles = useAssistantStyleConfig();
+  return (
   <CollapsibleContent
-    className={cn(
+      className={cn(
+        styles.tools?.contentClassName,
       "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
       className
     )}
     {...props}
   />
-);
+  );
+};
 
 export type ToolInputProps = ComponentProps<"div"> & {
   input: ToolUIPart["input"];

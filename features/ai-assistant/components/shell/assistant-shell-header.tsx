@@ -9,6 +9,7 @@
 
 import Image from 'next/image';
 import { ChevronDown, ChevronUp, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { useAssistantStyleConfig } from '../../providers/assistant-style-context';
 
 interface AssistantShellHeaderProps {
   isCollapsed: boolean;
@@ -28,6 +29,7 @@ export function AssistantShellHeader({
   onToggleSidebar,
   onToggleFullscreen,
 }: AssistantShellHeaderProps) {
+  const styles = useAssistantStyleConfig();
   function handleHeaderKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if (!isFullScreen && (event.key === 'Enter' || event.key === ' ')) {
       event.preventDefault();
@@ -50,15 +52,15 @@ export function AssistantShellHeader({
       onClick={isFullScreen ? undefined : onToggleCollapsed}
       className={`p-4 font-semibold flex flex-row items-center justify-between gap-2 transition-colors
         ${isFullScreen ? 'cursor-default' : 'cursor-pointer'}
-        ${isCollapsed ? 'bg-foreground text-background' : 'bg-foreground text-background'}`}
+        ${styles.shell?.headerClassName ?? ''}`}
       role="button"
       tabIndex={0}
       aria-label={isCollapsed ? 'Expand chat' : 'Collapse chat'}
       onKeyDown={handleHeaderKeyDown}
     >
       <div className="flex flex-row items-center gap-2">
-        <Image src="/images/icon.png" alt="AI Assistant" className='p-1 bg-white rounded h-6 w-12' width={60} height={24} />
-        <span className="text-white">Shop Assistant</span>
+        <Image src={styles.branding?.logoSrc ?? '/images/icon.png'} alt={styles.branding?.logoAlt ?? 'AI Assistant'} className={styles.branding?.logoClassName ?? 'p-1 bg-white rounded h-6 w-12'} width={60} height={24} />
+        <span className={styles.branding?.nameClassName ?? 'text-white'}>{styles.branding?.name ?? 'Shop Assistant'}</span>
       </div>
 
       <div className="flex flex-row items-center gap-2">
@@ -66,7 +68,7 @@ export function AssistantShellHeader({
           id="assistant-sidebar-toggle"
           type="button"
           onClick={handleSidebarClick}
-          className={`p-1 rounded bg-foreground text-background hover:bg-foreground/90 cursor-pointer ${
+          className={`p-1 rounded cursor-pointer ${styles.branding?.controlClassName ?? ''} ${styles.branding?.controlHoverClassName ?? ''} ${
             isCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100 delay-200'
           }`}
           aria-hidden={isCollapsed}
@@ -81,7 +83,7 @@ export function AssistantShellHeader({
           id="assistant-fullscreen-toggle"
           type="button"
           onClick={handleFullscreenClick}
-          className="p-1 rounded bg-foreground text-background hover:bg-foreground/90 transition-colors cursor-pointer"
+          className={`p-1 rounded transition-colors cursor-pointer ${styles.branding?.controlClassName ?? ''} ${styles.branding?.controlHoverClassName ?? ''}`}
           aria-label={isFullScreen ? 'Exit compact mode' : 'Enter full screen'}
           title={isFullScreen ? 'Exit compact mode' : 'Enter full screen'}
         >

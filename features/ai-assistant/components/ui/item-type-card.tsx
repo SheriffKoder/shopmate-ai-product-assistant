@@ -9,6 +9,7 @@
 'use client';
 
 import { SuggestionCard } from '../../config/intro-suggestions';
+import { useAssistantStyleConfig } from '../../providers/assistant-style-context';
 
 interface ItemTypeCardProps {
   card: SuggestionCard;
@@ -17,15 +18,14 @@ interface ItemTypeCardProps {
 }
 
 export const ItemTypeCard = ({ card, onClick, isMessage = false }: ItemTypeCardProps) => {
+  const styles = useAssistantStyleConfig();
 
   const cardContent = (
     <div
       className={`flex h-full gap-3 rounded p-4 transition-all duration-200 ${
         isMessage ? 'flex-row items-center' : 'flex-col items-start'
       } ${
-        isMessage 
-          ? 'bg-gradient-to-r from-primary to-primary hover:bg-[#e0e0e0] text-foreground cursor-pointer text-left' 
-          : 'bg-gradient-to-r from-primary to-primary hover:bg-[#e0e0e0] text-foreground cursor-pointer text-left'
+        `${styles.suggestions?.cardClassName ?? ''} ${styles.suggestions?.cardHoverClassName ?? ''}`
       }`}
       style={{
         backgroundColor: card.backgroundColor,
@@ -36,8 +36,8 @@ export const ItemTypeCard = ({ card, onClick, isMessage = false }: ItemTypeCardP
       
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <h4 className="mb-1 text-sm font-medium opacity-70">{card.header}</h4>
-        {card.description ? <p className="text-xs opacity-90">{card.description}</p> : null}
+        <h4 className={styles.suggestions?.titleClassName}>{card.header}</h4>
+        {card.description ? <p className={styles.suggestions?.descriptionClassName}>{card.description}</p> : null}
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { MarkdownText } from '@/features/ai-assistant/components/ui/markdown-tex
 import { Table } from '../sheet/components/table-non-edit';
 import { ChartRenderer } from '../chart/components/chart-renderer';
 import { cn } from '@/shared/lib/utils';
+import { useAssistantStyleConfig } from '@/features/ai-assistant/providers/assistant-style-context';
 
 interface DocumentContentProps {
   document: {
@@ -30,9 +31,10 @@ interface DocumentContentProps {
  */
 export function DocumentContent({ document }: DocumentContentProps) {
   const { artifact } = useArtifact();
+  const styles = useAssistantStyleConfig();
 
   const containerClassName = cn(
-    'h-[257px] artifact-content border border-foreground/20 border-t-0',
+    styles.artifacts?.previewContentClassName,
     {
       'p-4 sm:px-14 sm:py-16': document.kind === 'text',
       'p-0': document.kind === 'code' || document.kind === 'sheet' || document.kind === 'chart',

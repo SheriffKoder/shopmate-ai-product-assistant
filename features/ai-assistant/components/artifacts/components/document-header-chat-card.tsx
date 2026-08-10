@@ -10,6 +10,7 @@
 
 import { File, Loader2 } from 'lucide-react';
 import { memo } from 'react';
+import { useAssistantStyleConfig } from '@/features/ai-assistant/providers/assistant-style-context';
 
 interface DocumentHeaderProps {
   title: string;
@@ -26,8 +27,10 @@ const PureDocumentHeader = ({
   title,
   kind,
   isStreaming,
-}: DocumentHeaderProps) => (
-  <div className="artifact-header bg-foreground text-background flex flex-row items-start justify-between gap-2 border-b-0 p-4 sm:items-center">
+}: DocumentHeaderProps) => {
+  const styles = useAssistantStyleConfig();
+  return (
+  <div className={styles.artifacts?.previewHeaderClassName}>
     <div className="flex flex-row items-start gap-3 sm:items-center">
       <div className="text-muted-foreground">
         {isStreaming ? (
@@ -42,7 +45,8 @@ const PureDocumentHeader = ({
     </div>
     <div className="w-8" />
   </div>
-);
+  );
+};
 
 export const DocumentHeader = memo(PureDocumentHeader, (prevProps, nextProps) => {
   if (prevProps.title !== nextProps.title) {

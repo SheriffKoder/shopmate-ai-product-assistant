@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import { DataStreamProvider } from '../data-stream/data-stream-provider';
 import { FullscreenProvider } from './fullscreen-context';
 import { AssistantShellProvider } from './assistant-shell-context';
+import { AssistantStyleProvider } from './assistant-style-context';
 
 /**
  * Props for {@link AssistantRootProvider}.
@@ -39,12 +40,14 @@ export function AssistantRootProvider({
 }: AssistantRootProviderProps) {
   return (
     <AssistantShellProvider>
-      <FullscreenProvider>
-        <DataStreamProvider>
-        {children}
-        {streamHandler}
-        </DataStreamProvider>
-      </FullscreenProvider>
+      <AssistantStyleProvider>
+        <FullscreenProvider>
+          <DataStreamProvider>
+            {children}
+            {streamHandler}
+          </DataStreamProvider>
+        </FullscreenProvider>
+      </AssistantStyleProvider>
     </AssistantShellProvider>
   );
 }

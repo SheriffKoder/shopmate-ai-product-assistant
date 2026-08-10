@@ -18,6 +18,7 @@
 'use client';
 
 import { useArtifact } from '../../hooks/use-artifact';
+import { useAssistantStyleConfig } from '@/features/ai-assistant/providers/assistant-style-context';
 import { useDocument } from '../../hooks/use-document-swr';
 import { useVersionHistoryDebounce } from '../../hooks/version-history-debounce';
 import { useVersionHistorySave } from '../../hooks/version-history-save';
@@ -52,6 +53,7 @@ import { logger } from '@/features/ai-assistant/lib/logger';
  * 6. Version count updates automatically
  */
 export function ChartArtifactContent() {
+  const styles = useAssistantStyleConfig();
   const { artifact, setArtifact } = useArtifact();
   const documentId = artifact.documentId !== 'init' ? artifact.documentId : null;
 
@@ -230,9 +232,9 @@ export function ChartArtifactContent() {
     : (localJson || activeDocument?.content || artifact.content || '');
 
   return (
-    <div className="h-full flex flex-col text-foreground">
+    <div className={`${styles.artifacts?.editorClassName ?? ''} text-foreground`}>
       {/* Sticky Header with editable title and version history */}
-      <div className="sticky top-0 z-10 bg-background border-b p-6 pb-4">
+      <div className={styles.artifacts?.editorHeaderClassName}>
         <VersionHistoryHeader
           documentId={documentId}
           title={localTitle}

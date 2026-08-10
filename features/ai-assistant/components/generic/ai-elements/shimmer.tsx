@@ -9,6 +9,7 @@ import {
   memo,
   useMemo,
 } from "react";
+import { useAssistantStyleConfig } from "../../../providers/assistant-style-context";
 
 export type TextShimmerProps = {
   children: string;
@@ -25,6 +26,7 @@ const ShimmerComponent = ({
   duration = 2,
   spread = 2,
 }: TextShimmerProps) => {
+  const styles = useAssistantStyleConfig();
   const MotionComponent = motion.create(
     Component as keyof JSX.IntrinsicElements
   );
@@ -38,8 +40,7 @@ const ShimmerComponent = ({
     <MotionComponent
       animate={{ backgroundPosition: "0% center" }}
       className={cn(
-        "relative inline-block bg-[length:250%_100%,auto] bg-clip-text text-transparent",
-        "[--bg:linear-gradient(90deg,#0000_calc(50%-var(--spread)),var(--color-background),#0000_calc(50%+var(--spread)))] [background-repeat:no-repeat,padding-box]",
+        styles.shimmer?.className,
         className
       )}
       initial={{ backgroundPosition: "100% center" }}
@@ -47,7 +48,7 @@ const ShimmerComponent = ({
         {
           "--spread": `${dynamicSpread}px`,
           backgroundImage:
-            "var(--bg), linear-gradient(var(--color-muted-foreground), var(--color-muted-foreground))",
+            `var(--bg), linear-gradient(${styles.shimmer?.backgroundColor}, ${styles.shimmer?.backgroundColor})`,
         } as CSSProperties
       }
       transition={{

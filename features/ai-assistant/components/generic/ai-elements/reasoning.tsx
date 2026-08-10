@@ -12,6 +12,7 @@ import type { ComponentProps } from "react";
 import { createContext, memo, useContext, useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
 import { Shimmer } from "./shimmer";
+import { useAssistantStyleConfig } from "../../../providers/assistant-style-context";
 
 type ReasoningContextValue = {
   isStreaming: boolean;
@@ -111,9 +112,9 @@ export const Reasoning = memo(
 
 export type ReasoningTriggerProps = ComponentProps<typeof CollapsibleTrigger>;
 
-const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
+const getThinkingMessage = (isStreaming: boolean, duration?: number, shimmerClassName?: string) => {
   if (isStreaming || duration === 0) {
-    return <span className="pl-4"><Shimmer duration={1}>Thinking...</Shimmer></span>;
+    return <span className="pl-4"><Shimmer className={shimmerClassName} duration={1}>Thinking...</Shimmer></span>;
   }
   if (duration === undefined) {
     return <p>Thought for a few seconds</p>;
@@ -124,11 +125,12 @@ const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
 export const ReasoningTrigger = memo(
   ({ className, children, ...props }: ReasoningTriggerProps) => {
     const { isStreaming, isOpen, duration } = useReasoning();
+    const styles = useAssistantStyleConfig();
 
     return (
       <CollapsibleTrigger
         className={cn(
-          "flex w-full items-center gap-2 pl-4 text-black/70 text-xs transition-colors hover:text-black",
+          `${styles.reasoning?.triggerClassName ?? ''} ${styles.reasoning?.triggerHoverClassName ?? ''}`,
           className
         )}
         {...props}
@@ -136,7 +138,7 @@ export const ReasoningTrigger = memo(
         {children ?? (
           <>
             <BrainIcon className="size-4" />
-            {getThinkingMessage(isStreaming, duration)}
+            {getThinkingMessage(isStreaming, duration, styles.reasoning?.shimmerClassName)}
             <ChevronDownIcon
               className={cn(
                 "size-4 transition-transform",
@@ -157,10 +159,12 @@ export type ReasoningContentProps = ComponentProps<
 };
 
 export const ReasoningContent = memo(
-  ({ className, children, ...props }: ReasoningContentProps) => (
+  ({ className, children, ...props }: ReasoningContentProps) => {
+    const styles = useAssistantStyleConfig();
+    return (
     <CollapsibleContent
       className={cn(
-        "mt-4 text-sm",
+        styles.reasoning?.contentClassName ?? "",
         "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-muted-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
         className
       )}
@@ -168,7 +172,8 @@ export const ReasoningContent = memo(
     >
       <Streamdown {...props}>{children}</Streamdown>
     </CollapsibleContent>
-  )
+    );
+  }
 );
 
 Reasoning.displayName = "Reasoning";

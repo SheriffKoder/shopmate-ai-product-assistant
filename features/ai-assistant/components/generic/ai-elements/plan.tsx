@@ -20,6 +20,7 @@ import { ChevronsUpDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { createContext, useContext } from "react";
 import { Shimmer } from "./shimmer";
+import { useAssistantStyleConfig } from "../../../providers/assistant-style-context";
 
 type PlanContextValue = {
   isStreaming: boolean;
@@ -47,7 +48,7 @@ export const Plan = ({
 }: PlanProps) => (
   <PlanContext.Provider value={{ isStreaming }}>
     <Collapsible asChild data-slot="plan" {...props}>
-      <Card className={cn("shadow-none", className)}>{children}</Card>
+      <Card className={cn(useAssistantStyleConfig().plan?.cardClassName, className)}>{children}</Card>
     </Collapsible>
   </PlanContext.Provider>
 );
@@ -56,7 +57,7 @@ export type PlanHeaderProps = ComponentProps<typeof CardHeader>;
 
 export const PlanHeader = ({ className, ...props }: PlanHeaderProps) => (
   <CardHeader
-    className={cn("flex items-start justify-between", className)}
+    className={cn(useAssistantStyleConfig().plan?.headerClassName, className)}
     data-slot="plan-header"
     {...props}
   />
@@ -92,10 +93,11 @@ export const PlanDescription = ({
   ...props
 }: PlanDescriptionProps) => {
   const { isStreaming } = usePlan();
+  const styles = useAssistantStyleConfig();
 
   return (
     <CardDescription
-      className={cn("text-balance", className)}
+      className={cn(styles.plan?.descriptionClassName, className)}
       data-slot="plan-description"
       {...props}
     >
@@ -129,7 +131,7 @@ export type PlanTriggerProps = ComponentProps<typeof CollapsibleTrigger>;
 export const PlanTrigger = ({ className, ...props }: PlanTriggerProps) => (
   <CollapsibleTrigger asChild>
     <Button
-      className={cn("size-8", className)}
+      className={cn(useAssistantStyleConfig().plan?.triggerClassName, className)}
       data-slot="plan-trigger"
       size="icon"
       variant="ghost"

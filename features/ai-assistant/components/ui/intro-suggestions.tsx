@@ -10,6 +10,7 @@
 
 import { introSuggestions as defaultIntroSuggestions, SuggestionSet } from '../../config/intro-suggestions';
 import { ItemTypeCard } from './item-type-card';
+import { useAssistantStyleConfig } from '../../providers/assistant-style-context';
 
 interface IntroSuggestionsProps {
   onSuggestionClick: (prompt: string, card: any) => void; // Callback when a suggestion card is clicked (now includes card data)
@@ -17,6 +18,7 @@ interface IntroSuggestionsProps {
 }
 
 export const IntroSuggestions = ({ onSuggestionClick, suggestions = defaultIntroSuggestions }: IntroSuggestionsProps) => {
+  const styles = useAssistantStyleConfig();
   const handleCardClick = (card: any) => {
     onSuggestionClick(card.header, card);
   };
@@ -24,14 +26,14 @@ export const IntroSuggestions = ({ onSuggestionClick, suggestions = defaultIntro
   return (
     <div className="w-full space-y-6">
       {suggestions.map((set: SuggestionSet, setIndex: number) => (
-        <div key={setIndex} className="space-y-3">
+        <div key={setIndex} className={styles.suggestions?.groupClassName}>
           {/* Set Header */}
-          <h3 className="text-left text-sm font-semibold text-black/70 uppercase tracking-wide">
+          <h3 className={styles.suggestions?.headerClassName}>
             {set.header}
           </h3>
           
           {/* Cards Grid */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className={styles.suggestions?.gridClassName}>
             {set.cards.map((card, cardIndex: number) => (
               <ItemTypeCard
                 key={cardIndex}

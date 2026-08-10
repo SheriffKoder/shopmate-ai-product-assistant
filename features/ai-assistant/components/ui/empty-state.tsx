@@ -12,6 +12,7 @@ import { ConversationEmptyState } from '@/features/ai-assistant/components/gener
 import { IntroSuggestions } from './intro-suggestions';
 import type { SuggestionSet } from '../../config/intro-suggestions';
 import type { ReactNode } from 'react';
+import { useAssistantStyleConfig } from '../../providers/assistant-style-context';
 
 interface EmptyStateProps {
   onSuggestionClick: (prompt: string, card: any) => void;
@@ -20,13 +21,14 @@ interface EmptyStateProps {
 }
 
 export const EmptyState = ({ onSuggestionClick, content, suggestions }: EmptyStateProps) => {
+  const styles = useAssistantStyleConfig();
   return (
     <ConversationEmptyState>
       <div className="w-full space-y-4">
         {content ?? (
           <div className="text-center">
-            <p className="text-sm font-semibold mb-2 text-black">AI Assistant</p>
-            <p className="text-xl text-black/70">Ask about products, orders, or your cart.</p>
+            <p className={`text-sm font-semibold mb-2 ${styles.emptyState?.className ?? ''}`}>{styles.emptyState?.title ?? 'AI Assistant'}</p>
+            <p className="text-xl text-black/70">{styles.emptyState?.description ?? 'Ask about products, orders, or your cart.'}</p>
           </div>
         )}
         <IntroSuggestions onSuggestionClick={onSuggestionClick} suggestions={suggestions} />

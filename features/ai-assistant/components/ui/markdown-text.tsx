@@ -11,6 +11,7 @@
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/shared/lib/utils';
+import { useAssistantStyleConfig } from '../../providers/assistant-style-context';
 
 interface MarkdownTextProps {
   children: string;
@@ -18,11 +19,12 @@ interface MarkdownTextProps {
 }
 
 export const MarkdownText = ({ children, className }: MarkdownTextProps) => {
+  const styles = useAssistantStyleConfig();
   // Replace single newlines with double newlines for proper paragraph breaks in markdown
   const processedText = children.replace(/\n/g, '\n\n');
   
   return (
-    <div className={cn('markdown-content', className)}>
+    <div className={cn('markdown-content', styles.messages?.markdownClassName, className)}>
       <Markdown 
         remarkPlugins={[remarkGfm]}
         components={{
@@ -96,4 +98,3 @@ export const MarkdownText = ({ children, className }: MarkdownTextProps) => {
     </div>
   );
 };
-
