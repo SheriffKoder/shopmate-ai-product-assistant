@@ -24,16 +24,24 @@ See [`server/README.md`](./server/README.md) for the server folder responsibilit
 
 ## Agent routing architecture
 
+The current incremental routing flow is documented in
+[`docs/agent-routing-flow.md`](./docs/agent-routing-flow.md). It adds typed
+intent extraction and route planning while keeping existing agents and tools
+in place.
+
 ```mermaid
 flowchart TD
     Request[Assistant request] --> Runtime[ShopAssistantRuntime]
-    Runtime --> Query[Query classifier]
-    Query -->|shopping| Product[Product classifier]
-    Query -->|technical| Technical[Technical discussion agent]
-    Query -->|unrelated| Unrelated[Not-related agent]
-    Product -->|search/cart| ProductsCart[Products and cart agent]
-    Product -->|recommend| Recommendation[Recommendation agent]
-    Product -->|filter| Filtering[Filtering agent]
+    Runtime --> Query[Existing model classifier]
+    Runtime --> Intent[Intent extractor]
+    Query --> Planner[Store route planner]
+    Intent --> Planner
+    Planner --> Router[ShopMate router]
+    Router -->|search / lookup / cart| ProductsCart[Products and cart agent]
+    Router -->|recommend / compare / table| Recommendation[Recommendation agent]
+    Router -->|filter / availability| Filtering[Filtering agent]
+    Router -->|technical| Technical[Technical discussion agent]
+    Router -->|unrelated| Unrelated[Not-related agent]
     ProductsCart --> Tools[Business tools]
     Recommendation --> Tools
     Filtering --> Tools

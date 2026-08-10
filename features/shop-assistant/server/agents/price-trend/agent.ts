@@ -5,6 +5,7 @@ import { createDocumentTool } from '@/features/ai-assistant/components/artifacts
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 import type { CatalogSource } from '../../../model/catalog-source';
 import { getPriceTrendPrompt } from './prompt';
+import { createEmptyCatalogResponse } from '@/features/shop-assistant/server/empty-catalog-response';
 
 interface PriceTrendRequest {
   messages: UIMessage[];
@@ -19,6 +20,9 @@ export async function processPriceTrendRequest(
 ) {
   const products = await request.catalogSource.searchProducts({ query: request.userQuery, limit: 3 });
   const product = products[0];
+  if (!product) {
+    return createEmptyCatalogResponse();
+  }
   const productContext = product
     ? `Product: ${product.name}\nCurrent price: $${product.price.toFixed(2)}\nCategory: ${product.category}`
     : 'No exact product was found; explain that the trend is unavailable.';

@@ -23,6 +23,9 @@ import { createCatalogSourceFromShopApi, createCartSourceFromShopApi } from './s
 import { getInitialProducts } from '@/features/catalog/model/initial-data';
 import { routeToAgent, type AgentRequest } from './router';
 import { writeAssistantStep } from './assistant-step';
+import { extractStoreIntent } from './intent-extractor';
+import { planStoreRoute } from './store-route-planner';
+import { extractStoreRequest } from './request-extraction-agent';
 
 /**
  * Runtime that preserves current ShopMate assistant behavior behind the adapter contract.
@@ -40,6 +43,27 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
 
     // 2. Keep current query classification behavior behind the runtime boundary.
     const classification = await classifyQuery({ query: request.userQuery, model: models.chat });
+    const extractedStoreRequest = await extractStoreRequest({
+      query: request.userQuery,
+      model: models.chat,
+    });
+    const storeRoute = planStoreRoute(extractedStoreRequest
+      ? {
+          intent: extractedStoreRequest.intent,
+          entities: {
+            productNames: extractedStoreRequest.productTerms,
+            category: extractedStoreRequest.category ?? undefined,
+            minPrice: extractedStoreRequest.constraints.minPrice ?? undefined,
+            maxPrice: extractedStoreRequest.constraints.maxPrice ?? undefined,
+            colors: extractedStoreRequest.constraints.colors,
+            features: extractedStoreRequest.constraints.features,
+            useCase: extractedStoreRequest.useCase ?? undefined,
+            sortBy: extractedStoreRequest.constraints.sortBy ?? undefined,
+            wantsTable: extractedStoreRequest.outputFormat === 'table',
+            wantsComparison: extractedStoreRequest.outputFormat === 'comparison',
+          },
+        }
+      : extractStoreIntent(request.userQuery));
     writeAssistantStep(dataStream, {
       id: 'query-classification',
       label: 'Classifying',
@@ -53,6 +77,16 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
     const catalogSource = createCatalogSourceFromShopApi(shopApi);
     const cartSource = createCartSourceFromShopApi(shopApi);
 
+    // Store-first retrieval: resolve catalog candidates before any catalog agent generates text.
+    const catalogProducts = storeRoute.requiresCatalogLookup
+      ? await catalogSource.searchProducts({
+          query: extractedStoreRequest?.catalogQuery || request.userQuery,
+          category: storeRoute.entities.category,
+          maxPrice: storeRoute.entities.maxPrice,
+          limit: 8,
+        })
+      : [];
+
     // 4. Adapt generic business context back into the existing ShopMate agent request shape.
     return routeToAgent(
       classification,
@@ -63,6 +97,9 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
         cartSource,
         userQuery: request.userQuery,
         persistenceMode: request.persistenceMode,
+        storeRoute,
+        products: catalogProducts,
+        catalogLookupCompleted: storeRoute.requiresCatalogLookup,
       } as AgentRequest,
       request.userQuery,
       dataStream

@@ -20,6 +20,7 @@ import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import { logger } from '@/features/ai-assistant/lib/logger';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
 import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
+import { createEmptyCatalogResponse } from '@/features/shop-assistant/server/empty-catalog-response';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -33,6 +34,7 @@ interface RecommendationRequest {
   cartSource?: import('@/features/shop-assistant/model/cart-source').CartSource;
   userQuery: string;
   persistenceMode: PersistenceMode;
+  catalogLookupCompleted?: boolean;
 }
 
 /**
@@ -47,16 +49,21 @@ export async function processRecommendationRequest(
 ) {
   const { messages, products = [], cart, models, persistenceMode } = request;
 
+  if (request.catalogLookupCompleted && products.length === 0) {
+    return createEmptyCatalogResponse();
+  }
+
   // Get system prompt
   const systemPrompt = getRecommendationPrompt();
 
   // Get product catalog context from the catalog source.
   // Why: Recommendations should receive a filtered catalog slice now and a DB-filtered slice later.
-  const contextProducts = await request.catalogSource.getProductContext({
-    query: request.userQuery,
-    limit: 8,
-  });
-  const productCatalogContext = getProductCatalogContext(contextProducts.length > 0 ? contextProducts : products);
+  const contextProducts = request.catalogLookupCompleted
+    ? products
+    : await request.catalogSource.getProductContext({ query: request.userQuery, limit: 8 });
+  const productCatalogContext = contextProducts.length > 0
+    ? getProductCatalogContext(contextProducts)
+    : 'STORE LOOKUP RESULT: No matching products were found in the store. Apologize and do not invent products.';
   
   // Get cart context
   const cartContext = getCartContext(cart);

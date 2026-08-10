@@ -14,6 +14,7 @@ import { getProductCatalogContext, getCartContext } from '@/features/shop-assist
 import { createProductSearchTool, createCartInfoTool } from '@/features/shop-assistant/tools';
 import { CartState } from '@/features/cart/model/cart';
 import type { AssistantResolvedModels } from '@/features/ai-assistant/server/assistant-model-provider';
+import { createEmptyCatalogResponse } from '@/features/shop-assistant/server/empty-catalog-response';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -26,6 +27,7 @@ interface FilteringRequest {
   catalogSource: import('@/features/shop-assistant/model/catalog-source').CatalogSource;
   cartSource?: import('@/features/shop-assistant/model/cart-source').CartSource;
   userQuery: string;
+  catalogLookupCompleted?: boolean;
 }
 
 /**
@@ -40,16 +42,21 @@ export async function processFilteringRequest(
 ) {
   const { messages, products = [], cart, models } = request;
 
+  if (request.catalogLookupCompleted && products.length === 0) {
+    return createEmptyCatalogResponse();
+  }
+
   // Get system prompt
   const systemPrompt = getFilteringPrompt();
 
   // Get product catalog context from the catalog source.
   // Why: Filtering agents should reason over candidate products, not the entire catalog.
-  const contextProducts = await request.catalogSource.getProductContext({
-    query: request.userQuery,
-    limit: 8,
-  });
-  const productCatalogContext = getProductCatalogContext(contextProducts.length > 0 ? contextProducts : products);
+  const contextProducts = request.catalogLookupCompleted
+    ? products
+    : await request.catalogSource.getProductContext({ query: request.userQuery, limit: 8 });
+  const productCatalogContext = contextProducts.length > 0
+    ? getProductCatalogContext(contextProducts)
+    : 'STORE LOOKUP RESULT: No matching products were found in the store. Apologize and do not invent products.';
   
   // Get cart context
   const cartContext = getCartContext(cart);

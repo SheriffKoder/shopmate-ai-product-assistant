@@ -8,6 +8,8 @@
 
 export interface Product {
   id: string;
+  /** Canonical public route slug; legacy interactive data may use id as its slug. */
+  slug?: string;
   name: string;
   category: string; // Product category (e.g., "smartphone", "laptop", "tablet", "smartwatch", "headphones", "earbuds")
   rating: number; // e.g., 4.8, 2.2, etc. (0-5 scale)
@@ -22,4 +24,3 @@ export interface Product {
   keywords: string[]; // Array of search keywords for better matching
   colors: string[]; // Array of available color options (e.g., ["white", "black", "blue"])
 }
-

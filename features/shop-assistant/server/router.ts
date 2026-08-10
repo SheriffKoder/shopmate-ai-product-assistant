@@ -37,6 +37,7 @@ import { processProductAssistantRequest } from './agents/products-cart/agent';
 import type { QueryClassification } from './agents';
 import { writeAssistantStep } from './assistant-step';
 import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
+import type { StoreRoutePlan } from './store-route-planner';
 
 /**
  * Agent request type - matches what agents expect
@@ -50,6 +51,8 @@ export type AgentRequest = {
   cartSource?: CartSource;
   userQuery: string;
   persistenceMode: PersistenceMode;
+  storeRoute?: StoreRoutePlan;
+  catalogLookupCompleted?: boolean;
 };
 
 /**
@@ -76,6 +79,24 @@ export async function routeToAgent(
 ): Promise<any> {
   try {
     logger.classification('query', classification, userQuery);
+
+    // Prefer the deterministic store route when it identifies a high-confidence intent.
+    if (request.storeRoute && !/price|pricing|cost|trend|historical|past years|price history/i.test(userQuery)) {
+      switch (request.storeRoute.agent) {
+        case 'recommendation':
+          return await processRecommendationRequest(request, dataStream);
+        case 'filtering':
+          return await processFilteringRequest(request, dataStream);
+        case 'products':
+        case 'cart':
+          return await processProductAssistantRequest(request, dataStream);
+        case 'unrelated':
+          return await processNotRelatedRequest({ models: request.models });
+        case 'policy':
+        case 'clarification':
+          break;
+      }
+    }
 
     // Route structured table requests directly to the artifact-capable
     // recommendation agent before product classification can treat them as a

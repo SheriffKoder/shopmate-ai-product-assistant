@@ -8,13 +8,15 @@
 
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Product } from '@/features/catalog/model/product';
 import { Star } from 'lucide-react';
 import { CartState } from '@/features/cart/model/cart';
 import Image from 'next/image';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 import { ProductCartAction } from '@/widgets/product-highlight-cards/ui/product-cart-action';
+import { AssistantAwareLink, useAssistantAwareRouter } from '@/features/ai-assistant/navigation';
+import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
 import type { ShopAssistantCommand } from '../../model/shop-assistant-command-handler';
 
 interface ProductCardProps {
@@ -24,9 +26,11 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, cart, onCommand }: ProductCardProps) => {
-  const router = useRouter();
+  const router = useAssistantAwareRouter();
+  const locale = getLocaleFromPathname(usePathname());
+  const productSlug = product.slug ?? product.id;
   const handleCardClick = () => {
-    router.push(`/products/${product.id}`);
+    router.push(`/${locale}/products/${productSlug}`);
   };
 
   const { isFullScreen } = useFullscreen();
@@ -46,7 +50,15 @@ export const ProductCard = ({ product, cart, onCommand }: ProductCardProps) => {
       <div className={`flex flex-col p-2 ${isFullScreen ? 'lg:h-[100%] lg:w-[60%]' : 'h-[60%]'}`}>
 
       {/* Product Name */}
-      <h3 className="text-lg font-semibold text-white mb-2">{product.name}</h3>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        <AssistantAwareLink
+          href={`/${locale}/products/${productSlug}`}
+          onClick={function stopProductLinkPropagation(event) { event.stopPropagation(); }}
+          className="hover:underline"
+        >
+          {product.name}
+        </AssistantAwareLink>
+      </h3>
 
       {/* Category and Rating - Flex Row */}
       <div className="flex gap-2 mb-2">

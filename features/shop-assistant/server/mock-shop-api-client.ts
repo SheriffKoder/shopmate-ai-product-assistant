@@ -19,7 +19,7 @@ import type {
 import { getInitialProducts } from '@/features/catalog/model/initial-data';
 
 function toProductDto(product: Product): ShopProductDto {
-  return { ...product } as ShopProductDto;
+  return { ...product, slug: product.slug ?? product.id } as ShopProductDto;
 }
 
 function toCartDto(cart: CartState): ShopCartDto {

@@ -29,6 +29,7 @@ import type { CatalogSearchSort, CatalogSource } from '@/features/shop-assistant
 // Schema for product output (matches Product interface)
 const productSchema = z.object({
   id: z.string().describe('Unique identifier for the product'),
+  slug: z.string().optional().describe('Canonical product route slug; use this for product links when available'),
   name: z.string().describe('Product name'),
   category: z.string().describe('Product category (e.g., "smartphone", "laptop", "tablet", "smartwatch", "headphones" - note: headphones and earbuds are in the same "headphones" category)'),
   rating: z.number().describe('Product rating (0-5 scale)'),
