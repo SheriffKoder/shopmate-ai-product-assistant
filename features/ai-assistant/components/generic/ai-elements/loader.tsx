@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@/shared/lib/utils";
 import type { HTMLAttributes } from "react";
+import { useAssistantStyleConfig } from "../../../providers/assistant-style-context";
 
 type LoaderIconProps = {
   size?: number;
@@ -83,11 +86,14 @@ export type LoaderProps = HTMLAttributes<HTMLDivElement> & {
   size?: number;
 };
 
-export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
-  <div className="flex flex-row items-center justify-start gap-2 opacity-70 pl-4">
+export const Loader = ({ className, size = 16, ...props }: LoaderProps) => {
+  const styles = useAssistantStyleConfig();
+  return (
+  <div className={cn(styles.loading?.containerClassName, className)} {...props}>
     <span className="animate-spin">
       <LoaderIcon size={size} />
     </span>
-    <p className="text-sm text-black dark:text-white shimmer-text">Thinking...</p>
+    <p className={styles.loading?.labelClassName}>Thinking...</p>
   </div>
-);
+  );
+};
