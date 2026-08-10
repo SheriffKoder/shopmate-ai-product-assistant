@@ -122,12 +122,27 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
       }
 
       if (!user) {
+        const messagesWithThinkingSteps = assistantSteps.length === 0
+          ? finishedMessages
+          : finishedMessages.map((message, index) => {
+              const lastAssistantIndex = finishedMessages.findLastIndex((item) => item.role === 'assistant');
+              if (index !== lastAssistantIndex) return message;
+
+              return {
+                ...message,
+                parts: [
+                  ...(message.parts || []).filter((part: any) => part.type !== 'data-assistant-thinking-steps'),
+                  { type: 'data-assistant-thinking-steps' as const, data: assistantSteps },
+                ],
+              };
+            });
+
         savingOrchestrator.saveLocalChat({
           chatId,
           title: finishedMessages.find((message) => message.role === 'user')?.parts?.[0]?.type === 'text'
             ? String((finishedMessages.find((message) => message.role === 'user')?.parts?.[0] as { text?: string }).text || 'New conversation')
             : 'New conversation',
-          messages: finishedMessages,
+          messages: messagesWithThinkingSteps,
         });
       }
     },
