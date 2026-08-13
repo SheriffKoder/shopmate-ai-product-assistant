@@ -23,7 +23,7 @@ import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
 import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
-import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { getOrCreateConstantUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 import { getSupabaseTableNames } from '@/shared/config/table-names';
 import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
 
@@ -372,16 +372,18 @@ CRITICAL INSTRUCTIONS:
           kind: 'chart',
         });
       
-      // Generate a temporary user ID (UUID format) for development
-      // TODO: Replace with actual user ID from authentication session
-      const tempUserId = generateUUID();
-      
+      const owner = await getOrCreateConstantUser();
+      if (!owner) {
+        logger.error('[Chart Artifact] Failed to resolve document owner user', { documentId });
+        return fullContent;
+      }
+
       const documentData = {
         id: documentId,
         title,
         content: fullContent,
         kind: 'chart' as const,
-        userId: tempUserId, // Temporary UUID for development - replace with actual user ID
+        userId: owner.id,
         createdAt: new Date().toISOString(),
       };
 

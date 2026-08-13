@@ -27,7 +27,7 @@ export function ArtifactDownloadButton({ content, kind, title }: ArtifactDownloa
       size="sm"
       onClick={function handleDownload() { downloadArtifact({ content, kind, title }); }}
       disabled={!content.trim()}
-      className="gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+      className="gap-2 rounded bg-foreground text-background cursor-pointer hover:opacity-80 hover:bg-foreground/90 hover:text-background"
       aria-label={`Download ${kind} artifact`}
       title={`Download ${kind} artifact`}
     >

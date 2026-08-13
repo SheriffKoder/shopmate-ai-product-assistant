@@ -132,7 +132,7 @@ export function VersionHistoryManagementButtons({
           size="sm"
           onClick={onUndo}
           disabled={!canUndo}
-          className="gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+          className="gap-2 rounded bg-foreground text-background cursor-pointer hover:opacity-80 hover:bg-foreground/90 hover:text-background"
           aria-label="Undo (previous version)"
           title="Previous version"
         >
@@ -147,7 +147,7 @@ export function VersionHistoryManagementButtons({
           size="sm"
           onClick={onRedo}
           disabled={!canRedo}
-          className="gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+          className="gap-2 rounded bg-foreground text-background cursor-pointer hover:opacity-80 hover:bg-foreground/90 hover:text-background"
           aria-label="Redo (next version)"
           title="Next version"
         >
@@ -163,7 +163,7 @@ export function VersionHistoryManagementButtons({
             size="sm"
             onClick={handleKeep}
             disabled={isKeeping || !currentVersionTimestamp}
-            className="gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+            className="gap-2 rounded bg-foreground text-background cursor-pointer hover:opacity-80 hover:bg-foreground/90 hover:text-background"
             aria-label="Keep this version and delete all after it"
             title="Keep this version (delete all versions after this)"
           >

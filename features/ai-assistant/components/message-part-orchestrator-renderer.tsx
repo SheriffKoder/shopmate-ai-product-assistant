@@ -1,9 +1,19 @@
 /**
  * Message Part Renderer
  * 
- * Purpose: Renders individual message parts with generic tool renderer registration.
+ * Purpose: Renders individual message parts with generic tool and stream-part registration.
  * Used in: features/ai-assistant/components/message-list.tsx
  * Why: Centralizes reusable assistant message rendering without importing business tool UI.
+ *
+ * Function Index:
+ * MessagePartRenderer: Mount text, reasoning, tool, artifact, and adapter data parts.
+ *
+ * Steps:
+ * 1. Render reasoning and text parts.
+ * 2. Mount DocumentPreview from createDocument tool results.
+ * 3. Mount DocumentPreview from persisted data-artifactContent when no createDocument card exists.
+ * 4. Mount adapter UI from streamPartRenderers keyed by data-* type, forwarding sendMessage + status.
+ * 5. Ignore unknown data-* parts without warning.
  */
 
 'use client';
@@ -14,7 +24,12 @@ import { DefaultToolRenderer } from '../tools/default-tool-renderer';
 import { MarkdownText } from './ui/markdown-text';
 import { DiscussionCard } from './ui/discussion-card';
 import { DocumentPreview } from '@/features/ai-assistant/components/artifacts/components';
+import type { AssistantStreamPartRendererRegistry } from '../model/stream-part-renderer-registry';
 import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
+import {
+  getArtifactContentPart,
+  hasCreateDocumentPreviewForId,
+} from '@/features/ai-assistant/lib/artifact-content-part';
 
 interface MessagePartRendererProps {
   part: any;
@@ -25,7 +40,10 @@ interface MessagePartRendererProps {
   isLastPart?: boolean;
   isLastMessage?: boolean;
   toolRenderers?: AssistantToolRendererRegistry;
+  streamPartRenderers?: AssistantStreamPartRendererRegistry;
   toolRendererContext?: unknown;
+  /** Sibling parts on the same message, used to avoid duplicate artifact cards. */
+  messageParts?: unknown[];
 }
 
 export const MessagePartRenderer = ({
@@ -37,7 +55,9 @@ export const MessagePartRenderer = ({
   isLastPart,
   isLastMessage,
   toolRenderers,
+  streamPartRenderers,
   toolRendererContext,
+  messageParts,
 }: MessagePartRendererProps) => {
   // Render reasoning parts
   if (part.type === 'reasoning') {
@@ -156,8 +176,50 @@ export const MessagePartRenderer = ({
     );
   }
 
+  // Catalog sheets (and other runtime artifacts) persist as data-artifactContent, not tool calls.
+  // Skip when createDocument already mounted a card for the same id so technical-discussion stays unchanged.
+  const artifactContent = getArtifactContentPart(part);
+  if (artifactContent?.id && artifactContent.title && artifactContent.kind) {
+    if (hasCreateDocumentPreviewForId(messageParts, artifactContent.id)) {
+      return null;
+    }
 
-    
+    return (
+      <DocumentPreview
+        key={`${messageId}-${partIndex}`}
+        result={{
+          id: artifactContent.id,
+          title: artifactContent.title,
+          kind: artifactContent.kind,
+          content: artifactContent.content,
+        }}
+        isReadonly={false}
+      />
+    );
+  }
+
+  // Adapter data parts (product cards, cart) persist like artifacts. Core does not know business UI.
+  const partType = typeof part.type === 'string' ? part.type : '';
+  const StreamPartRenderer = partType ? streamPartRenderers?.[partType] : undefined;
+  if (StreamPartRenderer) {
+    return (
+      <StreamPartRenderer
+        part={part}
+        messageId={messageId}
+        partIndex={partIndex}
+        context={toolRendererContext}
+        sendMessage={sendMessage}
+        status={status}
+        isLastMessage={isLastMessage}
+      />
+    );
+  }
+
+  // Ignore other data-* parts (thinking steps, deltas, transient product cards).
+  if (partType.startsWith('data-')) {
+    return null;
+  }
+
   // Filter out internal AI SDK parts that shouldn't be displayed
   // These include: step-finish, text-delta
   // Note: tool-call and tool-result are handled above for createDocument

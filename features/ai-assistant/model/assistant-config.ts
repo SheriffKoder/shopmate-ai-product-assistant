@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import type { AssistantCommand, AssistantCommandDispatcher } from './assistant-commands';
 import type { AssistantRuntime } from './assistant-runtime';
+import type { AssistantStreamPartRendererRegistry } from './stream-part-renderer-registry';
 import type { AssistantToolRendererRegistry } from './tool-renderer-registry';
 import type { SuggestionSet } from '../config/intro-suggestions';
 import type { AssistantApiEndpoints } from './api-endpoints';
@@ -35,6 +36,8 @@ export interface AssistantConfig {
   currentUser?: AssistantUser;
   runtime?: AssistantRuntime;
   toolRenderers?: AssistantToolRendererRegistry;
+  /** Adapter renderers for persisted data-* parts (cards, cart), not AI tool names. */
+  streamPartRenderers?: AssistantStreamPartRendererRegistry;
   emptyState?: ReactNode;
   suggestions?: SuggestionSet[];
   callbacks?: AssistantHostCallbacks;

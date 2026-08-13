@@ -13,6 +13,7 @@ import ChatContainer from '@/features/ai-assistant/chat-container';
 import { SidebarHistory } from '@/features/ai-assistant/components/history-sidebar/components';
 import { useSidebarRefresh } from '@/features/ai-assistant/components/history-sidebar/hooks/use-sidebar-refresh';
 import { useCurrentChatId } from '@/features/ai-assistant/components/history-sidebar/utils/chat-navigation';
+import type { AssistantStreamPartRendererRegistry } from '@/features/ai-assistant/model/stream-part-renderer-registry';
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 import type { SuggestionSet } from './config/intro-suggestions';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
@@ -24,6 +25,7 @@ interface ChatWrapperProps {
   chatId: string; // Fallback chatId if no searchParam
   isFullScreen?: boolean;
   toolRenderers?: AssistantToolRendererRegistry;
+  streamPartRenderers?: AssistantStreamPartRendererRegistry;
   endpoint?: string;
   suggestions?: SuggestionSet[];
   toolRendererContext?: unknown;
@@ -33,6 +35,7 @@ export const ChatWrapper = ({
   chatId: fallbackChatId,
   isFullScreen = false,
   toolRenderers,
+  streamPartRenderers,
   endpoint,
   suggestions,
   toolRendererContext,
@@ -122,6 +125,7 @@ export const ChatWrapper = ({
             urlChatId={urlChatId}
             onChatFinish={triggerRefresh} 
             toolRenderers={toolRenderers}
+            streamPartRenderers={streamPartRenderers}
             endpoint={endpoint}
             suggestions={suggestions}
             toolRendererContext={toolRendererContext}

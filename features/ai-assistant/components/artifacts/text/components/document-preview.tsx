@@ -27,6 +27,8 @@ interface DocumentPreviewProps {
     id: string;
     title: string;
     kind: 'text' | 'code' | 'sheet' | 'chart';
+    /** Optional snapshot from a persisted data-artifactContent part. */
+    content?: string;
   };
   args?: {
     title: string;
@@ -136,11 +138,12 @@ export function DocumentPreview({
       artifact.documentId !== 'init' && 
       artifact.documentId === previewDocumentId;
     
-    if (artifactMatchesPreview && (artifact.content || artifact.title)) {
+    if (artifactMatchesPreview && (artifact.content || artifact.title || result?.content)) {
       return {
         title: artifact.title || result?.title || args?.title || 'Untitled Document',
         kind: artifact.kind || result?.kind || args?.kind || 'text',
-        content: artifact.content || '',
+        // Prefer live artifact content while streaming; fall back to the persisted part snapshot.
+        content: artifact.content || result?.content || '',
         id: artifact.documentId,
       };
     }
@@ -150,7 +153,8 @@ export function DocumentPreview({
       return {
         title: result.title || 'Untitled Document',
         kind: result.kind || 'text',
-        content: '', // Don't use artifact.content here - it might be from a different document
+        // Catalog sheets carry CSV on the message part so compact chat can preview without the panel.
+        content: result.content || '',
         id: result.id,
       };
     }

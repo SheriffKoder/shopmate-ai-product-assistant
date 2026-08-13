@@ -13,9 +13,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
-import type { Document } from '@/shared/infrastructure/supabase/types';
+import type { Document, DocumentKind } from '@/shared/infrastructure/supabase/types';
 import { logger } from '@/features/ai-assistant/lib/logger';
-import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { getOrCreateConstantUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 import { getSupabaseTableNames } from '@/shared/config/table-names';
 
 const tableNames = getSupabaseTableNames();
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
  * Request Body:
  * - title: Document title
  * - content: Document content
- * - kind: Document kind ('text' | 'code' | 'sheet')
+ * - kind: Document kind ('text' | 'code' | 'sheet' | 'chart')
  * 
  * Returns:
  * - 200: Created document (new version with new createdAt)
@@ -174,11 +174,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate kind enum
-    if (!['text', 'code', 'sheet'].includes(kind)) {
+    const allowedKinds: DocumentKind[] = ['text', 'code', 'sheet', 'chart'];
+    if (!allowedKinds.includes(kind)) {
       logger.warn(`[Document API] Invalid kind: ${kind}`);
       return NextResponse.json(
-        { error: 'Kind must be one of: text, code, sheet' },
+        { error: 'Kind must be one of: text, code, sheet, chart' },
         { status: 400 }
       );
     }
@@ -192,8 +192,8 @@ export async function POST(request: NextRequest) {
       .eq('id', id)
       .limit(1);
 
-    // Use existing userId if document exists, otherwise generate new UUID
-    // This ensures all versions of the same document have the same userId
+    // Use existing userId if document exists, otherwise use the app user.
+    // sm_documents.userId must reference sm_users.id after the FK constraint.
     let userId: string;
     if (existingDocs && existingDocs.length > 0) {
       userId = existingDocs[0].userId;
@@ -203,10 +203,16 @@ export async function POST(request: NextRequest) {
       //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
       // }
     } else {
-      // First version - generate new UUID for userId
-      // TODO: Replace with session.user.id when authentication is implemented
-      userId = generateUUID();
-      logger.debug('[Document API] Generated new userId for first version', { userId });
+      const owner = await getOrCreateConstantUser();
+      if (!owner) {
+        logger.error('[Document API] Failed to resolve document owner user');
+        return NextResponse.json(
+          { error: 'Failed to resolve document owner' },
+          { status: 500 }
+        );
+      }
+      userId = owner.id;
+      logger.debug('[Document API] Using app user for first version', { userId });
     }
 
     // Insert new version (creates new row with same id, new createdAt)

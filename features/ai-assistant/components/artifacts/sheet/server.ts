@@ -2,18 +2,21 @@
  * Sheet Artifact Handler (Server-Side)
  * 
  * Purpose: Generates CSV/spreadsheet content and streams it to the artifact UI
- * Used in: Agents after createDocument tool is called with kind='sheet'
+ * Used in: Agents after createDocument tool is called with kind='sheet',
+ *          and server renderers that pass precomputed CSV
  * Why: Handles the actual content generation and streaming for sheet artifacts
  * 
  * How it works:
- * 1. Receives document title and dataStream
- * 2. Uses AI to generate CSV data based on title
+ * 1. Receives document title, dataStream, and optional precomputed CSV
+ * 2. Streams provided CSV directly, or uses AI to generate CSV from the title
  * 3. Streams CSV deltas to UI in real-time
  * 4. Signals completion when done
- * 5. Saves to Supabase for persistence
+ * 5. Writes non-transient data-artifactContent so chat can mount DocumentPreview
+ * 6. Saves to Supabase for persistence
  * 
  * Usage:
  * - Called after createDocument tool execution
+ * - Called with precomputed CSV when the caller already owns the rows
  * - Only for sheet artifacts (kind === 'sheet')
  * - Content is streamed as it's generated
  */
@@ -23,7 +26,7 @@ import { z } from 'zod/v3';
 import type { UIMessageStreamWriter } from 'ai';
 import { supabaseAdmin } from '@/shared/infrastructure/supabase/server/create-service-client';
 import { logger } from '@/features/ai-assistant/lib/logger';
-import { generateUUID } from '@/features/ai-assistant/lib/utils';
+import { getOrCreateConstantUser } from '@/shared/infrastructure/supabase/queries/user-queries';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
 import { writeAssistantStep } from '@/features/ai-assistant/server/assistant-step';
 import { getSupabaseTableNames } from '@/shared/config/table-names';
@@ -35,13 +38,15 @@ const tableNames = getSupabaseTableNames();
  * Parameters for creating a sheet document
  */
 interface CreateSheetDocumentParams {
-  /** Document title (used as prompt) */
+  /** Document title (used as prompt when content is not provided) */
   title: string;
   /** Data stream writer for streaming content to UI */
   dataStream: UIMessageStreamWriter<any>;
   /** Document ID (optional, will be generated if not provided) */
   documentId?: string;
   persistenceMode?: PersistenceMode;
+  /** Precomputed CSV. When set, skip LLM generation and stream these rows. */
+  content?: string;
 }
 
 /**
@@ -49,10 +54,11 @@ interface CreateSheetDocumentParams {
  * 
  * Generates CSV/spreadsheet content using AI and streams it to the artifact UI.
  * After streaming completes, saves the document to Supabase for persistence.
+ * When `content` is provided, that CSV is streamed as-is instead of generating from the title.
  * 
  * Uses streamObject for structured CSV generation (better than text streaming for tables).
  * 
- * @param params - Parameters including title, dataStream, and optional documentId
+ * @param params - Parameters including title, dataStream, optional documentId, and optional CSV content
  * @returns Full generated CSV content as string
  * 
  * @example
@@ -60,7 +66,8 @@ interface CreateSheetDocumentParams {
  * await createSheetDocument({
  *   title: "Product inventory spreadsheet",
  *   dataStream: writer,
- *   documentId: "doc-123" // Optional
+ *   documentId: "doc-123", // Optional
+ *   content: "Name,Price\\niPhone,999", // Optional precomputed CSV
  * });
  * ```
  */
@@ -69,51 +76,65 @@ export async function createSheetDocument({
   dataStream,
   documentId,
   persistenceMode = 'database',
+  content,
 }: CreateSheetDocumentParams): Promise<string> {
   logger.debug('[Sheet Artifact] createSheetDocument called', {
     title,
     documentId: documentId || 'NOT PROVIDED',
     hasDataStream: !!dataStream,
+    hasPrecomputedContent: Boolean(content),
   });
 
   let fullContent = '';
   let deltaCount = 0;
 
   // ✅ STREAMING PHASE: Stream content in real-time
-  // Generate CSV content using AI with structured output
-  logger.debug('[Sheet Artifact] Starting CSV generation stream...');
-  const models = getAssistantModels();
-  const { fullStream } = streamObject({
-    model: models.chat,
-    system: `You are a helpful assistant that creates well-structured CSV data for spreadsheets.
+  if (content) {
+    // Caller already has the full CSV. Skip model generation.
+    logger.debug('[Sheet Artifact] Streaming precomputed CSV...');
+    fullContent = content;
+    deltaCount = 1;
+    dataStream.write({
+      type: 'data-sheetDelta',
+      data: content,
+      transient: true, // UI-only, don't save to message history
+    });
+  } else {
+    // Generate CSV content using AI with structured output
+    logger.debug('[Sheet Artifact] Starting CSV generation stream...');
+    const models = getAssistantModels();
+    const { fullStream } = streamObject({
+      model: models.chat,
+      system: `You are a helpful assistant that creates well-structured CSV data for spreadsheets.
 Generate CSV data based on the user's request. The CSV should be properly formatted with headers.
 Return only valid CSV data, no explanations or markdown formatting.
 Use commas as delimiters and newlines for rows.`,
-    prompt: title,
-    schema: z.object({
-      csv: z.string().describe('CSV data with headers. Use commas as delimiters, newlines for rows.'),
-    }),
-  });
+      prompt: title,
+      schema: z.object({
+        csv: z.string().describe('CSV data with headers. Use commas as delimiters, newlines for rows.'),
+      }),
+    });
 
-  // Stream CSV deltas to UI in real-time
-  logger.debug('[Sheet Artifact] Starting to process stream deltas...');
-  for await (const delta of fullStream) {
-    if (delta.type === 'object') {
-      const { object } = delta;
-      const { csv } = object;
+    // Stream CSV deltas to UI in real-time
+    logger.debug('[Sheet Artifact] Starting to process stream deltas...');
+    for await (const delta of fullStream) {
+      if (delta.type === 'object') {
+        const { object } = delta;
+        const { csv } = object;
 
-      if (csv) {
-        // streamObject sends full object each time, so we replace (not append)
-        // This is different from textDelta which appends incrementally
-        fullContent = csv;
-        deltaCount++;
+        if (csv) {
+          // streamObject sends full object each time, so we replace (not append)
+          // This is different from textDelta which appends incrementally
+          fullContent = csv;
+          deltaCount++;
 
-        // Stream full CSV to UI (streamObject replaces, not appends)
-        dataStream.write({
-          type: 'data-sheetDelta',
-          data: csv,
-          transient: true, // UI-only, don't save to message history
-        });
+          // Stream full CSV to UI (streamObject replaces, not appends)
+          dataStream.write({
+            type: 'data-sheetDelta',
+            data: csv,
+            transient: true, // UI-only, don't save to message history
+          });
+        }
       }
     }
   }
@@ -131,6 +152,7 @@ Use commas as delimiters and newlines for rows.`,
     data: 'complete',
     transient: true,
   });
+  // Persist on the assistant message so MessagePartRenderer can mount a sheet card without createDocument.
   dataStream.write({
     type: 'data-artifactContent',
     data: { documentId, title, kind: 'sheet', content: fullContent },
@@ -154,16 +176,18 @@ Use commas as delimiters and newlines for rows.`,
         kind: 'sheet',
       });
       
-      // Generate a temporary user ID (UUID format) for development
-      // TODO: Replace with actual user ID from authentication session
-      const tempUserId = generateUUID();
-      
+      const owner = await getOrCreateConstantUser();
+      if (!owner) {
+        logger.error('[Sheet Artifact] Failed to resolve document owner user', { documentId });
+        return fullContent;
+      }
+
       const documentData = {
         id: documentId,
         title,
         content: fullContent,
         kind: 'sheet' as const,
-        userId: tempUserId, // Temporary UUID for development - replace with actual user ID
+        userId: owner.id,
         createdAt: new Date().toISOString(),
       };
 

@@ -20,7 +20,7 @@ export function createGenericAssistantConfig(): AssistantConfig {
 
 /** Build a ShopMate configuration by injecting business-owned capabilities. */
 export function createShopAssistantConfig(
-  config: Pick<AssistantConfig, 'currentUser' | 'runtime' | 'toolRenderers' | 'emptyState' | 'suggestions' | 'callbacks'>
+  config: Pick<AssistantConfig, 'currentUser' | 'runtime' | 'toolRenderers' | 'streamPartRenderers' | 'emptyState' | 'suggestions' | 'callbacks'>
 ): AssistantConfig {
   return {
     endpoint: assistantApiEndpoints.assistant,

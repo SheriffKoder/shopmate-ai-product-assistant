@@ -29,6 +29,7 @@ import type { SuggestionSet } from './config/intro-suggestions';
 import { ArtifactPanel } from './components/artifacts/components/artifact-panel';
 import { useUpdateChatIdInUrl } from './components/history-sidebar/utils/chat-navigation';
 import { useAssistantModelSelection } from './hooks/use-assistant-model-selection';
+import type { AssistantStreamPartRendererRegistry } from './model/stream-part-renderer-registry';
 import type { AssistantToolRendererRegistry } from './model/tool-renderer-registry';
 import { assistantApiEndpoints } from './model/api-endpoints';
 import { getDictationConfig } from './dictation/model/dictation-config';
@@ -41,6 +42,7 @@ interface ChatContainerProps {
   urlChatId: string | null; // URL chatId (null when cleared for new chat)
   onChatFinish?: () => void;
   toolRenderers?: AssistantToolRendererRegistry;
+  streamPartRenderers?: AssistantStreamPartRendererRegistry;
   endpoint?: string;
   onError?: (error: unknown) => void;
   buildRequestBody?: () => Record<string, unknown>;
@@ -49,7 +51,7 @@ interface ChatContainerProps {
   suggestions?: SuggestionSet[];
 }
 
-const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoint = assistantApiEndpoints.assistant, onError, buildRequestBody, toolRendererContext, emptyState, suggestions }: ChatContainerProps) => {
+const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, streamPartRenderers, endpoint = assistantApiEndpoints.assistant, onError, buildRequestBody, toolRendererContext, emptyState, suggestions }: ChatContainerProps) => {
   
   //////////////////////////////////
   // Data Stream Access: For accumulating streaming data parts
@@ -246,6 +248,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
                 regenerate={regenerate}
                 status={status}
                 toolRenderers={toolRenderers}
+                streamPartRenderers={streamPartRenderers}
                 toolRendererContext={toolRendererContext}
                 assistantSteps={assistantSteps}
               />
@@ -287,6 +290,7 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, endpoin
         sendMessage={sendMessage}
         regenerate={regenerate}
         toolRenderers={toolRenderers}
+        streamPartRenderers={streamPartRenderers}
         toolRendererContext={toolRendererContext}
       />
     </>

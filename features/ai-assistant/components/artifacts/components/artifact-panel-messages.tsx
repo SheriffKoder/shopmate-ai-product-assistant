@@ -12,6 +12,7 @@ import { useRef } from 'react';
 import { MessageList } from '@/features/ai-assistant/components/message-list';
 import { PromptInput } from '@/features/ai-assistant/components/prompt-input';
 import { useAssistantModelSelection } from '@/features/ai-assistant/hooks/use-assistant-model-selection';
+import type { AssistantStreamPartRendererRegistry } from '@/features/ai-assistant/model/stream-part-renderer-registry';
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 import { getDictationConfig } from '@/features/ai-assistant/dictation/model/dictation-config';
 import { useAssistantStyleConfig } from '@/features/ai-assistant/providers/assistant-style-context';
@@ -27,6 +28,7 @@ interface ArtifactMessagesProps {
   cart?: any;
   dispatchCartAction?: any;
   toolRenderers?: AssistantToolRendererRegistry;
+  streamPartRenderers?: AssistantStreamPartRendererRegistry;
   toolRendererContext?: unknown;
 }
 
@@ -46,6 +48,7 @@ export function ArtifactMessages({
   cart,
   dispatchCartAction,
   toolRenderers,
+  streamPartRenderers,
   toolRendererContext,
 }: ArtifactMessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,6 +76,7 @@ export function ArtifactMessages({
           regenerate={regenerate}
           status={status}
           toolRenderers={toolRenderers}
+          streamPartRenderers={streamPartRenderers}
           toolRendererContext={toolRendererContext ?? fallbackToolRendererContext}
         />
       </div>

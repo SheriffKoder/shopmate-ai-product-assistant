@@ -4,6 +4,11 @@
  * Purpose: Renders the list of messages in the conversation
  * Used in: chat-container.tsx
  * Why: Separates message list rendering from main component and forwards adapter tool rendering.
+ *
+ * Steps:
+ * 1. Hide internal parts (thinking steps, deltas).
+ * 2. Display conversation metadata (data-uiMetadata) after text on the same message.
+ * 3. Forward sendMessage into MessagePartRenderer so stream-part UI can start a new turn.
  */
 
 'use client';
@@ -17,8 +22,10 @@ import {
 import { CopyIcon, RefreshCcwIcon } from 'lucide-react';
 import { ItemTypeCard } from './ui/item-type-card';
 import { MessagePartRenderer } from './message-part-orchestrator-renderer';
+import type { AssistantStreamPartRendererRegistry } from '../model/stream-part-renderer-registry';
 import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
 import type { AssistantStepEvent } from '../model/assistant-events';
+import { orderMessagePartsForDisplay } from '../lib/order-message-parts-for-display';
 import { ThinkingSteps } from './thinking-steps/thinking-steps';
 import { useAssistantStyleConfig } from '../providers/assistant-style-context';
 
@@ -29,6 +36,7 @@ interface MessageListProps {
   regenerate?: (options?: { messageId?: string }) => void;
   status?: 'idle' | 'streaming' | 'submitted' | 'error' | 'ready';
   toolRenderers?: AssistantToolRendererRegistry;
+  streamPartRenderers?: AssistantStreamPartRendererRegistry;
   toolRendererContext?: unknown;
   assistantSteps?: AssistantStepEvent[];
 }
@@ -40,6 +48,7 @@ export const MessageList = ({
   regenerate,
   status,
   toolRenderers,
+  streamPartRenderers,
   toolRendererContext,
   assistantSteps = [],
 }: MessageListProps) => {
@@ -91,10 +100,13 @@ export const MessageList = ({
                 }
               />
             )}
-            {message.parts.map((part: any, i: number) => {
+            {orderMessagePartsForDisplay(message.parts).map(({ part, index: i }) => {
               // Filter out internal AI SDK parts that shouldn't be displayed
               // These include: step-finish, text-delta
               // Note: tool-call and tool-result for createDocument are handled in MessagePartRenderer
+              // Note: persisted data-artifactContent also mounts DocumentPreview in MessagePartRenderer
+              // Note: adapter data-* parts (cards, cart, uiMetadata) mount via streamPartRenderers
+              // Note: data-uiMetadata is ordered after text so Find chips sit under the reply
               // Note: reasoning and step-start are now displayed
               const internalPartTypes = ['step-finish', 'text-delta', 'data-assistant-thinking-steps'];
               if (internalPartTypes.includes(part.type)) {
@@ -126,12 +138,14 @@ export const MessageList = ({
                     isLastPart={i === message.parts.length - 1}
                     isLastMessage={message.id === messages.at(-1)?.id}
                     toolRenderers={toolRenderers}
+                    streamPartRenderers={streamPartRenderers}
                     toolRendererContext={toolRendererContext}
+                    messageParts={message.parts}
                   />
                 );
               }
               
-              // ALL OTHER PARTS (reasoning, step-start, tools, etc.):
+              // ALL OTHER PARTS (reasoning, step-start, tools, artifact content, data parts, etc.):
               return (
                 <MessagePartRenderer
                   key={`${message.id}-${i}`}
@@ -143,7 +157,9 @@ export const MessageList = ({
                   isLastPart={i === message.parts.length - 1}
                   isLastMessage={message.id === messages.at(-1)?.id}
                   toolRenderers={toolRenderers}
+                  streamPartRenderers={streamPartRenderers}
                   toolRendererContext={toolRendererContext}
+                  messageParts={message.parts}
                 />
               );
             })}

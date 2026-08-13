@@ -23,6 +23,7 @@ import { SheetArtifactContent } from '../sheet/components/sheet-artifact-content
 import { ChartArtifactContent } from '../chart/components/chart-artifact-content';
 import { ArtifactCloseButton } from './artifact-close-button';
 import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
+import type { AssistantStreamPartRendererRegistry } from '@/features/ai-assistant/model/stream-part-renderer-registry';
 import type { AssistantToolRendererRegistry } from '@/features/ai-assistant/model/tool-renderer-registry';
 import { useAssistantStyleConfig } from '@/features/ai-assistant/providers/assistant-style-context';
 
@@ -37,6 +38,7 @@ interface ArtifactPanelProps {
   cart?: any;
   dispatchCartAction?: any;
   toolRenderers?: AssistantToolRendererRegistry;
+  streamPartRenderers?: AssistantStreamPartRendererRegistry;
   toolRendererContext?: unknown;
 }
 
@@ -60,6 +62,7 @@ export function ArtifactPanel({
   cart,
   dispatchCartAction,
   toolRenderers,
+  streamPartRenderers,
   toolRendererContext,
 }: ArtifactPanelProps) {
   const { artifact, setArtifact } = useArtifact();
@@ -120,6 +123,7 @@ export function ArtifactPanel({
             cart={cart}
             dispatchCartAction={dispatchCartAction}
             toolRenderers={toolRenderers}
+            streamPartRenderers={streamPartRenderers}
             toolRendererContext={toolRendererContext}
           />
         </motion.div>

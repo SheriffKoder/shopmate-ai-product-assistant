@@ -2,8 +2,19 @@
  * Logger Utility
  * 
  * Purpose: Centralized logging for AI Assistant
- * Used in: API routes, agents, utilities, and components
+ * Used in: API routes, agents, utilities, runtime nodes, and components
  * Why: Provides consistent logging with environment awareness and better debugging
+ *
+ * Function Index:
+ * logger.debug / info / warn / error: Levelled console logs.
+ * logger.separator: Development banner lines.
+ * logger.node: One routing-node trace with input, details, result, and status.
+ * logger.classification: Compatibility wrapper around logger.node.
+ *
+ * Steps:
+ * 1. Gate debug logs to development.
+ * 2. Print a named banner for each assistant node.
+ * 3. Include input, what happened, result, and error or success.
  */
 
 /**
@@ -39,6 +50,39 @@ const defaultConfig: LoggerConfig = {
   enableInfo: true,
   prefix: '[AI Assistant]',
 };
+
+/** Outcome printed in a node banner. */
+export type AssistantNodeStatus = 'success' | 'error' | 'skipped';
+
+/** One routing or agent node trace for the terminal. */
+export interface AssistantNodeLog {
+  /** Banner title, for example QUERY CLASSIFICATION. */
+  name: string;
+  /** Payload the node received. */
+  input?: unknown;
+  /** Short explanation of what the node did. */
+  details?: unknown;
+  /** Decision or output. */
+  result?: unknown;
+  status?: AssistantNodeStatus;
+  error?: unknown;
+}
+
+/** Print a scalar inline and keep objects inspectable. */
+function logNodeField(
+  debug: (message: string, data?: unknown) => void,
+  label: string,
+  value: unknown,
+): void {
+  if (value === undefined) return;
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    debug(`${label}: ${value}`);
+    return;
+  }
+
+  debug(`${label}:`, value);
+}
 
 /**
  * Format log message with prefix and timestamp
@@ -159,6 +203,36 @@ export const logger = {
   },
 
   /**
+   * Log one assistant routing or agent node.
+   * Development only, except errors which always print.
+   *
+   * @example
+   * logger.node({
+   *   name: 'QUERY CLASSIFICATION',
+   *   input: { query: 'Show me smartphones' },
+   *   details: 'Outer classifier mapped the query to a shop route.',
+   *   result: { classification: 'related' },
+   *   status: 'success',
+   * })
+   */
+  node: (entry: AssistantNodeLog): void => {
+    const status = entry.status ?? (entry.error ? 'error' : 'success');
+    if (!defaultConfig.enableDebug && status !== 'error') {
+      return;
+    }
+
+    logger.separator(entry.name);
+    logger.debug(`Status: ${status}`);
+    logNodeField(logger.debug, 'Input', entry.input);
+    logNodeField(logger.debug, 'Details', entry.details);
+    logNodeField(logger.debug, 'Result', entry.result);
+    if (entry.error !== undefined || status === 'error') {
+      logger.error('Error:', entry.error ?? 'unknown error');
+    }
+    logger.separator();
+  },
+
+  /**
    * Log classification results (specific to our use case)
    * Only shown in development
    * 
@@ -167,14 +241,13 @@ export const logger = {
    * @param query - User query that was classified
    */
   classification: (type: 'query' | 'product', result: string, query: string): void => {
-    if (!defaultConfig.enableDebug) {
-      return;
-    }
-    
-    logger.separator(`${type.toUpperCase()} CLASSIFICATION`);
-    logger.debug(`Result: ${result}`);
-    logger.debug(`User Query: ${query}`);
-    logger.separator();
+    logger.node({
+      name: `${type.toUpperCase()} CLASSIFICATION`,
+      input: { query },
+      details: `Mapped the query to ${result}.`,
+      result,
+      status: 'success',
+    });
   },
 };
 

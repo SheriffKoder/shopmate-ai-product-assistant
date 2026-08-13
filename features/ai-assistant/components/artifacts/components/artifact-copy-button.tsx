@@ -134,7 +134,7 @@ export function ArtifactCopyButton({
       size={size}
       onClick={handleCopy}
       disabled={!content || !content.trim()}
-      className={cn('gap-2 rounded bg-foreground text-background hover:bg-foreground/90 hover:text-background', className)}
+      className={cn('gap-2 rounded bg-foreground text-background cursor-pointer hover:opacity-80 hover:bg-foreground/90 hover:text-background', className)}
       aria-label={`Copy ${kind} content to clipboard`}
       title={`Copy ${kind} content`}
     >

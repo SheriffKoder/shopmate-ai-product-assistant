@@ -2,7 +2,7 @@
  * Create Document Tool
  * 
  * Purpose: Tool that AI can call to create a text artifact
- * Used in: Agents (products-cart, recommendation, etc.)
+ * Used in: Agents and server renderers that open the artifact panel
  * Why: Allows AI to create artifacts via tool calls during conversations
  * 
  * How it works:
@@ -11,11 +11,16 @@
  * 3. Tool returns success message
  * 4. Artifact handler (separate) will generate and stream content
  * 
+ * Function Index:
+ * streamArtifactMetadata: Open the artifact panel before content streams.
+ * createDocumentTool: Model-callable wrapper around artifact metadata streaming.
+ * 
  * Usage:
  * - For substantial content (>10 lines)
  * - For content users will likely save/reuse (emails, code, essays, etc.)
  * - When explicitly requested to create a document
  * - For content containing code snippets
+ * - Server renderers can call streamArtifactMetadata directly, then stream content
  */
 
 import { dynamicTool, type UIMessageStreamWriter } from 'ai';
@@ -23,6 +28,63 @@ import { z } from 'zod/v3';
 import { generateUUID } from '@/features/ai-assistant/lib/utils';
 import type { AssistantUIDataTypes } from '../../../../types/stream';
 import { writeAssistantStep } from '../../../../server/assistant-step';
+
+/**
+ * Stream artifact metadata to the UI before content generation.
+ * Used in: createDocumentTool and server renderers that open the artifact panel.
+ * Used for: Opening the artifact panel with id, title, kind, and streaming status.
+ *
+ * @example
+ * streamArtifactMetadata(dataStream, { id, title: 'Quarterly notes', kind: 'text' })
+ */
+export function streamArtifactMetadata(
+  dataStream: UIMessageStreamWriter<any> | undefined,
+  params: { id: string; title: string; kind: 'text' | 'code' | 'sheet' | 'chart' }
+) {
+  if (!dataStream) return;
+
+  writeAssistantStep(dataStream, {
+    id: `artifact:${params.title}`,
+    label: 'Creating artifact',
+    summary: params.title,
+    status: 'loading',
+  });
+
+  // 1. Stream document ID so the panel can bind to this artifact.
+  dataStream.write({
+    type: 'data-artifactId',
+    data: params.id,
+    transient: true, // UI-only, don't save to message history
+  });
+
+  // 2. Stream document title.
+  dataStream.write({
+    type: 'data-artifactTitle',
+    data: params.title,
+    transient: true,
+  });
+
+  // 3. Stream document kind so the correct artifact renderer mounts.
+  dataStream.write({
+    type: 'data-artifactKind',
+    data: params.kind,
+    transient: true,
+  });
+
+  // 4. Set status to streaming (content will be generated next).
+  dataStream.write({
+    type: 'data-artifactStatus',
+    data: 'streaming',
+    transient: true,
+  });
+
+  // 5. Clear any existing artifact content before the new stream starts.
+  dataStream.write({
+    type: 'data-artifactClear',
+    data: null,
+    transient: true,
+  });
+}
 
 /**
  * Create Document Tool
@@ -59,13 +121,6 @@ export const createDocumentTool = (
         title: string;
         kind?: 'text' | 'code' | 'sheet' | 'chart';
       };
-
-      writeAssistantStep(dataStream, {
-        id: `artifact:${title}`,
-        label: 'Creating artifact',
-        summary: title,
-        status: 'loading',
-      });
       
       // Use shared ID from agent if available, otherwise generate new one
       // This ensures the tool and agent use the same ID for syncing
@@ -82,41 +137,7 @@ export const createDocumentTool = (
 
       // Stream artifact metadata to UI
       // These will be processed by DataStreamHandler to update artifact state
-
-      // 1. Stream document ID
-      dataStream?.write({
-        type: 'data-artifactId',
-        data: id,
-        transient: true, // UI-only, don't save to message history
-      });
-
-      // 2. Stream document title
-      dataStream?.write({
-        type: 'data-artifactTitle',
-        data: title,
-        transient: true,
-      });
-
-      // 3. Stream document kind
-      dataStream?.write({
-        type: 'data-artifactKind',
-        data: kind,
-        transient: true,
-      });
-
-      // 4. Set status to streaming (content will be generated next)
-      dataStream?.write({
-        type: 'data-artifactStatus',
-        data: 'streaming',
-        transient: true,
-      });
-
-      // 5. Clear any existing artifact content
-      dataStream?.write({
-        type: 'data-artifactClear',
-        data: null,
-        transient: true,
-      });
+      streamArtifactMetadata(dataStream, { id, title, kind });
 
       // Return success message
       // Note: Actual content generation happens in artifact handlers (e.g., text/server.ts)
