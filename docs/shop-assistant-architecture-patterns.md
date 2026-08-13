@@ -156,7 +156,7 @@ For a new project:
 ## Reference files
 
 - [`features/shop-assistant/server/shop-assistant-runtime.ts`](../features/shop-assistant/server/shop-assistant-runtime.ts)
-- [`features/shop-assistant-v1/server/router.ts`](../features/shop-assistant-v1/server/router.ts)
+- [`features/shop-assistant/model/execution-plan.ts`](../features/shop-assistant/model/execution-plan.ts)
 - [`features/shop-assistant/model/sources/catalog-source.ts`](../features/shop-assistant/model/sources/catalog-source.ts)
 - [`features/shop-assistant/model/sources/cart-source.ts`](../features/shop-assistant/model/sources/cart-source.ts)
 - [`features/shop-assistant/model/sources/shop-api-client.ts`](../features/shop-assistant/model/sources/shop-api-client.ts)

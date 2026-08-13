@@ -17,7 +17,6 @@
 - Generic assistant request parsing, SSE, persistence, or runtime contracts (`features/ai-assistant`).
 - Artifact document storage and generic artifact panel (`features/ai-assistant` artifacts).
 - Storefront catalog/cart state (`features/catalog`, `features/cart`, `entities/*`).
-- The archived v1 adapter (`features/shop-assistant-v1`).
 
 ## Dependency direction
 

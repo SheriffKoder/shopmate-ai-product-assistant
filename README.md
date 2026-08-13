@@ -64,7 +64,7 @@ This allows the assistant feature to be reused in another application by supplyi
 
 ### Request flow
 
-ShopMate labels each request with one schema LLM ([`request-agent.ts`](features/shop-assistant/server/request-agent.ts)), then [`planFromSchema`](features/shop-assistant/model/execution-plan.ts) chooses lookup, view, cart, refuse, or policy. Catalog facts come from lookup rows ([`match-catalog-products.ts`](features/shop-assistant/lib/catalog/match-catalog-products.ts)), not from a second AI search. The live flow is in the [Shop Assistant README](features/shop-assistant/README.md). The previous multi-agent router is archived at [`features/shop-assistant-v1`](features/shop-assistant-v1/).
+ShopMate labels each request with one schema LLM ([`request-agent.ts`](features/shop-assistant/server/request-agent.ts)), then [`planFromSchema`](features/shop-assistant/model/execution-plan.ts) chooses lookup, view, cart, refuse, or policy. Catalog facts come from lookup rows ([`match-catalog-products.ts`](features/shop-assistant/lib/catalog/match-catalog-products.ts)), not from a second AI search. The live flow is in the [Shop Assistant README](features/shop-assistant/README.md). This replaced the previous multi-agent classifier/router.
 
 Example: “Should I get an iPhone or a Samsung for social media reels?”
 

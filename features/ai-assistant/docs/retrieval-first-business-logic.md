@@ -195,7 +195,7 @@ Do not remount catalog UI from `toolName === 'productSearch'`. Refresh must remo
 - Not AI tools for catalog, cart, or shop artifacts.
 - Not inventing sheet/document rows after a “table” wording leak into routing.
 - Not HITL mutations. Cart **read** can be retrieval-first; cart **write** needs [workflow / HITL](./workflow-hitl-business-logic.md).
-- Not the archived v1 adapter. `features/shop-assistant-v1/` is history, not a second catalog pattern.
+- Not the previous multi-agent adapter (classifiers, specialist agents, AI tools). That is history, not a second catalog pattern.
 
 ---
 
@@ -234,4 +234,3 @@ Retrieval answers questions; verified direct commands protect writes.
 - Lookup: `features/shop-assistant/lib/catalog/match-catalog-products.ts`
 - Render: `features/shop-assistant/server/render/`
 - Stream-part UI: `features/shop-assistant/ui/integration/stream-part-registry.tsx`
-- Archived v1 (agents + AI tools): `features/shop-assistant-v1/`

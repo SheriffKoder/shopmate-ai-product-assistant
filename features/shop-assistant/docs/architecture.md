@@ -1,6 +1,6 @@
 # Architecture
 
-What Shop Assistant is, and why it replaced [`features/shop-assistant-v1`](../../shop-assistant-v1/).
+What Shop Assistant is, and why it replaced the previous multi-agent adapter.
 
 ## One sentence
 
@@ -334,4 +334,4 @@ Shop Assistant keeps what worked:
 - Not embeddings or AI ranking inside lookup (unless we add it later as an explicit node).
 - Not cart mutations authorized by schema. `action: cart` only means show cart UI.
 - Not dumping catalog cards on rec / compare. Schema `view` + `metadata` choose text vs Find chips; click starts a visible `Provide X from the catalog` turn.
-- Not a third runtime living beside v1 forever. This folder is the live adapter; v1 is archived as `shop-assistant-v1`.
+- Not a third runtime living beside the old multi-agent adapter. This folder is the live adapter.

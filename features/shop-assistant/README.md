@@ -2,7 +2,7 @@
 
 Live ShopMate adapter for the reusable AI assistant. One schema LLM labels the request; deterministic lookup, render, stream-part UI, and an optional speaker do the rest.
 
-Injected by [`app/api/ai-assistant/route.ts`](../../app/api/ai-assistant/route.ts) and [`components/layout-wrapper.tsx`](../../components/layout-wrapper.tsx). The previous multi-agent adapter is archived at [`features/shop-assistant-v1`](../shop-assistant-v1/).
+Injected by [`app/api/ai-assistant/route.ts`](../../app/api/ai-assistant/route.ts) and [`components/layout-wrapper.tsx`](../../components/layout-wrapper.tsx). This replaced the previous multi-agent classifier, router, and AI-tool adapter.
 
 ## Why this folder exists
 
