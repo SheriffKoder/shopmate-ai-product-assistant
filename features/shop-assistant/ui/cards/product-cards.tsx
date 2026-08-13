@@ -1,11 +1,11 @@
 /**
  * @file features/shop-assistant/ui/cards/product-cards.tsx
- * Catalog card grid mounted from a persisted data-productCards part.
+ * Catalog card list mounted from a persisted data-productCards part.
  * Used in: ui/integration/stream-part-registry.tsx.
  * Used for: Chat remount after refresh without a productSearch AI tool.
  *
  * Function Index:
- * ProductCards: Header, paragraph, lookup-row cards, optional footer.
+ * ProductCards: Header, paragraph, stacked row cards, optional footer.
  *
  * Steps:
  * 1. Render copy from the persisted payload.
@@ -56,7 +56,7 @@ export function ProductCards({
       )}
 
       {part.products.length > 0 && (
-        <div className="flex flex-row gap-4 mt-4 flex-wrap">
+        <div className="mt-4 flex flex-col gap-3">
           {part.products.map((product) => (
             <ProductCard
               key={product.id}

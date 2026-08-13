@@ -5,7 +5,7 @@
  * Used for: Rendering lookup rows. Does not search or talk to the model.
  *
  * Function Index:
- * ProductCard: Product image, details, and cart action.
+ * ProductCard: Row layout [image | details] with cart action.
  *
  * Steps:
  * 1. Navigate to the product page on card click.
@@ -20,7 +20,6 @@ import Image from 'next/image';
 import { Star } from 'lucide-react';
 import type { Product } from '@/features/catalog/model/product';
 import type { CartState } from '@/features/cart/model/cart';
-import { useFullscreen } from '@/features/ai-assistant/providers/fullscreen-context';
 import { ProductCartAction } from '@/widgets/product-highlight-cards/ui/product-cart-action';
 import { AssistantAwareLink, useAssistantAwareRouter } from '@/features/ai-assistant/navigation';
 import { getLocaleFromPathname } from '@/shared/i18n/lib/get-locale-from-pathname';
@@ -32,6 +31,10 @@ interface ProductCardProps {
   onCommand?: (command: ShopAssistantCommand) => void | Promise<void>;
 }
 
+const CHIP_CLASS =
+  'bg-background/20 rounded-full px-2 py-0.5 text-xs font-semibold tracking-wide text-background';
+const MAX_FEATURE_CHIPS = 3;
+
 /**
  * Render one catalog product as a chat card.
  *
@@ -42,7 +45,6 @@ export const ProductCard = ({ product, onCommand }: ProductCardProps) => {
   const router = useAssistantAwareRouter();
   const locale = getLocaleFromPathname(usePathname());
   const productSlug = product.slug ?? product.id;
-  const { isFullScreen } = useFullscreen();
 
   const handleCardClick = () => {
     router.push(`/${locale}/products/${productSlug}`);
@@ -51,20 +53,20 @@ export const ProductCard = ({ product, onCommand }: ProductCardProps) => {
   return (
     <div
       onClick={handleCardClick}
-      className={`bg-[#000000] ${isFullScreen ? 'lg:w-[630px] lg:h-[320px] lg:flex-row lg:flex lg:gap-4' : 'w-[320px] h-[630px] flex flex-col'} p-2 border-2 border-[#000000] transition-all duration-200 cursor-pointer hover:border-primary`}
+      className="flex w-full flex-row items-stretch gap-3 bg-[#000000] p-2 border-2 border-[#000000] transition-all duration-200 cursor-pointer hover:border-primary"
     >
-      <div className={`${isFullScreen ? 'lg:h-[100%] lg:w-[40%]' : 'h-[40%]'}`}>
+      <div className="relative w-28 shrink-0 self-stretch overflow-hidden bg-white sm:w-36">
         <Image
           src={product.image_url || '/images/placeholder.png'}
           alt={product.name}
-          width={200}
-          height={200}
-          className="w-full h-full object-cover bg-white"
+          fill
+          sizes="(max-width: 640px) 112px, 144px"
+          className="object-cover"
         />
       </div>
 
-      <div className={`flex flex-col p-2 ${isFullScreen ? 'lg:h-[100%] lg:w-[60%]' : 'h-[60%]'}`}>
-        <h3 className="text-lg font-semibold text-white mb-2">
+      <div className="flex min-w-0 flex-1 flex-col py-1">
+        <h3 className="text-lg font-semibold text-white mb-1">
           <AssistantAwareLink
             href={`/${locale}/products/${productSlug}`}
             onClick={function stopProductLinkPropagation(event) { event.stopPropagation(); }}
@@ -74,41 +76,31 @@ export const ProductCard = ({ product, onCommand }: ProductCardProps) => {
           </AssistantAwareLink>
         </h3>
 
-        <div className="flex gap-2 mb-2">
+        <p className="text-background tracking-wide text-sm mb-2 line-clamp-2">{product.shortDescription}</p>
+
+        <div className="mb-2 flex flex-wrap gap-1.5 border-t border-[#4E4E4E] pt-2">
           {product.category && (
-            <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-white">
-              {product.category}
+            <span className={CHIP_CLASS}>{product.category}</span>
+          )}
+          <span className={`inline-flex items-center gap-1 ${CHIP_CLASS}`}>
+            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+            {product.rating}
+          </span>
+          {product.features.slice(0, MAX_FEATURE_CHIPS).map((feature, index) => (
+            <span key={index} className={CHIP_CLASS}>
+              {feature}
+            </span>
+          ))}
+          {product.features.length > MAX_FEATURE_CHIPS && (
+            <span className={CHIP_CLASS}>
+              +{product.features.length - MAX_FEATURE_CHIPS} more
             </span>
           )}
-          <div className="flex items-center gap-1 px-2 py-1">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-white text-sm font-medium">{product.rating}</span>
-          </div>
         </div>
 
-        <p className="text-background tracking-wide text-sm mb-3 line-clamp-2">{product.shortDescription}</p>
-
-        {product.features.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-[#4E4E4E]">
-            <ul className="space-y-1">
-              {product.features.slice(0, 3).map((feature, index) => (
-                <li key={index} className="text-background tracking-wide font-semibold text-xs flex items-start gap-2">
-                  <span className="text-blue-400 mt-1">•</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-              {product.features.length > 3 && (
-                <li className="text-background tracking-wide font-semibold">+{product.features.length - 3} more features</li>
-              )}
-            </ul>
-          </div>
-        )}
-
         {onCommand && (
-          <div className="mt-auto flex gap-2 justify-between">
-            <div className="flex items-center justify-start">
-              <span className="text-xl font-bold text-white">${product.price.toFixed(2)}</span>
-            </div>
+          <div className="mt-auto flex items-center justify-between gap-2">
+            <span className="text-xl font-bold text-white">${product.price.toFixed(2)}</span>
             <div onClick={function stopCardNavigation(event) { event.stopPropagation(); }}>
               <ProductCartAction cartProduct={product} name={product.name} />
             </div>

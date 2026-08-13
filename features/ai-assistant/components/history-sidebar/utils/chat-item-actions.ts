@@ -2,6 +2,8 @@
 
 import { assistantHttpHistoryClient } from '@/features/ai-assistant/client/assistant-history-client';
 import { buildAssistantAwareHref } from '@/features/ai-assistant/navigation';
+import type { PersistenceMode } from '@/features/ai-assistant/message-persistence/model/persistence-mode';
+import { MessageSavingOrchestrator } from '@/features/ai-assistant/message-persistence/saving-orchestrator';
 
 /**
  * Copy chat link with chatId param to clipboard.
@@ -23,10 +25,18 @@ export async function copyChatLink(chatId: string): Promise<void> {
 }
 
 /**
- * Delete a chat and its messages via API.
- * Uses the assistant-owned DELETE /api/ai-assistant/chat/[chatId] endpoint.
+ * Delete a chat from the active persistence store.
+ * Guest chats live in localStorage; signed-in chats use DELETE /api/ai-assistant/chat/[chatId].
  */
-export async function deleteChatWithMessages(chatId: string): Promise<void> {
+export async function deleteChatWithMessages(
+  chatId: string,
+  persistenceMode: PersistenceMode = 'database',
+): Promise<void> {
+  if (persistenceMode === 'local') {
+    new MessageSavingOrchestrator('local').deleteLocalChat(chatId);
+    return;
+  }
+
   try {
     await assistantHttpHistoryClient.delete({ chatId });
   } catch (error) {

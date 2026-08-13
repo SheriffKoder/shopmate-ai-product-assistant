@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { EllipsisVertical, Send, Trash } from 'lucide-react';
+import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
 import { copyChatLink, deleteChatWithMessages } from '../utils/chat-item-actions';
 
 interface ChatItemActionsProps {
@@ -16,6 +17,7 @@ interface ChatItemActionsProps {
  * Currently logs the chatId to console when actions are clicked.
  */
 export function ChatItemActions({ chatId, onDeleted }: ChatItemActionsProps) {
+  const { user } = useUserSession();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -47,7 +49,7 @@ export function ChatItemActions({ chatId, onDeleted }: ChatItemActionsProps) {
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await deleteChatWithMessages(chatId);
+      await deleteChatWithMessages(chatId, user ? 'database' : 'local');
       if (onDeleted) {
         onDeleted(chatId);
       }
@@ -63,7 +65,7 @@ export function ChatItemActions({ chatId, onDeleted }: ChatItemActionsProps) {
       <button
         type="button"
         onClick={handleToggle}
-        className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-foreground/70 hover:text-foreground transition-colors"
+        className="p-1 rounded-md cursor-pointer hover:bg-foreground/10 text-foreground/70 hover:text-foreground transition-colors"
         aria-label="Chat actions"
       >
         <EllipsisVertical className="w-4 h-4" />
@@ -74,7 +76,7 @@ export function ChatItemActions({ chatId, onDeleted }: ChatItemActionsProps) {
           <button
             type="button"
             onClick={handleShare}
-            className="w-full px-3 py-2 flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="w-full px-3 py-2 flex items-center gap-2 text-sm text-foreground/80 cursor-pointer hover:text-foreground hover:bg-foreground/10 transition-colors"
           >
             <Send className="w-4 h-4" />
             <span>Share</span>
@@ -82,7 +84,7 @@ export function ChatItemActions({ chatId, onDeleted }: ChatItemActionsProps) {
           <button
             type="button"
             onClick={handleDelete}
-            className="w-full px-3 py-2 flex items-center gap-2 text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="w-full px-3 py-2 flex items-center gap-2 text-sm text-red-500 cursor-pointer hover:bg-foreground/10 transition-colors"
           >
             <Trash className="w-4 h-4" />
             <span>Delete</span>

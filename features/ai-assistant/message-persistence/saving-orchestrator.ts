@@ -1,5 +1,10 @@
 import type { UIMessage } from 'ai';
-import { clearLocalChatHistory, readLocalChatHistory, writeLocalChatHistory } from './lib/local-chat-history';
+import {
+  clearLocalChatHistory,
+  deleteLocalChatHistoryItem,
+  readLocalChatHistory,
+  writeLocalChatHistory,
+} from './lib/local-chat-history';
 import type { LocalChatHistoryItem } from './model/local-chat-history';
 import type { PersistenceMode } from './model/persistence-mode';
 
@@ -32,6 +37,11 @@ export class MessageSavingOrchestrator {
 
   getLocalChats(): LocalChatHistoryItem[] {
     return this.mode === 'local' ? readLocalChatHistory().chats : [];
+  }
+
+  deleteLocalChat(chatId: string): void {
+    if (this.mode !== 'local') return;
+    deleteLocalChatHistoryItem(chatId);
   }
 
   clearLocalChats(): void {

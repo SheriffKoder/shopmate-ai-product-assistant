@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ChatContainer from '@/features/ai-assistant/chat-container';
 import { SidebarHistory } from '@/features/ai-assistant/components/history-sidebar/components';
 import { useSidebarRefresh } from '@/features/ai-assistant/components/history-sidebar/hooks/use-sidebar-refresh';
@@ -69,6 +69,9 @@ export const ChatWrapper = ({
   // Initialize as open if fullscreen is active
   //////////////////////////////////
   const [isSidebarOpen, setIsSidebarOpen] = useState(isFullScreenState);
+  const closeSidebar = useCallback(function closeSidebar() {
+    setIsSidebarOpen(false);
+  }, []);
 
   //////////////////////////////////
   // Effect: Auto-open sidebar when entering fullscreen, close when exiting
@@ -119,6 +122,7 @@ export const ChatWrapper = ({
         isSidebarOpen={isSidebarOpen}
         isFullScreen={isFullScreenState}
         sidebar={<SidebarHistory refreshTrigger={refreshTrigger} triggerRefresh={triggerRefresh} />}
+        onCloseSidebar={closeSidebar}
       >
         <ChatContainer
             chatId={currentChatId} 

@@ -30,3 +30,11 @@ export function clearLocalChatHistory(): void {
   if (typeof window === 'undefined') return;
   window.localStorage.removeItem(LOCAL_CHAT_HISTORY_KEY);
 }
+
+export function deleteLocalChatHistoryItem(chatId: string): void {
+  if (typeof window === 'undefined') return;
+
+  writeLocalChatHistory(
+    readLocalChatHistory().chats.filter((chat) => chat.id !== chatId),
+  );
+}

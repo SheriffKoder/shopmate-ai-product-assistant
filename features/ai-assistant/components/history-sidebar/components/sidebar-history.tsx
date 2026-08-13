@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { RotateCw, Plus } from 'lucide-react';
 import useSWRInfinite from 'swr/infinite';
 import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
@@ -51,6 +51,7 @@ interface SidebarHistoryProps {
 
 export function SidebarHistory({ refreshTrigger, triggerRefresh }: SidebarHistoryProps) {
   const { user } = useUserSession();
+  const [, setGuestHistoryEpoch] = useState(0);
   const savingOrchestrator = new MessageSavingOrchestrator(user ? 'database' : 'local');
   const localChats = savingOrchestrator.getLocalChats();
   const { isMerging } = useMessagePersistenceSync(() => {
@@ -125,6 +126,8 @@ export function SidebarHistory({ refreshTrigger, triggerRefresh }: SidebarHistor
   const handleChatDeleted = useCallback((deletedChatId: string) => {
     if (user) {
       mutate();
+    } else {
+      setGuestHistoryEpoch((epoch) => epoch + 1);
     }
     // If the deleted chat is the one currently open, clear the chatId param to start a new chat
     if (deletedChatId === currentChatId) {

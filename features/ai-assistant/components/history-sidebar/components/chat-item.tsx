@@ -52,8 +52,8 @@ const PureChatItem = ({ chat, isActive, onClick, onDeleted }: ChatItemProps) => 
         group relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm
         transition-colors cursor-pointer
         ${isActive 
-          ? 'bg-primary/20 text-foreground font-medium' 
-          : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-foreground/70 hover:text-foreground'
+          ? 'bg-primary/20 text-foreground font-medium hover:bg-primary/30' 
+          : 'text-foreground/70 hover:bg-foreground/10 hover:text-foreground'
         }
       `}
     >

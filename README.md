@@ -3,6 +3,8 @@
 An AI assistant integration for an e-commerce website built with Next.js. ShopMate combines conversational shopping with a server-first storefront using SSG/ISR patterns, localization, and a responsive product experience.
 
 [See it live](https://shopmate-ai-product-assistant.vercel.app/)
+[Another application (Mutations, Human-in-the-loop etc.)](https://closer-crm-lovat.vercel.app/)
+
 
 ---
 

@@ -24,6 +24,7 @@ Current responsibilities:
 
 - Select local or database mode.
 - Save and read guest chats.
+- Delete one guest chat from local history.
 - Clear guest history after a successful merge.
 - Keep the local history shape provider-neutral.
 
@@ -80,6 +81,13 @@ The history sidebar will use the same normalized history contract for both sourc
 ```text
 local mode     → MessageSavingOrchestrator.getLocalChats()
 database mode  → /api/ai-assistant/history
+```
+
+Delete uses the same split:
+
+```text
+local mode     → MessageSavingOrchestrator.deleteLocalChat()
+database mode  → DELETE /api/ai-assistant/chat/[chatId]
 ```
 
 ### Login merge
