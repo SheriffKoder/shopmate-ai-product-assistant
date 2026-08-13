@@ -13,7 +13,7 @@ This adapter is the same store behavior with a smaller system:
 1. One schema LLM labels the request.
 2. A deterministic planner picks lookup / view / cart / refuse.
 3. Lookup owns unique catalog values and returns rows.
-4. Server render functions stream cards, sheets, documents, cart UI, or conversation Find chips.
+4. Server render functions stream cards, sheets, documents, cart UI, or Find chips (conversation / answer).
 5. An optional speaker writes short prose with no tools.
 
 ## Docs
@@ -21,7 +21,7 @@ This adapter is the same store behavior with a smaller system:
 | Doc | What it covers |
 |---|---|
 | [`docs/architecture.md`](./docs/architecture.md) | What the system is, why it replaced v1, expected replies |
-| [`docs/conversation.md`](./docs/conversation.md) | Rec / compare Find chips from schema `metadata` |
+| [`docs/conversation.md`](./docs/conversation.md) | Rec / compare / product Q&A Find chips from schema `metadata` |
 | [`docs/tools.md`](./docs/tools.md) | Tool vs component vs server function — when to build which |
 | [`docs/stream-parts.md`](./docs/stream-parts.md) | What a stream part is, and how chat remounts `data-*` UI |
 | [`docs/responsibilities.md`](./docs/responsibilities.md) | Owns / does not own / dependency direction |

@@ -8,7 +8,7 @@
  * AssistantAction: What the runtime should do (lookup / cart / refuse / …).
  * CatalogCategory: Closed catalog categories the schema may hint.
  * CatalogSortMode: Deterministic catalog sort options.
- * AssistantView: Presentation only. cards = defined products. conversation = broader discussion.
+ * AssistantView: Presentation only. cards = listing. answer = product Q&A. conversation = rec/compare.
  * AssistantConstraints: Price, color, feature, and sort filters for lookup.
  * AssistantMetadataType: Which UI file to mount after a conversation reply.
  * AssistantMetadataItem: One chip — label for display, value for the follow-up search.
@@ -43,8 +43,11 @@ export const CATALOG_SORT_MODES = [
 ] as const;
 export type CatalogSortMode = (typeof CATALOG_SORT_MODES)[number];
 
-/** How to present. cards = user asked to see products. conversation = rec/compare/advice. Not an action. */
-export const ASSISTANT_VIEWS = ['cards', 'sheet', 'document', 'conversation'] as const;
+/**
+ * How to present. Not an action.
+ * cards = show products. answer = ask about a product (features/specs). conversation = rec/compare/advice.
+ */
+export const ASSISTANT_VIEWS = ['cards', 'sheet', 'document', 'conversation', 'answer'] as const;
 export type AssistantView = (typeof ASSISTANT_VIEWS)[number];
 
 /** Which conversation UI to mount. Extend later (links, chips, …). Not an action. */

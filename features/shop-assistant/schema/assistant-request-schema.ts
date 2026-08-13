@@ -54,15 +54,15 @@ export const assistantRequestSchema = z.object({
     sortBy: z.enum(CATALOG_SORT_MODES).nullable().optional().default(null),
   }).optional().default(DEFAULT_ASSISTANT_CONSTRAINTS),
   view: z.enum(ASSISTANT_VIEWS).describe(
-    'cards = user asked to see products (show me / do you have / Provide X). conversation = broader rec, compare, or advice. sheet/document = artifacts.',
+    'cards = show products (show me / Provide X). answer = ask about a product (features/specs/tell me about). conversation = rec/compare/advice. sheet/document = artifacts.',
   ),
-  // Conversation Find chips. Cards / sheet / document / cart leave this at none.
+  // Find chips for conversation / answer. Cards / sheet / document / cart leave this at none.
   metadata: z.object({
     type: z.enum(ASSISTANT_METADATA_TYPES).optional().default('none').describe(
-      'buttons only for catalog conversation rec/compare. none for cards, sheet, document, cart, policy, unrelated.',
+      'buttons for catalog conversation or answer follow-ups. none for cards, sheet, document, cart, policy, unrelated.',
     ),
     items: z.array(assistantMetadataItemSchema).max(3).optional().default([]).describe(
-      '1-3 catalog categories. value is smartphone|laptop|tablet|smartwatch|headphones. Include every matching aisle (pen diary → smartphone + tablet). No SKU names.',
+      'Conversation only: 1-3 catalog categories. value is smartphone|laptop|tablet|smartwatch|headphones. Answer leaves this empty; runtime chips use lookup product names. No invented SKUs.',
     ),
   }).optional().default(DEFAULT_ASSISTANT_METADATA),
 });

@@ -1,24 +1,30 @@
-# Conversation Find chips
+# Conversation and answer Find chips
 
-How rec / compare replies offer follow-up catalog searches without dumping cards.
+How rec / compare / product Q&A replies offer follow-up catalog searches without dumping cards.
 
 Related: [`architecture.md`](./architecture.md), [`stream-parts.md`](./stream-parts.md).
 
 ## One sentence
 
-Schema `view` chooses discussion vs product listing. Schema `metadata` chooses Find chips. Click starts a visible new turn. Runtime stays dumb.
+Schema `view` chooses listing vs Q&A vs discussion. Schema `metadata` chooses Find chips. Click starts a visible new turn. Runtime stays dumb.
 
 ## Turn flow
 
 ```text
-Turn 1  catalog + conversation
-        speaker text
-        Find [Smartphones] [Tablets]     ← metadata.type = buttons
-Turn 2  click → "Provide tablets from the catalog"
-        catalog + cards → lookup → cards
+Turn 1a  catalog + conversation
+         speaker text
+         Find [Smartphones] [Tablets]     ← metadata.type = buttons
+
+Turn 1b  catalog + answer
+         lookup → speaker cites store facts
+         Find [iPhone 15 Pro Max]         ← from lookup product names
+         (no product cards)
+
+Turn 2   click → "Provide tablets from the catalog"
+         catalog + cards → lookup → cards
 ```
 
-Conversation never streams product cards. Cards appear only after the user picks a chip (or asks to see products directly).
+Conversation and answer never stream product cards. Cards appear only after the user picks a chip (or asks to see products directly).
 
 ## Schema
 
@@ -58,22 +64,25 @@ data-uiMetadata: {
 |---|---|
 | diary on the go, what products match? | `view: conversation`, `metadata.buttons`: Smartphones, Tablets |
 | tablets or laptops for X? | `view: conversation`, items: Tablets, Laptops |
+| what features the iphone 15 pro max has? | `view: answer`, catalogQuery for the SKU, Find chip from lookup name |
 | Show me smart phones | `view: cards`, `metadata: none` |
 | Provide tablets from the catalog | `view: cards`, `category: tablet`, `metadata: none` |
 
 Rules in `server/request-agent.ts`:
 
-- Rec / compare → `view: conversation`, `metadata.type: buttons`, 1–3 items.
+- Rec / compare → `view: conversation`. Set `category` when the aisle is clear so lookup can cite products. Use `metadata.buttons` when there is no single aisle.
+- Features / specs / tell me about X → `view: answer`, lookup query set, `metadata: none` (runtime chips from product names).
 - Show me / table / document / cart → `metadata.type: none`, `items: []`.
 - `"Provide tablets from the catalog"` → `action: catalog`, `view: cards`, `category: tablet`, `metadata: none`.
 
 ## Runtime
 
-`planFromSchema` is unchanged. `view` still chooses cards vs conversation.
+`planFromSchema` maps `view` to render. Lookup and UI follow the plan.
 
 | Path | Lookup | Render | Metadata |
 |---|---|---|---|
-| catalog + conversation | skip | speaker reply | write `data-uiMetadata` when `type === 'buttons'` |
+| catalog + conversation | when category or query set | speaker may cite products; no cards | product-name chips if rows, else schema aisle chips |
+| catalog + answer | yes | speaker from store facts (no cards) | Find chips from matched **product names** |
 | catalog + cards | yes | cards + confirm | ignore |
 | sheet / document / cart / refuse / policy | as usual | as usual | ignore |
 
@@ -94,5 +103,5 @@ Speaker answers the question in full. It does not confirm briefly, invent SKUs, 
 - Not a `find: CatalogCategory[]` schema field. Metadata covers it.
 - Not lookup-based offer builders or invented SKU chips.
 - Not speaker markdown chips.
-- Not dumping cards on `metadata.type: buttons`.
+- Not dumping cards on `metadata.type: buttons` or on `view: answer`.
 - Not a `tools/` folder. Execute is `server/render/`. UI is `ui/metadata/`. Parse is `lib/stream/`.

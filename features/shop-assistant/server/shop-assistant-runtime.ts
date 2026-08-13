@@ -25,6 +25,8 @@ import type { AssistantMetadata } from '../model/assistant-request';
 import type { ExecutionPlan } from '../model/execution-plan';
 import { planFromSchema } from '../model/execution-plan';
 import { catalogRenderTitle, resolveRuntimeLookup } from '../lib/catalog/runtime-lookup';
+import { buildCatalogFacts } from '../lib/catalog/build-catalog-facts';
+import { buildFindChipsFromProducts } from '../lib/catalog/find-chips-from-products';
 import { labelAssistantRequest } from './request-agent';
 import { createMockShopApiClient } from './sources/mock-shop-api-client';
 import {
@@ -161,6 +163,7 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
       render: plan.render,
       userQuery: request.userQuery,
       catalogNames: rendered.catalogNames,
+      catalogFacts: rendered.catalogFacts,
       cartItemCount: rendered.cartItemCount,
       renderedTitle: rendered.renderedTitle,
       lookupEmpty: rendered.lookupEmpty,
@@ -176,6 +179,8 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
 interface RenderExecutionResult {
   reply: string;
   catalogNames: string[];
+  /** Factual lines for answer view. */
+  catalogFacts?: string[];
   cartItemCount?: number;
   renderedTitle?: string;
   lookupEmpty: boolean;
@@ -235,46 +240,106 @@ async function renderExecution(input: {
   }
 
   if (input.plan.render === 'conversation') {
-    // Schema view=conversation: speaker + optional Find chips. Never dump cards.
-    const shouldWriteMetadata = input.plan.action === 'catalog'
+    // Speaker-owned. Never dump cards.
+    // Prefer Find chips from matched products when lookup returned rows.
+    // Else fall back to schema category chips (open rec with no filter).
+    const productChips = buildFindChipsFromProducts(input.products);
+    const schemaChips = input.plan.action === 'catalog'
       && input.metadata.type === 'buttons'
-      && input.metadata.items.length > 0;
-    const metadataPart = shouldWriteMetadata
+      && input.metadata.items.length > 0
+      ? input.metadata
+      : null;
+    const chipsToWrite = productChips.type === 'buttons' && productChips.items.length > 0
+      ? productChips
+      : schemaChips;
+    const metadataPart = chipsToWrite
       ? renderUiMetadata({
-          metadata: input.metadata,
+          metadata: chipsToWrite,
           maxPrice: input.maxPrice,
           dataStream: input.dataStream,
         })
       : null;
-    const categoryHints = metadataPart?.items.map((item) => item.label)
-      ?? (input.metadata.type === 'buttons'
-        ? input.metadata.items.map((item) => item.label)
-        : []);
+    const categoryHints = metadataPart?.items.map((item) => item.label) ?? [];
+    const catalogFacts = buildCatalogFacts(input.products);
 
     logger.node({
       name: 'RENDER',
       input: {
         render: 'conversation',
         action: input.plan.action,
-        metadataType: input.metadata.type,
+        productCount: input.products.length,
+        chipSource: productChips.items.length > 0 ? 'products' : (schemaChips ? 'schema' : 'none'),
         itemCount: categoryHints.length,
       },
-      details: metadataPart
-        ? 'Conversation is speaker-owned. Streamed Find chips from schema metadata. No cards.'
-        : 'Conversation is speaker-owned. No cards, no metadata chips.',
+      details: catalogFacts.length > 0
+        ? 'Conversation: speaker may cite lookup products. Find chips from matched names. No cards.'
+        : metadataPart
+          ? 'Conversation: no lookup rows. Streamed Find chips from schema metadata. No cards.'
+          : 'Conversation: speaker-owned. No cards, no metadata chips.',
       result: {
         kind: 'conversation',
+        metadataType: metadataPart?.type ?? 'none',
+        values: metadataPart?.items.map((item) => item.value) ?? [],
+        factCount: catalogFacts.length,
+      },
+      status: 'success',
+    });
+
+    return renderResult('How can I help with ShopMate shopping?', {
+      catalogNames,
+      catalogFacts,
+      lookupEmpty: false,
+      categoryHints,
+    });
+  }
+
+  if (input.plan.render === 'answer') {
+    // Schema view=answer: lookup already ran. Speaker owns the reply from store facts.
+    // Find chips come from matched product names, not schema aisle metadata.
+    const productChips = buildFindChipsFromProducts(input.products);
+    const metadataPart = productChips.type === 'buttons' && productChips.items.length > 0
+      ? renderUiMetadata({
+          metadata: productChips,
+          maxPrice: input.maxPrice,
+          dataStream: input.dataStream,
+        })
+      : null;
+    const categoryHints = metadataPart?.items.map((item) => item.label) ?? [];
+    const catalogFacts = buildCatalogFacts(input.products);
+    const lookupEmpty = input.products.length === 0;
+
+    logger.node({
+      name: 'RENDER',
+      input: {
+        render: 'answer',
+        action: input.plan.action,
+        productCount: input.products.length,
+        chipCount: categoryHints.length,
+      },
+      details: lookupEmpty
+        ? 'Answer path: empty lookup. Speaker may say the product is not in the store. No cards.'
+        : 'Answer path: lookup facts for speaker. Find chips from matched product names. No cards.',
+      result: {
+        kind: 'answer',
+        catalogNames,
+        factCount: catalogFacts.length,
         metadataType: metadataPart?.type ?? 'none',
         values: metadataPart?.items.map((item) => item.value) ?? [],
       },
       status: 'success',
     });
 
-    return renderResult('How can I help with ShopMate shopping?', {
-      catalogNames: [],
-      lookupEmpty: false,
-      categoryHints,
-    });
+    return renderResult(
+      lookupEmpty
+        ? EMPTY_CATALOG_MESSAGE
+        : 'Here is what I found about that product in the store.',
+      {
+        catalogNames,
+        catalogFacts,
+        lookupEmpty,
+        categoryHints,
+      },
+    );
   }
 
   if (input.plan.render === 'document' && input.plan.action === 'technical') {

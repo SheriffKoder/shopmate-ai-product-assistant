@@ -12,8 +12,8 @@ One schema LLM labels the request. Runtime lookup, render, and an optional speak
 User message
   → 1 schema LLM
   → planFromSchema
-  → lookup? (catalog cards / sheet / document only)
-  → render view (cards / sheet / document / cart / refuse / policy / conversation + Find chips)
+  → lookup? (catalog cards / sheet / document / answer)
+  → render view (cards / sheet / document / cart / refuse / policy / conversation + Find chips / answer + Find chips)
   → optional speaker
 ```
 
@@ -28,8 +28,10 @@ flowchart TD
   P -->|technical + conversation| T[Speaker]
   P -->|technical + document| D1[createDocument]
   P -->|catalog + conversation| Sp[Speaker + Find chips]
+  P -->|catalog + answer| A[Catalog lookup]
   P -->|catalog + cards/sheet/document| L[Catalog lookup]
 
+  A --> Ans[Speaker from facts + Find chips]
   L --> V{view}
   V -->|cards| Cards[Stream product cards]
   V -->|sheet| Sheet[CSV sheet artifact]
@@ -41,6 +43,7 @@ flowchart TD
   T --> Out
   D1 --> Out
   Sp --> Out
+  Ans --> Out
   Cards --> Out
   Sheet --> Out
   D2 --> Out
@@ -64,7 +67,7 @@ Closed enums only. If two values do not change lookup, render, or cart, they do 
     features: string[],
     sortBy: 'relevance' | 'rating' | 'price-low' | 'price-high' | 'reviews' | 'name' | null,
   },
-  view: 'cards' | 'sheet' | 'document' | 'conversation',
+  view: 'cards' | 'sheet' | 'document' | 'conversation' | 'answer',
   metadata: {
     type: 'none' | 'buttons',
     items: Array<{ label: string; value: string }>,  // max 3; value is a CatalogCategory
@@ -76,8 +79,8 @@ Closed enums only. If two values do not change lookup, render, or cart, they do 
 |---|---|---|
 | `action` | skip lookup / refuse / cart / technical / catalog | picking a specialist agent |
 | `catalogQuery` + `category` + `constraints` | catalog lookup | presentation |
-| `view` | cards vs sheet vs document vs prose | whether to search |
-| `metadata` | conversation Find chips (`data-uiMetadata`) | lookup, render choice, or SKU chips |
+| `view` | cards vs sheet vs document vs prose vs product Q&A | whether to search (except conversation skip) |
+| `metadata` | conversation / answer Find chips (`data-uiMetadata`) | lookup, render choice, or SKU chips |
 
 No `tools` field. Runtime derives render from `action` + `view`. Constraint fields are optional with defaults so omitting `sortBy` does not drop a valid label. Metadata default is `{ type: 'none', items: [] }`.
 
@@ -94,6 +97,20 @@ No `tools` field. Runtime derives render from `action` + `view`. Constraint fiel
   "metadata": { "type": "none", "items": [] }
 }
 ```
+
+**What features does the iPhone 15 Pro Max have?**
+
+```json
+{
+  "action": "catalog",
+  "catalogQuery": "iphone 15 pro max",
+  "category": "smartphone",
+  "view": "answer",
+  "metadata": { "type": "none", "items": [] }
+}
+```
+
+Runtime looks up the product, speaker cites store facts, Find chip = **iPhone 15 Pro Max** (from lookup rows, not schema metadata).
 
 **All available products in a table**
 
@@ -207,9 +224,10 @@ Filters stay on `AssistantRequest` for lookup. View never overrides action.
 | `catalog` | `cards` | yes | cards | confirm |
 | `catalog` | `sheet` | yes | sheet | confirm |
 | `catalog` | `document` | yes | document | confirm |
-| `catalog` | `conversation` | skip | conversation + Find chips | reply |
+| `catalog` | `answer` | yes | answer (no cards) + Find chips from product names | reply |
+| `catalog` | `conversation` | when category or query set | conversation + cite products if rows + Find chips | reply |
 
-`planFromSchema` still sets `requiresCatalogLookup: true` for every catalog action. Runtime lookup skips when `render === 'conversation'`. `view` chooses cards vs discussion. `metadata.buttons` chooses Find chips.
+`planFromSchema` still sets `requiresCatalogLookup: true` for every catalog action. Runtime lookup skips when `render === 'conversation'`. `answer` looks up for speaker facts but never streams cards. `view` chooses listing vs Q&A vs discussion. `metadata.buttons` chooses Find chips.
 
 `cart` + `document` still renders cart. `unrelated` + `sheet` still refuses. Technical only honors `document`; `cards` / `sheet` on technical become conversation so we do not invent catalog rows.
 
@@ -225,7 +243,7 @@ Then execute in order: lookup → render → optional speaker.
 2. `planFromSchema`.
 3. Catalog lookup when `requiresCatalogLookup` and `render !== 'conversation'`.
 4. Server render (`server/render/store-output`, `server/render/cart`, `server/render/ui-metadata`, refuse/policy text).
-5. Optional speaker (`server/speaker.ts`, no tools). Refuse, policy, and empty lookup stay deterministic.
+5. Optional speaker (`server/speaker.ts`, no tools). Refuse, policy, and empty card/sheet/document lookup stay deterministic.
 
 Node logs: `REQUEST SCHEMA`, `EXECUTION PLAN`, `CATALOG LOOKUP`, `RENDER`, `SPEAKER`. Injected by `/api/ai-assistant`.
 
@@ -255,9 +273,10 @@ If lookup already ran, do not search again inside a `productSearch` AI tool.
 | `catalog` + `cards` | yes | stream product cards from rows |
 | `catalog` + `sheet` | yes | CSV → sheet artifact |
 | `catalog` + `document` | yes | text artifact filled from rows |
+| `catalog` + `answer` | yes | speaker from store facts + Find chips from matched product names (no cards) |
 | `catalog` + `conversation` | skip | speaker + optional `data-uiMetadata` Find chips |
 
-Conversation never streams product cards. `view` is defined products vs discussion. Find chips come from schema `metadata`. Click is a visible user turn: `Provide ${value} from the catalog`. See [`conversation.md`](./conversation.md).
+Conversation never streams product cards. Answer never streams product cards either — it looks up so the speaker can cite real features. `view` is listing vs Q&A vs discussion. Find chips come from schema `metadata`. Click is a visible user turn: `Provide ${value} from the catalog`. See [`conversation.md`](./conversation.md).
 
 Shop + document is not a new agent. It is `action: catalog` + `view: document`. If it is shop, the document is filled from lookup, not invented by the model.
 
@@ -270,7 +289,7 @@ Server functions:
 | `catalog document` | `createTextDocument` with row markdown + `data-artifactContent` |
 | `technical document` | `createTextDocument` from the topic (no lookup rows) |
 | `cart` | transient `data-cartUpdate` + persisted `data-cart` |
-| `catalog conversation` | persisted `data-uiMetadata` when `metadata.type === 'buttons'` |
+| `catalog conversation` / `catalog answer` | persisted `data-uiMetadata` when `metadata.type === 'buttons'` |
 | `refuse` / `policy` | deterministic text stream |
 
 Chat remounts cards/cart/Find chips from persisted `data-productCards` / `data-cart` / `data-uiMetadata` via `ui/integration/stream-part-registry.tsx`. Artifacts mount from `data-artifactContent`. See [`stream-parts.md`](./stream-parts.md).
@@ -280,14 +299,16 @@ Chat remounts cards/cart/Find chips from persisted `data-productCards` / `data-c
 One optional `streamText` after render (`server/speaker.ts`). No tools. No inventing SKUs.
 
 - Conversation: answer the question in full. Do not confirm briefly. Category hints may be mentioned; Find chips are a separate `data-uiMetadata` part, not markdown.
+- Answer: reply in full from STORE CONTEXT (lookup facts). No cards. Optional Find chips.
 - Cards / sheet / document / cart: confirm briefly.
-- Refuse, policy, and empty lookup: deterministic text.
+- Refuse, policy, and empty card/sheet/document lookup: deterministic text.
 
 ## Expected replies
 
 | Prompt | Result |
 |---|---|
 | Show me smart phones | Cards: Galaxy + iPhone only |
+| what features the iphone 15 pro max has? | AI text from store facts + Find [iPhone 15 Pro Max], no cards |
 | All available products in a table | Sheet artifact from real catalog CSV, preview in chat |
 | Buying guide for our smartphones | Text artifact citing lookup rows |
 | Windows vs Mac laptops | Technical text artifact, no fake SKUs |
@@ -295,6 +316,7 @@ One optional `streamText` after render (`server/speaker.ts`). No tools. No inven
 | Who is Elon Musk? | Short refuse, no lookup |
 | diary on the go, what products can be matching? | AI text + Find [Smartphones] [Tablets], no cards |
 | tablets or laptops for travel? | AI text + Find [Tablets] [Laptops]; click → cards |
+| should i get an iphone or a samsung galaxy? | AI text citing store phones + Find [iPhone…] [Galaxy…], no cards |
 
 ## Why this over the previous adapter
 
@@ -333,5 +355,5 @@ Shop Assistant keeps what worked:
 - Not a bigger prompt with more tools.
 - Not embeddings or AI ranking inside lookup (unless we add it later as an explicit node).
 - Not cart mutations authorized by schema. `action: cart` only means show cart UI.
-- Not dumping catalog cards on rec / compare. Schema `view` + `metadata` choose text vs Find chips; click starts a visible `Provide X from the catalog` turn.
+- Not dumping catalog cards on rec / compare / product Q&A. Schema `view` chooses cards vs answer vs conversation; `metadata` chooses Find chips; click starts a visible `Provide X from the catalog` turn.
 - Not a third runtime living beside the old multi-agent adapter. This folder is the live adapter.

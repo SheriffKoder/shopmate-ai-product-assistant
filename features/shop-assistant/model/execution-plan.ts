@@ -26,7 +26,8 @@ export type ExecutionRender =
   | 'cards'
   | 'sheet'
   | 'document'
-  | 'conversation';
+  | 'conversation'
+  | 'answer';
 
 /**
  * Optional speaker after render.
@@ -100,10 +101,12 @@ export function planFromSchema(
   }
 
   // 5. Catalog: lookup first, then view chooses presentation.
+  // answer looks up for speaker facts but never streams cards.
+  // conversation skips lookup at runtime (Find chips from schema only).
   return plan(action, view, {
     requiresCatalogLookup: true,
     render: renderForCatalogView(view),
-    speaker: view === 'conversation' ? 'reply' : 'confirm',
+    speaker: view === 'conversation' || view === 'answer' ? 'reply' : 'confirm',
   });
 }
 
@@ -111,6 +114,7 @@ function renderForCatalogView(view: AssistantView): ExecutionRender {
   if (view === 'cards') return 'cards';
   if (view === 'sheet') return 'sheet';
   if (view === 'document') return 'document';
+  if (view === 'answer') return 'answer';
   return 'conversation';
 }
 

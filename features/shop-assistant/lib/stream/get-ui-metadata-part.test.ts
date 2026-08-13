@@ -60,7 +60,7 @@ describe('getUiMetadataPart', () => {
     ]);
   });
 
-  it('trims items, drops empty and non-category values, and caps at 3', () => {
+  it('trims items, drops empty values, keeps product names, and caps at 3', () => {
     const part = getUiMetadataPart({
       type: 'data-uiMetadata',
       data: {
@@ -68,7 +68,7 @@ describe('getUiMetadataPart', () => {
         items: [
           { label: ' Tablets ', value: 'Tablet' },
           { label: '', value: 'laptop' },
-          { label: 'iPhone 16', value: 'iphone 16' },
+          { label: 'iPhone 15 Pro Max', value: 'iPhone 15 Pro Max' },
           { label: 'Laptops', value: 'laptop' },
           { label: 'Phones', value: 'smartphone' },
           { label: 'Watches', value: 'smartwatch' },
@@ -78,8 +78,8 @@ describe('getUiMetadataPart', () => {
 
     assert.deepEqual(part?.items, [
       { label: 'Tablets', value: 'tablet' },
+      { label: 'iPhone 15 Pro Max', value: 'iphone 15 pro max' },
       { label: 'Laptops', value: 'laptop' },
-      { label: 'Phones', value: 'smartphone' },
     ]);
   });
 

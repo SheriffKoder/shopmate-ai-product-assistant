@@ -10,9 +10,9 @@
  *
  * Steps:
  * 1. Browse-all wording or empty catalogQuery empties the lookup query.
- * 2. Conversation skips lookup. Schema view + metadata choose text / Find chips.
- * 3. Sheet uses a larger limit so the full matching catalog can render.
- * 4. Title prefers browse-all labels, else the user query for documents.
+ * 2. Conversation looks up only when category or catalogQuery can narrow the store.
+ * 3. Answer / cards / sheet / document look up when the plan requires it.
+ * 4. Sheet uses a larger limit so the full matching catalog can render.
  */
 
 import { isBrowseAllCatalogRequest } from './is-browse-all-catalog-request';
@@ -36,8 +36,9 @@ export interface RuntimeLookupDecision {
  * Decide whether to search, with which query, and how many rows.
  *
  * Empty catalogQuery is browse-all. Browse-all wording also empties invented keywords.
- * Conversation never looks up: speaker + optional Find chips from schema metadata.
- * Category stays on AssistantRequest and is passed separately to CatalogSource.
+ * Conversation looks up when category or catalogQuery narrows the store (cite + chips if rows).
+ * Open conversation with no filter skips lookup (no dumping the whole catalog).
+ * Answer / cards / sheet / document look up when requiresCatalogLookup.
  *
  * @example
  * resolveRuntimeLookup({
@@ -58,10 +59,22 @@ export function resolveRuntimeLookup(input: {
   const browseAll = browseAllWording || !input.request.catalogQuery.trim();
   const lookupQuery = browseAll ? '' : input.request.catalogQuery.trim();
   const limit = input.plan.render === 'sheet' ? SHEET_LOOKUP_LIMIT : DEFAULT_LOOKUP_LIMIT;
+  const hasConversationFilter = Boolean(
+    input.request.catalogQuery.trim() || input.request.category,
+  );
+
+  let shouldLookup = false;
+  if (input.plan.requiresCatalogLookup) {
+    if (input.plan.render === 'conversation') {
+      // Only search when we can narrow aisles/products. Avoid citing the whole catalog.
+      shouldLookup = hasConversationFilter;
+    } else {
+      shouldLookup = true;
+    }
+  }
 
   return {
-    // view: conversation is discussion, not a product listing. Schema metadata owns Find chips.
-    shouldLookup: input.plan.requiresCatalogLookup && input.plan.render !== 'conversation',
+    shouldLookup,
     browseAll,
     lookupQuery,
     limit,

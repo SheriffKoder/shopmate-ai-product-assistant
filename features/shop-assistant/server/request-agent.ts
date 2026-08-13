@@ -52,19 +52,24 @@ constraints: price bounds, colors, feature keywords, sortBy. Omit unknown fields
 
 view is presentation only. It never changes action. The runtime stays dumb and follows view.
 - cards: the user defined products they want to see ("show me", "what do you have", "do you have X", "Provide X from the catalog")
+- answer: ask about a product — features, specs, "tell me about", "what does X have", compare two named SKUs in prose. Lookup feeds the speaker. Do not dump cards.
 - sheet: table, spreadsheet, tabular list, structured list
 - document: buying guide, write a document/article/report, artifact prose
 - conversation: broader discussion — rec, compare, "what products match", open advice, policy, cart, unrelated, ordinary chat
 
-metadata is conversation UI only. It never changes action, lookup, or view.
-- Defined product request → view=cards, metadata.type=none, items=[].
-- Broader rec / compare → view=conversation, metadata.type=buttons, 1–3 items. Include every matching catalog aisle (pen/diary → smartphone AND tablet, not tablet only).
+metadata is conversation / answer UI only. It never changes action, lookup, or view.
+- Defined product listing → view=cards, metadata.type=none, items=[].
+- Product Q&A / features / specs → view=answer, metadata.type=none. Runtime builds Find chips from matched product names after lookup.
+- Broader rec / compare → view=conversation. Set category (or catalogQuery) when the aisle is clear so the runtime can look up and cite real products. metadata.buttons for aisle chips when there is no clear category filter; otherwise metadata.type=none is fine (product chips come from lookup).
 - Table / document / cart / unrelated / "Provide X from the catalog" → metadata.type=none, items=[].
-- items[].label is chip text (Tablets). items[].value is a catalog category only: smartphone, laptop, tablet, smartwatch, headphones. No invented product names.
+- items[].label is chip text (Tablets). items[].value is a catalog category only: smartphone, laptop, tablet, smartwatch, headphones. No invented product names in schema metadata.
 - "Provide tablets from the catalog" → action=catalog, view=cards, category=tablet, metadata.type=none.
 
 Examples:
 - "Show me smart phones" → action=catalog, catalogQuery="smartphone", category=smartphone, view=cards, metadata.type=none
+- "what features the iphone 15 pro max has?" → action=catalog, catalogQuery="iphone 15 pro max", category=smartphone, view=answer, metadata.type=none
+- "tell me about the Sony WH-1000XM5" → action=catalog, catalogQuery="sony wh-1000xm5", category=headphones, view=answer, metadata.type=none
+- "should i get an iphone or a samsung galaxy?" → action=catalog, catalogQuery="", category=smartphone, view=conversation, metadata.type=none
 - "All available products in a table" → action=catalog, catalogQuery="", category=null, view=sheet, metadata.type=none
 - "Buying guide for our smartphones" → action=catalog, catalogQuery="smartphone", category=smartphone, view=document, metadata.type=none
 - "Windows vs Mac laptops" → action=technical, catalogQuery="", category=null, view=document, metadata.type=none

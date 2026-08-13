@@ -141,12 +141,29 @@ describe('planFromSchema — remaining action/view pairs', () => {
     assert.equal(plan.speaker, 'reply');
   });
 
-  it('catalog + conversation → lookup then speaker', () => {
+  it('catalog + conversation → lookup flagged then speaker (runtime skips search)', () => {
     const plan = planFromSchema(request({ action: 'catalog', view: 'conversation' }));
 
     assert.equal(plan.requiresCatalogLookup, true);
     assert.equal(plan.render, 'conversation');
     assert.equal(plan.speaker, 'reply');
+  });
+
+  it('catalog + answer → lookup for speaker facts, no cards', () => {
+    const plan = planFromSchema(request({
+      action: 'catalog',
+      catalogQuery: 'iphone 15 pro max',
+      category: 'smartphone',
+      view: 'answer',
+    }));
+
+    assert.deepEqual(plan, {
+      action: 'catalog',
+      view: 'answer',
+      requiresCatalogLookup: true,
+      render: 'answer',
+      speaker: 'reply',
+    });
   });
 });
 

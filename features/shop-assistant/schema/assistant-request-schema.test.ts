@@ -101,6 +101,22 @@ describe('assistantRequestSchema', () => {
     ]);
   });
 
+  it('accepts view answer for product Q&A', () => {
+    const parsed = assistantRequestSchema.parse({
+      action: 'catalog',
+      catalogQuery: 'iphone 15 pro max',
+      category: 'smartphone',
+      view: 'answer',
+      metadata: {
+        type: 'buttons',
+        items: [{ label: 'Smartphones', value: 'smartphone' }],
+      },
+    });
+
+    assert.equal(parsed.view, 'answer');
+    assert.equal(parsed.metadata.type, 'buttons');
+  });
+
   it('rejects unknown metadata.type', () => {
     assert.throws(() => assistantRequestSchema.parse({
       action: 'catalog',

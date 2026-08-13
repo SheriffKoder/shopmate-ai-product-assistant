@@ -112,11 +112,30 @@ describe('resolveRuntimeLookup', () => {
     assert.equal(lookup.shouldLookup, false);
   });
 
-  it('skips lookup for catalog conversation; schema view owns discussion vs cards', () => {
+  it('looks up for conversation when category is set even if catalogQuery is empty', () => {
     const assistantRequest = request({
       action: 'catalog',
       catalogQuery: '',
       category: 'tablet',
+      view: 'conversation',
+    });
+    const plan = planFromSchema(assistantRequest);
+    const lookup = resolveRuntimeLookup({
+      userQuery: 'what tablets would work for travel notes?',
+      request: assistantRequest,
+      plan,
+    });
+
+    assert.equal(plan.requiresCatalogLookup, true);
+    assert.equal(plan.render, 'conversation');
+    assert.equal(lookup.shouldLookup, true);
+  });
+
+  it('skips lookup for open conversation with no category and no query', () => {
+    const assistantRequest = request({
+      action: 'catalog',
+      catalogQuery: '',
+      category: null,
       view: 'conversation',
     });
     const plan = planFromSchema(assistantRequest);
@@ -126,9 +145,45 @@ describe('resolveRuntimeLookup', () => {
       plan,
     });
 
-    assert.equal(plan.requiresCatalogLookup, true);
-    assert.equal(plan.render, 'conversation');
     assert.equal(lookup.shouldLookup, false);
+  });
+
+  it('looks up for conversation when comparing products in one aisle', () => {
+    const assistantRequest = request({
+      action: 'catalog',
+      catalogQuery: '',
+      category: 'smartphone',
+      view: 'conversation',
+    });
+    const plan = planFromSchema(assistantRequest);
+    const lookup = resolveRuntimeLookup({
+      userQuery: 'should i get an iphone or a samsung galaxy?',
+      request: assistantRequest,
+      plan,
+    });
+
+    assert.equal(plan.render, 'conversation');
+    assert.equal(lookup.shouldLookup, true);
+  });
+
+  it('looks up for catalog answer so the speaker can cite store facts', () => {
+    const assistantRequest = request({
+      action: 'catalog',
+      catalogQuery: 'iphone 15 pro max',
+      category: 'smartphone',
+      view: 'answer',
+    });
+    const plan = planFromSchema(assistantRequest);
+    const lookup = resolveRuntimeLookup({
+      userQuery: 'what features the iphone 15 pro max has?',
+      request: assistantRequest,
+      plan,
+    });
+
+    assert.equal(plan.render, 'answer');
+    assert.equal(lookup.shouldLookup, true);
+    assert.equal(lookup.browseAll, false);
+    assert.equal(lookup.lookupQuery, 'iphone 15 pro max');
   });
 
   it('skips lookup for unrelated and technical', () => {

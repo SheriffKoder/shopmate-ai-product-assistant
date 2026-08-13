@@ -13,13 +13,13 @@
  *
  * Steps:
  * 1. Ignore type none, empty items, and unknown metadata types.
- * 2. Trim items, drop empty / non-category values, cap at 3.
+ * 2. Trim items, drop empty values, cap at 3. Category vs product is decided upstream
+ *    (schema validate keeps categories for LLM; answer chips are lookup product names).
  * 3. Optional maxPrice is presentation-only for the click prompt.
  */
 
 import {
   isAssistantMetadataType,
-  isCatalogCategory,
   type AssistantMetadata,
   type AssistantMetadataItem,
   type AssistantMetadataType,
@@ -46,8 +46,8 @@ function normalizeMetadataItems(items: unknown): AssistantMetadataItem[] {
     const typed = item as { label?: unknown; value?: unknown };
     const label = typeof typed.label === 'string' ? typed.label.trim() : '';
     const value = typeof typed.value === 'string' ? typed.value.trim().toLowerCase() : '';
-    // Chip values must be real catalog categories so turn-2 cannot invent SKUs.
-    if (!label || !value || !isCatalogCategory(value) || seen.has(value)) continue;
+    // Allow category or product-name fragments. LLM SKUs are blocked in validateAssistantRequest.
+    if (!label || !value || seen.has(value)) continue;
     seen.add(value);
     normalized.push({ label, value });
     if (normalized.length >= 3) break;
