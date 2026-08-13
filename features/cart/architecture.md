@@ -6,7 +6,7 @@ The cart feature combines pure cart rules, Zustand client state, browser persist
 flowchart TD
     ProductPage[views/product-detail/ui/product-detail-page.tsx] --> Hook[features/cart/hooks/use-cart.ts]
     Header[widgets/app-header/ui/app-header.tsx] --> Hook
-    Assistant[features/shop-assistant/tools/* renderer] --> Command[features/shop-assistant/model/shop-assistant-command-handler.ts]
+    Assistant[features/shop-assistant/ui/cart + stream-part registry] --> Command[features/shop-assistant/model/sources/shop-assistant-command-handler.ts]
     Command --> Handler[Shop Assistant command dispatcher]
     Handler --> Hook
 
@@ -72,7 +72,7 @@ Future integration can be added behind the same `useCart` facade. Good options a
 
 [`widgets/app-header/ui/app-header.tsx`](../../widgets/app-header/ui/app-header.tsx) adapts the store's cart items into the dropdown's display model.
 
-[`features/shop-assistant/model/shop-assistant-command-handler.ts`](../shop-assistant/model/shop-assistant-command-handler.ts) translates assistant commands into cart operations. This keeps the generic AI assistant unaware of both the cart store and ShopMate's data model.
+[`features/shop-assistant/model/sources/shop-assistant-command-handler.ts`](../shop-assistant/model/sources/shop-assistant-command-handler.ts) translates assistant commands into cart operations. This keeps the generic AI assistant unaware of both the cart store and ShopMate's data model.
 
 ## Update flow
 

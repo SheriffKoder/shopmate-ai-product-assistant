@@ -61,13 +61,16 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/catalog/`: legacy-compatible product model and initial catalog data used by cart/assistant interactive surfaces until the Supabase catalog fully replaces those contracts.
 - `features/header-search/`: header product search input and localized product-search navigation helper.
 - `features/locale-switcher/`: locale dropdown island and href builder for EN/AR route switching.
-- `features/shop-assistant/`: ShopMate AI assistant adapter with electronics prompts, query/product classifiers, product/cart agents, product/cart data-source contracts, mock/DB-ready catalog sources, tool factories, product/cart tool renderers, renderer registry, UI integration shell, adapter search helpers, and runtime model consumption.
+- `features/shop-assistant/`: live ShopMate AI assistant adapter. One schema LLM + deterministic planner, lookup, render, stream-part UI mounts, and optional speaker. Injected by `/api/ai-assistant` and `components/layout-wrapper.tsx`. Layer folders plus `model/sources`, `lib/catalog`, `lib/stream`, `transform/catalog`, `server/sources`, `server/render`, `ui/cards`, `ui/cart`, `ui/metadata`, `ui/integration`. Start at `features/shop-assistant/README.md`.
+- `features/shop-assistant-v1/`: archived multi-agent adapter (classifiers, specialist agents, product/cart AI tools). Kept for diff until smoke tests pass.
 
 ## AI Assistant Internals
 
 - `features/ai-assistant/model/assistant-runtime.ts` defines the reusable runtime contract that business adapters implement.
+- `features/ai-assistant/docs/retrieval-first-business-logic.md` is the catalog/Q&A adapter pattern: schema → lookup → server render → optional speaker. HITL mutations are `features/ai-assistant/docs/workflow-hitl-business-logic.md`. Archived v1 agents/tools live in `features/shop-assistant-v1/`, not as a second catalog pattern.
 - `features/ai-assistant/model/assistant-model-config.ts` defines env-driven default, search, and allowed assistant model ids.
 - `features/ai-assistant/model/tool-renderer-registry.ts` defines the generic client-side tool renderer registry contract.
+- `features/ai-assistant/model/stream-part-renderer-registry.ts` defines the generic client-side registry for persisted `data-*` message parts (cards, cart, Find chips). Adapters register UI; core does not import shop components. See `features/shop-assistant/docs/stream-parts.md`.
 - `features/ai-assistant/navigation/` preserves assistant-owned URL state such as `chatId` across app links and imperative router navigation.
 - `features/ai-assistant/providers/assistant-root-provider.tsx` composes fullscreen and data-stream providers behind one reusable assistant root.
 - `features/ai-assistant/server/assistant-model-provider.ts` resolves configured model ids into provider model instances behind one OpenAI-specific boundary.
@@ -75,18 +78,14 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `features/ai-assistant/server/handle-assistant-request.ts` owns assistant request parsing, chat persistence calls, stream creation, runtime invocation, and SSE response formatting.
 - `features/ai-assistant/server/assistant-chat-persistence.ts` isolates development user/chat/message persistence use-cases from the API route.
 - Old assistant-core product/cart compatibility export paths were removed in cleanup phase 08; use `features/catalog`, `features/cart`, `features/shop-assistant`, or generic assistant contracts as the canonical owners.
-- `features/shop-assistant/server/shop-assistant-runtime.ts` implements the runtime injected into the reusable assistant handler and resolves selected request models once per stream.
-- `features/shop-assistant/ui/shop-assistant-integration.tsx` mounts the reusable assistant root with ShopMate stream handling and chat id wiring.
-- `features/shop-assistant/model/catalog-source.ts` and `model/cart-source.ts` define product/cart data contracts for assistant tools and renderers.
-- `features/shop-assistant/server/mock-catalog-source.ts` adapts request/mock products to the catalog contract with deterministic filters before AI ranking.
-- `features/shop-assistant/server/db-catalog-source.ts` documents the future Supabase/Postgres filter implementation boundary.
-- `features/shop-assistant/server/agents/query-classifier/` decides whether a query is shopping-related, technical discussion, or unrelated.
-- `features/shop-assistant/server/agents/product-classifier/` routes shopping queries to products, recommendation, or filtering behavior.
-- `features/shop-assistant/server/agents/products-cart/`, `recommendation/`, `filtering/`, `technical-discussion/`, and `not-related/` contain specialized ShopMate agent implementations and prompts.
-- `features/shop-assistant/server/router.ts` coordinates ShopMate routing to the selected agent.
-- `features/shop-assistant/tools/product-search/` and `tools/cart-info/` define ShopMate AI tool behavior over adapter-owned catalog/cart sources.
-- `features/shop-assistant/ui/tool-renderer-registry.tsx` registers ShopMate product/cart tool renderers for the generic assistant message renderer.
+- `features/shop-assistant/server/shop-assistant-runtime.ts` implements the runtime injected into the reusable assistant handler: schema → plan → lookup → render → optional speaker.
+- `features/shop-assistant/ui/integration/shop-assistant-integration.tsx` mounts the reusable assistant root with stream-part hydration and chat id wiring.
+- `features/shop-assistant/model/sources/catalog-source.ts` and `model/sources/cart-source.ts` define product/cart data contracts for lookup and cart render.
+- `features/shop-assistant/server/sources/mock-shop-api-client.ts` adapts request/mock products with unique-value catalog matching.
+- `features/shop-assistant/server/request-agent.ts` is the one schema LLM. `model/execution-plan.ts` turns the schema into lookup/view/cart/refuse.
+- `features/shop-assistant/server/render/` streams cards, sheets, documents, cart, refuse, policy, and conversation Find chips. `ui/integration/stream-part-registry.tsx` remounts persisted `data-productCards` / `data-cart` / `data-uiMetadata`.
 - Dependency rule: `features/shop-assistant` may import assistant contracts; `features/ai-assistant` must not import ShopMate adapter code; `app/api/ai-assistant/route.ts` imports only the reusable handler and current runtime composition.
+- Archived v1 (agents, router, AI tools) lives in `features/shop-assistant-v1/`.
 - `features/ai-assistant/artifacts/` contains text and sheet artifact support, version-history hooks, panel UI, and document tool result/call components.
 - `features/ai-assistant/history-sidebar/` contains chat history UI, SWR pagination, date grouping, navigation helpers, and deletion operation notes.
 
@@ -118,6 +117,8 @@ Use this as the first repo read when you need orientation. It is intentionally c
 - `AGENTS.md`: required agent workflow instructions.
 - `.cursor/rules/project-structure.mdc`: responsibility-first folder rules and dependency direction.
 - `app/development/project-guidelines/project-guidelines.md`: project coding, documentation, architecture, accessibility, and commit conventions.
+- `app/development/agent-routing/plan.md`: follow-up plan for catalog table artifact UI and router-aware thinking steps (v1-era).
+- `features/shop-assistant/docs/conversation.md`: rec / compare Find chips from schema `metadata: { type, items }`.
 
 ## Scan Discipline
 

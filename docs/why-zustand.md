@@ -31,7 +31,7 @@ For the complete wiring diagram and file-by-file explanation, see [Cart Architec
 - `features/cart/hooks/use-cart.ts`: the stable consumer-facing hook.
 - `features/cart/model/`: cart and mutation contracts.
 - `features/cart/ui/`: cart dropdown and cart-specific presentation.
-- `features/shop-assistant/model/shop-assistant-command-handler.ts`: translates assistant commands into cart mutations.
+- `features/shop-assistant/model/sources/shop-assistant-command-handler.ts`: translates assistant commands into cart mutations.
 
 ## Future synchronization
 

@@ -156,12 +156,12 @@ For a new project:
 ## Reference files
 
 - [`features/shop-assistant/server/shop-assistant-runtime.ts`](../features/shop-assistant/server/shop-assistant-runtime.ts)
-- [`features/shop-assistant/server/router.ts`](../features/shop-assistant/server/router.ts)
-- [`features/shop-assistant/model/catalog-source.ts`](../features/shop-assistant/model/catalog-source.ts)
-- [`features/shop-assistant/model/cart-source.ts`](../features/shop-assistant/model/cart-source.ts)
-- [`features/shop-assistant/model/shop-api-client.ts`](../features/shop-assistant/model/shop-api-client.ts)
-- [`features/shop-assistant/model/shop-assistant-command-handler.ts`](../features/shop-assistant/model/shop-assistant-command-handler.ts)
-- [`features/shop-assistant/ui/tool-renderer-registry.tsx`](../features/shop-assistant/ui/tool-renderer-registry.tsx)
-- [`features/shop-assistant/ui/shop-assistant-integration.tsx`](../features/shop-assistant/ui/shop-assistant-integration.tsx)
+- [`features/shop-assistant-v1/server/router.ts`](../features/shop-assistant-v1/server/router.ts)
+- [`features/shop-assistant/model/sources/catalog-source.ts`](../features/shop-assistant/model/sources/catalog-source.ts)
+- [`features/shop-assistant/model/sources/cart-source.ts`](../features/shop-assistant/model/sources/cart-source.ts)
+- [`features/shop-assistant/model/sources/shop-api-client.ts`](../features/shop-assistant/model/sources/shop-api-client.ts)
+- [`features/shop-assistant/model/sources/shop-assistant-command-handler.ts`](../features/shop-assistant/model/sources/shop-assistant-command-handler.ts)
+- [`features/shop-assistant/ui/integration/stream-part-registry.tsx`](../features/shop-assistant/ui/integration/stream-part-registry.tsx)
+- [`features/shop-assistant/ui/integration/shop-assistant-integration.tsx`](../features/shop-assistant/ui/integration/shop-assistant-integration.tsx)
 - [`app/api/ai-assistant/route.ts`](../app/api/ai-assistant/route.ts)
 

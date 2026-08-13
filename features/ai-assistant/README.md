@@ -2,16 +2,17 @@
 
 The reusable assistant feature. It owns chat transport, streaming, message and artifact presentation, history UI, message-persistence contracts, and assistant state needed to render a conversation.
 
-It does not own products, carts, business rules, agents, business prompts, or a database provider.
+It does not own products, carts, business rules, business prompts, or a database provider.
 
 ## Docs
 
 | Doc | What it covers |
 |---|---|
-| [`flow-paths.md`](./flow-paths.md) | Human walkthrough: integration → chat UI → API → runtime → tool cards |
-| [`docs/retrieval-first-business-logic.md`](./docs/retrieval-first-business-logic.md) | Pattern for catalog / Q&A assistants: intent → lookup → answer |
-| [`docs/workflow-hitl-business-logic.md`](./docs/workflow-hitl-business-logic.md) | Pattern for confirm/mutate workflows: command → tool gate → HITL |
+| [`flow-paths.md`](./flow-paths.md) | Integration → chat UI → API → runtime → stream parts or tool cards |
+| [`docs/retrieval-first-business-logic.md`](./docs/retrieval-first-business-logic.md) | Catalog / Q&A: schema → lookup → render → optional speaker |
+| [`docs/workflow-hitl-business-logic.md`](./docs/workflow-hitl-business-logic.md) | Confirm/mutate workflows: command → tool gate → HITL |
 | [`docs/DATABASE-INTEGRATION.md`](./docs/DATABASE-INTEGRATION.md) | Persistence / database integration notes |
+| [`../shop-assistant/docs/architecture.md`](../shop-assistant/docs/architecture.md) | Live ShopMate retrieval-first adapter |
 | [`../closer-assistant/docs/architecture.md`](../closer-assistant/docs/architecture.md) | Closer agents, tool gates, and scaling promotions |
 
 **Pick a business pattern by product type:** use retrieval-first when the risk is invented/stale data; use workflow/HITL when the risk is mutating too early. Many products combine both (browse with retrieval, writes with gates).
@@ -83,8 +84,8 @@ Copy both complete feature folders:
 - [`features/shop-assistant/`](../shop-assistant/)
 
 The AI assistant feature contains the chat UI, providers, artifacts, history, persistence contracts,
-model contracts, and server handlers. The shop assistant contains the business runtime, agents, tools,
-prompts, and tool renderers.
+model contracts, and server handlers. The shop assistant contains the business schema, planner,
+lookup, server render, stream-part UI, and optional speaker. See [`../shop-assistant/README.md`](../shop-assistant/README.md).
 
 ### 2. API routes
 
@@ -106,7 +107,7 @@ and artifacts.
 Mount the assistant provider and business integration in the new project layout. The relevant files are:
 
 - [`features/ai-assistant/providers/assistant-root-provider.tsx`](./providers/assistant-root-provider.tsx)
-- [`features/shop-assistant/ui/shop-assistant-integration.tsx`](../shop-assistant/ui/shop-assistant-integration.tsx)
+- [`features/shop-assistant/ui/integration/shop-assistant-integration.tsx`](../shop-assistant/ui/integration/shop-assistant-integration.tsx)
 - [`components/layout-wrapper.tsx`](../../components/layout-wrapper.tsx)
 
 Use the equivalent layout wrapper in the new project if its structure differs.
@@ -205,20 +206,22 @@ Use the assistant as a normal context-aware chat. Inject a generic runtime, or o
 </AssistantRootProvider>
 ```
 
-The assistant still renders messages, handles streaming, supports history when a history client is supplied, and remains usable without agents or tools.
+The assistant still renders messages, handles streaming, supports history when a history client is supplied, and remains usable without a business runtime.
 
 ### Business mode
 
-An application adapter injects the business runtime, tool renderer registry, current user, suggestions, persistence, and optional command callbacks.
+An application adapter injects the business runtime, stream-part and/or tool renderer registries, current user, suggestions, persistence, and optional command callbacks.
 
 ```text
 application route
   → generic assistant request handler
     → injected business runtime
-      → business agents and tools
+      → schema → plan → lookup? → server render → optional speaker
 ```
 
-The business adapter owns what the assistant can do. The generic assistant only knows the contracts in `model/`.
+ShopMate’s live adapter is retrieval-first ([`docs/retrieval-first-business-logic.md`](./docs/retrieval-first-business-logic.md)). HITL adapters inject operation registries and tools instead ([`docs/workflow-hitl-business-logic.md`](./docs/workflow-hitl-business-logic.md)).
+
+The business adapter owns what the assistant can do. The generic assistant only knows the contracts in [`model/`](./model/).
 
 ## File structure
 
@@ -239,7 +242,7 @@ features/ai-assistant/
 ├── message-persistence/    # Message persistence contracts and server adapters.
 │   ├── model/              # Persistence and history contracts.
 │   └── server/             # Server-side persistence implementations.
-├── model/                  # Contracts: runtime, events, documents, and endpoints.
+├── model/                  # Contracts: runtime, stream-part + tool registries, events, documents, endpoints.
 ├── navigation/             # Link/router helpers that preserve assistant URL state.
 ├── providers/              # React providers for stream and fullscreen state.
 ├── server/                 # Request parsing and assistant stream orchestration.
@@ -248,6 +251,18 @@ features/ai-assistant/
 ├── chat-container.tsx      # Transport-facing chat UI composition.
 └── chat-wrapper.tsx        # Assistant shell and session composition.
 ```
+
+## Key files
+
+| File | Role |
+|---|---|
+| [`model/assistant-runtime.ts`](./model/assistant-runtime.ts) | Injectable business stream contract |
+| [`model/stream-part-renderer-registry.ts`](./model/stream-part-renderer-registry.ts) | Remount chat UI from persisted `data-*` parts |
+| [`model/tool-renderer-registry.ts`](./model/tool-renderer-registry.ts) | Remount chat UI from AI tool parts (HITL / unknown tools) |
+| [`server/handle-assistant-request.ts`](./server/handle-assistant-request.ts) | Parse request, persist, open SSE, call runtime |
+| [`chat-wrapper.tsx`](./chat-wrapper.tsx) / [`chat-container.tsx`](./chat-container.tsx) | Shell + `useChat` transport |
+| [`components/message-part-orchestrator-renderer.tsx`](./components/message-part-orchestrator-renderer.tsx) | Text, artifacts, stream-part + tool mounts |
+| [`providers/assistant-root-provider.tsx`](./providers/assistant-root-provider.tsx) | Stream + fullscreen providers |
 
 ## Import direction
 

@@ -1,203 +1,191 @@
-# Pattern: Workflow / HITL Business Logic
+# Pattern: Operation-Driven Workflow / HITL Business Logic
 
-Use this when the assistant’s main job is a **guided multi-step path** with confirmation before side effects — not primarily “look up and answer.”
+Use this pattern when an assistant must guide users through business records and
+require explicit human confirmation before writes, generation, booking, assignment,
+or other consequential side effects.
 
-Typical products: CRM/property assistants, booking changes, proposal → confirm → apply, ad/content generation with review, anything where skipping a step is unsafe.
+For read-heavy catalog/Q&A products, see
+[`retrieval-first-business-logic.md`](./retrieval-first-business-logic.md). Most
+business assistants combine retrieval operations with HITL mutation operations.
 
-Related:
+## Core principle
 
-- Sibling pattern (catalog / Q&A): [`retrieval-first-business-logic.md`](./retrieval-first-business-logic.md)
-- Generic request path: [`../flow-paths.md`](../flow-paths.md)
-- Closer architecture (concrete instance): [`../../closer-assistant/docs/architecture.md`](../../closer-assistant/docs/architecture.md)
-- Runtime contract: [`../model/assistant-runtime.ts`](../model/assistant-runtime.ts)
-
----
-
-## When to choose this
-
-Choose **workflow / HITL** if most of these are true:
-
-- Wrong behavior is **mutating too early** or skipping confirm
-- Critical steps use **cards/forms** (select entity, edit fields, Confirm)
-- Free text alone must **not** unlock write tools
-- You need a small set of specialists (browse vs change vs generate), not dozens of Q&A intents
-
-If the product is mostly search/recommend/compare against a store, use the [retrieval-first pattern](./retrieval-first-business-logic.md) (or combine both — see below).
-
----
-
-## Core contract
+The LLM interprets free text. Deterministic application code owns workflow state,
+authorization, confirmation, mutation, completion, and client reconciliation.
 
 ```text
-user message (+ optional assistantCommand from a card/form)
-  → family / specialist router
-  → tool gate (whitelist for this workflow step)
-  → streamText({ systemPrompt, gated tools })
-  → tool UI card/form
-  → user confirms → next request with assistantCommand
+free text
+  → bounded planner
+  → registered operation
+  → canonical task inputs
+  → authorized retrieval/proposal tool
+  → structured renderer
+
+structured UI action
+  → revisioned command
+  → direct command endpoint (no LLM)
+  → proposal/auth/freshness verification
+  → domain mutation
+  → standardized completion + cache metadata
 ```
 
-Live enforcement = **latest structured command → tool allow-list**.  
-Prompts are guidance; gates are safety.
+Prompts are guidance. Schemas, operation registration, revision checks, signed
+proposals, server authorization, RLS, and direct commands are enforcement.
 
----
+## Generic shell versus business implementation
 
-## What `ai-assistant` provides vs what you build
-
-| Layer | Owns |
+| Layer | Responsibility |
 |---|---|
-| `features/ai-assistant` | Chat UI, stream, history, `toolRenderers` map, opaque `onCommand` / request body |
-| Your `*-assistant` feature | Commands, workflow gates, agents, tools, auth inside tools, integration wiring |
-| App API route | Inject your runtime + persistence into `handleAssistantRequest` |
+| Generic assistant | Chat UI, streaming, history, typed tool-part protocol, opaque command hooks |
+| Business assistant | Planner catalog, operation registry, task state, tools, authorization, renderers, cache/drawer integration |
+| API routes | Thin adapters to runtime or deterministic command executor |
+| Entity/domain code | Canonical repositories, mutations, query keys, RLS-compatible server use cases |
 
-The generic shell should stay **product-agnostic**. Avoid hard-coding domain command strings inside `chat-container` long-term — prefer a helper owned by the business integration.
+The generic shell must not know business entities, tool names, permissions, cache
+keys, or drawer keys.
 
----
-
-## Recommended business layout
+## Recommended layout
 
 ```text
 features/<product>-assistant/
-├── agents/
-│   ├── <entity>/                 # family router + workflow/
-│   │   ├── <entity>-agent-router.ts
-│   │   └── workflow/
-│   │       ├── commands.ts       # single source of truth for UI commands
-│   │       ├── router.ts         # command → tool gate
-│   │       ├── state.ts          # optional; wire when state is stored
-│   │       └── transitions.ts    # optional; needs stored state
-│   └── <entity>-<job>/           # thin specialists (prompt + agent.ts)
-├── tools/
-│   └── <entity>/                 # capability pack + name/renderer catalogs
+├── authorization/
+├── cache/
+├── conversation/
+│   ├── model/          # task, plan, command, operation contracts
+│   ├── client/         # task reducer/context
+│   └── server/         # planner, resolver, transition, command dispatcher
+├── operations/
+│   └── <entity>/<operation>/
+├── resolution/
 ├── server/
-│   └── <product>-runtime.ts      # AssistantRuntime → family router
+├── tools/
 └── ui/
-    └── <product>-integration.tsx # ChatWrapper + toolRenderers + host callbacks
 ```
 
----
+Do not create a hierarchy of model “agents” or specialist routers when a registered
+operation can own the behavior directly.
 
-## Implementation checklist
+## Operation contract
 
-### 1. Commands as the single source of truth
+Each operation owns:
 
-Define typed workflow commands in one module. Cards/forms **emit** them; routers **parse** them. No parallel string unions in UI vs server.
+- model-facing label and classification description;
+- focused system prompt;
+- intent parser and aliases;
+- canonical task-input merge behavior;
+- next-step/phase resolution;
+- operation-specific tool set;
+- deterministic structured-command execution.
 
-Example shapes (domain-specific names will differ):
+The runtime plans an operation ID and resolves it against the registry. Unknown
+operations cannot expose tools. Adding an entity means registering definitions, not
+adding runtime branches.
 
-```ts
-type WorkflowCommand =
-  | { type: 'entity-selected'; payload: { id: string; workflow?: string } }
-  | { type: 'entity-confirmed'; payload: { proposalId: string } }
-  | { type: 'details-submitted'; payload: { ... } }
-  | { type: 'cancelled'; payload?: { ... } }
-```
+## Task context
 
-Client sends `assistantCommand` in the request body (via `sendMessage` options). Server reads it from `businessContext`.
-
-### 2. Tool gates (whitelist)
-
-Map each command (or gate id) to the **only** tools allowed on the next turn:
+Task state stores only the canonical workflow snapshot:
 
 ```text
-no command / browse     → discovery tools only
-selected                → prepare / collect tools
-details submitted       → proposal tools
-confirmed               → apply / generate tools
-cancelled               → discovery again
+entity, operation, action, variant, phase
+inputs (lookup + desired outcome)
+references (selected record/proposal IDs)
+revision, updatedAt
 ```
 
-Implement as `restrictTools(allTools, gate)` — do not rely on the model to “only call confirm.”
+The browser retains context for continuity, but the server validates operation and
+revision on every structured command. A clear new operation may pause/switch the
+active task; short answers may continue it.
 
-### 3. Family router → specialists
+## Retrieval and proposal phase
 
-Keep a small router that returns `{ kind, systemPrompt, tools }` for the runtime:
+Model-facing tools may search, resolve, summarize, or prepare signed proposals. They
+must not trust model-provided IDs, roles, scope, permissions, or confirmation claims.
+
+Mutation discovery separates:
 
 ```text
-resolveEntityAgentRoute(userQuery, businessContext)
-  1. resolve kind from command gate, else free-text heuristics
-  2. resolve tool gate from the same command
-  3. create specialist tool set
-  4. restrict to whitelist
+lookup/current filters → identify the existing authorized row
+desired changes        → populate the proposal after selection
 ```
 
-Runtime stays dumb: it only streams whatever the router returns.
+Return explicit structured outcomes for one match, ambiguous matches, no matches,
+missing input, proposal, completion, and recoverable failure.
 
-### 4. HITL rules
+## Structured renderer phase
 
-| User action | Advances workflow? |
-|---|---|
-| Click Confirm / submit form (emits command) | Yes |
-| Free text “yes” / typing form fields in composer | No (unless you explicitly design a parser — usually don’t) |
-| New free-text browse while mid-flow | Usually discovery tools only; do not keep write tools hot |
+Cards, maps, forms, briefs, and proposal components own business presentation. They
+emit typed commands containing opaque IDs and edited values. Human-readable text and
+machine commands remain separate.
 
-This is intentional safety.
+Stop the model loop when a structured renderer owns the result. Otherwise the model
+may duplicate cards, reinterpret filters, or claim unsupported outcomes.
 
-### 5. Auth and side effects inside tools
+## Direct confirmation phase
 
-Authorization, confirmation tokens, and persistence belong in **tool execute** (server), not in the prompt. Tool results feed cards; cards emit the next command.
+Selection and confirmation UI actions that deterministically advance a workflow use
+a host-provided direct-command handler:
 
-### 6. Tool + renderer catalogs
+1. wrap the command with entity, operation, and active revision;
+2. post to the business command route;
+3. validate the envelope and active task;
+4. delegate to the registered operation command handler;
+5. verify proposal signature, expiry, freshness, authorization, and edited fields;
+6. execute the existing domain mutation once;
+7. return a task event and completion metadata;
+8. append the actual server result to chat.
 
-- Server-safe catalog: tool names, step labels, discovery list  
-- Client catalog: tool name → React renderer  
+Never convert Confirm into “yes, apply it” and send it to the LLM.
 
-Keys must match exactly or the shell falls back to generic tool output.
+## Completion contract
 
-### 7. Optional full state machine
+Successful mutations should return:
 
-`state.ts` / `transitions.ts` only pay off when you **store** workflow state on chat/session/request. Until then, **command → gate** is enough. Promote when you need sticky mid-flow recovery, resume, or validation against prior steps.
+- `kind: completed`;
+- `entity` and `operation`;
+- affected `recordIds`;
+- host-owned `cacheTags`;
+- optional `historyCreated`;
+- typed `result`/tool output;
+- task references and a terminal lifecycle event.
 
----
+Failures return concise, recoverable user text. Raw schema arrays, provider errors,
+database policy details, and secrets stay in protected development logs.
 
-## Free text vs commands
+## Host integration
 
-| Input | Role |
-|---|---|
-| Free text | Start a path / switch browse topic (heuristics or later a small classifier) |
-| `assistantCommand` | Advance or gate the next step on an existing path |
+The business host maps cache tags to canonical TanStack cache helpers and awaits
+reconciliation after successful writes. It may also expose page-based URL drawers for
+read-only Open actions. These are product behaviors and do not belong in the generic
+assistant.
 
-Do **not** replace HITL commands with an LLM classifier. A classifier may help only on the **no-command** branch when free-text phrases collide.
+## When a smaller pattern is enough
 
----
+Use retrieval-first alone when all operations are read-only and lookup plus server
+render can authoritatively answer the question. Add operation/HITL infrastructure when you need
+any of:
 
-## Scaling checklist (by symptom)
+- multi-turn input collection;
+- entity selection;
+- editable proposals;
+- confirmation before side effects;
+- resumable/switchable workflows;
+- deterministic UI actions;
+- completion-driven cache reconciliation.
 
-| Symptom | Promote to |
-|---|---|
-| Second entity domain (bookings, clients, …) | Top entity router + namespaced commands + per-entity tool packs |
-| Free-text misroutes between specialists | UI intent chips first; small LLM classifier only if still needed |
-| Mid-flow abandon / entity switch feels broken | Ignore stale command on clear topic change; optional stored workflow state |
-| Model invents entities to mutate | Require ids from prior tool results / commands; auth in tools |
+## Minimum verification matrix
 
----
+- free-text routing to every registered operation;
+- parser aliases and stale-context behavior;
+- lookup versus desired-change separation;
+- authorized one/many/no-match resolution;
+- selection retains desired changes;
+- form contains only issued fields;
+- Confirm bypasses the LLM;
+- expired, modified, stale, and unauthorized proposals fail safely;
+- mutation runs once and returns actual completion metadata;
+- cache tags invalidate the correct query families;
+- renderer keys match streamed typed tool parts;
+- cancellation and operation switching maintain valid task state;
+- authenticated smoke tests exercise provider, RLS, browser UI, and cache paths.
 
-## Combining with retrieval-first
-
-Many products need both:
-
-```text
-browse / Q&A     → retrieval-first (lookup before answer)
-mutate / generate → workflow HITL (command + tool gate)
-```
-
-Same `AssistantRuntime`, different branches after a top-level intent or command namespace check.
-
----
-
-## Test matrix (minimum)
-
-- Free-text discovery (read-only tools only)
-- Select entity on card → prepare step tools only
-- Confirm → apply/generate runs once with valid token
-- Free text “yes” does **not** apply
-- Cancel returns to discovery
-- Tool card renders via registry (name match)
-
----
-
-## Example references in this repo
-
-- Closer adapter: `features/closer-assistant/`
-- Property router + workflow commands: `features/closer-assistant/agents/property/`
-- Flow walkthrough (shell → runtime): [`../flow-paths.md`](../flow-paths.md)
+Concrete reference: [`../../closer-assistant/README.md`](../../closer-assistant/README.md).

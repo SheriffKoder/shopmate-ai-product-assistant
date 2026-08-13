@@ -42,7 +42,7 @@ References:
 - [`features/ai-assistant/server/assistant-step.ts`](../server/assistant-step.ts)
 - [`features/ai-assistant/model/assistant-runtime.ts`](../model/assistant-runtime.ts)
 - [`features/ai-assistant/server/handle-assistant-request.ts`](../server/handle-assistant-request.ts)
-- [`features/shop-assistant/server/router.ts`](../../shop-assistant/server/router.ts)
+- [`features/shop-assistant-v1/server/router.ts`](../../shop-assistant-v1/server/router.ts)
 
 Tasks:
 

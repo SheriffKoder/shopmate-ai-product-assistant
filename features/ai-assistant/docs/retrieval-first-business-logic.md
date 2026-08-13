@@ -4,11 +4,15 @@ Use this when the assistant’s main job is to **answer from a store, catalog, o
 
 Typical products: shop assistants, product Q&A, recommendations, comparisons, “create a table of…”, FAQ backed by docs or inventory.
 
+Live example: [`features/shop-assistant/`](../../shop-assistant/). Architecture: [`../../shop-assistant/docs/architecture.md`](../../shop-assistant/docs/architecture.md).
+
 Related:
 
 - Sibling pattern (mutations / HITL): [`workflow-hitl-business-logic.md`](./workflow-hitl-business-logic.md)
 - Generic request path: [`../flow-paths.md`](../flow-paths.md)
 - Runtime contract: [`../model/assistant-runtime.ts`](../model/assistant-runtime.ts)
+- Tool vs server function vs component: [`../../shop-assistant/docs/tools.md`](../../shop-assistant/docs/tools.md)
+- Stream parts: [`../../shop-assistant/docs/stream-parts.md`](../../shop-assistant/docs/stream-parts.md)
 
 ---
 
@@ -29,20 +33,18 @@ If the product is mostly “propose → confirm → apply”, use the [workflow 
 
 ```text
 user message
-  → existing broad classifier (when present)
-  → structured request extraction + validation
-  → deterministic route planner
-  → required domain lookup (source of truth)
-  → specialist prompt + allowed tools
-  → stream answer / cards / tables / artifacts
+  → one schema LLM (label action + filters + view)
+  → planFromSchema (pure; no model)
+  → required domain lookup? (source of truth)
+  → server render (view → cards / sheet / document / cart / Find chips)
+  → optional speaker (no tools)
 ```
 
-**Lookup before generation.** A prompt that says “always use the search tool” is not enough — the route must require a real source call (or a tool allow-list that cannot answer without it).
+**Lookup before generation.** A prompt that says “always use the search tool” is not enough. Runtime calls the source when the plan requires it. The model does not pick tools.
 
-Use a schema-constrained LLM extraction step when customers can describe the
-same need in many natural ways. The LLM interprets the request; the planner
-still owns route priority and lookup requirements. Keep heuristics only as a
-resilience fallback when extraction is unavailable or invalid.
+The schema LLM interprets free text. The planner owns lookup vs refuse vs cart vs presentation. Server functions stream UI. An optional speaker writes prose after render.
+
+Do not add a classifier, extractor, specialist-agent router, or `tools/` folder for catalog/cart/artifacts. Those were the v1 retrieval-first recipe. They are archived, not a second model.
 
 ---
 
@@ -50,125 +52,124 @@ resilience fallback when extraction is unavailable or invalid.
 
 | Layer | Owns |
 |---|---|
-| `features/ai-assistant` | Chat UI, stream, history, tool renderer registry, `AssistantRuntime` contract |
-| Your `*-assistant` feature | Intents, route planner, catalog/API source, agents, tools, product cards |
+| `features/ai-assistant` | Chat UI, stream, history, `AssistantRuntime`, stream-part + tool renderer registries, artifact helpers |
+| Your `*-assistant` feature | Schema, `planFromSchema`, domain source, server render, stream-part UI, optional speaker |
 | App API route | Inject your runtime + persistence into `handleAssistantRequest` |
 
-Do **not** put product URLs, SKUs, or catalog types into `ai-assistant`.
+Do **not** put product URLs, SKUs, or catalog types into `ai-assistant`. Core forwards `sendMessage` / `status` into stream-part renderers; it must not import business cards.
 
 ---
 
-## Recommended business layout
+## Business layout
+
+Layer folders. No `agents/`. No `tools/` unless the model must call something with unknown args mid-reply.
 
 ```text
 features/<product>-assistant/
 ├── model/
-│   ├── assistant-intent.ts     # typed intent union
-│   ├── store-request.ts        # validated semantic request + constraints
-│   └── catalog-source.ts       # (or domain-source) interface only
+│   ├── assistant-request.ts    # action + filters + view (+ optional metadata)
+│   ├── execution-plan.ts       # planFromSchema (pure)
+│   └── sources/                # CatalogSource / CartSource contracts
 ├── schema/
-│   └── store-request-schema.ts # validates and normalizes LLM extraction
+│   └── assistant-request-schema.ts
+├── lib/                        # deterministic match, parse data-* parts
+├── transform/                  # rows → CSV / markdown / card payload
 ├── server/
-│   ├── request-extraction-agent.ts # schema-constrained LLM extraction
-│   ├── intent-extractor.ts     # fallback heuristics only
-│   ├── route-planner.ts        # priority rules → intent + required lookup
-│   ├── <product>-runtime.ts    # implements AssistantRuntime
-│   └── agents/                 # thin specialists (prompt + tool wire-up)
-├── tools/
-│   └── <domain>/               # search, details, cart-read, …
-└── ui/
-    └── <product>-integration.tsx
+│   ├── request-agent.ts        # one generateObject
+│   ├── <product>-runtime.ts    # schema → plan → lookup → render → speaker
+│   ├── speaker.ts              # optional streamText, no tools
+│   ├── sources/                # source adapters
+│   └── render/                 # cards, sheet, document, cart, refuse, metadata
+├── ui/
+│   ├── integration/            # mount + stream-part registry
+│   ├── cards/ / cart/ / …
+└── config/                     # suggestion chips
 ```
 
-Agents stay thin: prompts + tool registration. HTTP/DB live behind the source interface.
+HTTP/DB live behind the source interface. Chat remounts from persisted `data-*` parts, not fake `dynamicTool` results.
 
 ---
 
-## Implementation checklist
+## Schema
 
-### 1. Typed intent and structured request
-
-Use a closed intent union and a schema-validated request. The extraction agent
-may produce a concise `catalogQuery` for retrieval, but it must not invent
-product facts or identities.
+One closed schema. If two values do not change lookup, render, or cart, they do not belong here.
 
 ```ts
-type StoreIntent =
-  | 'product-search'
-  | 'product-lookup'
-  | 'recommendation'
-  | 'comparison'
-  | 'filtering'
-  | 'table'
-  | 'availability'
-  | 'cart'
-  | 'store-policy'
-  | 'clarification'
-  | 'unrelated'
-
-type StoreRequest = {
-  intent: StoreIntent
-  catalogQuery: string
-  productTerms: string[]
-  category: string | null
-  useCase: string | null
+{
+  action: 'catalog' | 'cart' | 'policy' | 'technical' | 'unrelated',
+  catalogQuery: string,   // "" = browse all
+  category: string | null,
   constraints: {
-    minPrice: number | null
-    maxPrice: number | null
-    colors: string[]
-    features: string[]
-    sortBy: 'relevance' | 'rating' | 'price-low' | 'price-high' | null
-  }
-  outputFormat: 'conversation' | 'product-cards' | 'comparison' | 'table'
+    minPrice: number | null,
+    maxPrice: number | null,
+    colors: string[],
+    features: string[],
+    sortBy: 'relevance' | 'rating' | 'price-low' | 'price-high' | null,
+  },
+  view: 'cards' | 'sheet' | 'document' | 'conversation',
+  metadata: {
+    type: 'none' | 'buttons',
+    items: Array<{ label: string; value: string }>,
+  },
 }
 ```
 
-Normalize untrusted model fields before planning: trim query text, de-duplicate
-lists, reject unsupported categories/sort modes, and discard invalid price
-values. If extraction fails, fall back to a small heuristic extractor or the
-existing classifier/router path.
+| Field | Used by | Not used for |
+|---|---|---|
+| `action` | skip lookup / refuse / cart / technical / catalog | picking a specialist agent |
+| `catalogQuery` + `category` + `constraints` | catalog lookup | presentation |
+| `view` | cards vs sheet vs document vs prose | whether to search |
+| `metadata` | conversation Find chips | lookup, SKUs, or render choice |
 
-### 2. Deterministic route planner
+`table` / `sheet` belongs on `view`, not `action`. Rec / compare is `view: conversation` plus optional `metadata.buttons`. Click is a visible follow-up turn (`Provide X from the catalog`), not dumped cards. See [`../../shop-assistant/docs/conversation.md`](../../shop-assistant/docs/conversation.md).
 
-Prefer explicit priority over stacked LLM classifiers:
+Validate and normalize before planning: trim query text, drop empty metadata items, reject unsupported categories/sort modes, default omitted constraints. If labeling fails, use a safe default (`catalog` + `conversation`), not a second classifier.
 
-```text
-cart → exact lookup → comparison → table → availability
-  → search/filter → recommendation → policy → clarification → unrelated
-```
+---
 
-Planner output should include:
+## Planner
 
-- `intent`
-- normalized request entities/constraints
-- **`requiredLookup`** (`searchProducts`, `getProductById`, `none`, …)
-- selected agent / tool allow-list
+Pure function. No model. `planFromSchema({ action, view })` → lookup? render? speaker?
 
-### 3. Domain source of truth
+View never overrides action: `cart` + `document` still renders cart. `unrelated` + `sheet` still refuses.
 
-Inject a real `CatalogSource` (or equivalent). Replace mocks for any product/table/recommend path.
+Then execute in order: lookup → render → optional speaker.
 
-Every product-related intent must hit the source **before** the model invents rows for answers, tables, or comparisons.
+---
 
-Optional hard guarantee: runtime runs the required lookup **before** `streamText` and passes results into context so the model cannot skip tools.
+## Lookup
 
-Pass an explicit completion signal too (for example,
-`catalogLookupCompleted`). Agents can then distinguish “no lookup was needed”
-from “the source was checked and returned no products.”
+Domain lookup does **not** use AI. Inject a real `CatalogSource` (or equivalent). Runtime calls it when the plan requires rows.
 
-### 4. Tool capability contracts
+This node owns unique catalog values and which rows come back. Do not search again inside a `productSearch` AI tool after lookup.
 
-| Intent | Must use |
-|---|---|
-| lookup | `getProductById` / `searchProducts` |
-| comparison | search + details |
-| table | search, then artifact tool from **real** rows |
-| recommendation | search |
-| availability | search or inventory source |
-| policy | policy/doc source |
-| cart read | cart source / cart tools |
+Conversation rec / compare may **skip** lookup. Schema `view` + `metadata` own discussion vs cards. Find chips come from the label, not from inventing SKUs.
 
-### 5. Empty-result policy
+Pass an explicit completion signal when useful (`lookupEmpty`) so render/speaker can distinguish “no lookup needed” from “source checked, no rows.”
+
+---
+
+## Render
+
+Runtime already knows `action` + `view` and already has rows. Call a **server function**. Mount UI from persisted stream parts.
+
+| `action` + `view` | lookup | What runs |
+|---|---|---|
+| `unrelated` / `policy` | no | deterministic refuse / policy text |
+| `cart` | no | cart UI from `CartSource` |
+| `technical` + `document` | no | text artifact from the topic |
+| `catalog` + `cards` | yes | stream product cards from rows |
+| `catalog` + `sheet` | yes | CSV → sheet artifact from **real** rows |
+| `catalog` + `document` | yes | text artifact filled from rows |
+| `catalog` + `conversation` | skip | speaker + optional `data-uiMetadata` Find chips |
+
+Shop + document is not a new agent. It is `action: catalog` + `view: document`. If it is shop, fill the document from lookup.
+
+Use an AI tool only if the model must choose whether, when, and with which unknown args to call something (web search, third-party API). Catalog search, cart display, and shop artifacts do not qualify.
+
+---
+
+## Empty-result policy
 
 One shared rule for every store lookup:
 
@@ -177,38 +178,24 @@ no matches → apologize → restate active filters → optional “relax filter
             → do not invent substitute products
 ```
 
-### 6. UI renderers and links
+---
 
-Map tool names → cards in the **product** feature. Deep links (`/products/[slug]`) belong on the product-card renderer, not in generic assistant suggestion cards. Pass `id` + `slug` (or your canonical URL field) through tool payloads.
+## UI
 
-### 7. Progress steps (optional)
+Map persisted `data-*` types → cards in the **product** feature (`streamPartRenderers`). Deep links (`/products/[slug]`) belong on the product-card renderer, not in generic assistant suggestion cards. Pass `id` + `slug` (or your canonical URL field) through the stream payload.
 
-Examples: Understanding request → Checking store → Filtering → Comparing → Preparing table → Preparing response.
+Do not remount catalog UI from `toolName === 'productSearch'`. Refresh must remount from non-transient `data-productCards` / `data-cart` / `data-uiMetadata` / `data-artifactContent`.
 
 ---
 
-## Routing: planner vs classifiers
+## What this is not
 
-| Approach | Use when |
-|---|---|
-| Deterministic planner + heuristics | Default for shop/catalog traffic |
-| Deterministic planner + structured LLM extraction | Default when varied natural-language product requests need semantic interpretation; planner still decides precedence |
-| Heuristic extraction | Fallback only when structured extraction is unavailable or invalid |
-| Multiple LLM classifiers in series | Avoid as the default — cost, latency, drift |
-
-UI chips / explicit intents always outrank free-text classification when present.
-
----
-
-## Avoid agent sprawl
-
-Do not create one fat agent per phrase on day one. Prefer:
-
-```text
-intent → same search tools + different prompt / output shape
-```
-
-Split a specialist only when prompts or tool sets collide in production (e.g. policy docs vs catalog search).
+- Not stacked LLM classifiers plus a specialist-agent router.
+- Not a wide `StoreIntent` union (`recommendation`, `filtering`, `comparison`, …) that maps 1:1 to agents.
+- Not AI tools for catalog, cart, or shop artifacts.
+- Not inventing sheet/document rows after a “table” wording leak into routing.
+- Not HITL mutations. Cart **read** can be retrieval-first; cart **write** needs [workflow / HITL](./workflow-hitl-business-logic.md).
+- Not the archived v1 adapter. `features/shop-assistant-v1/` is history, not a second catalog pattern.
 
 ---
 
@@ -217,30 +204,34 @@ Split a specialist only when prompts or tool sets collide in production (e.g. po
 When you add cart writes, checkout, or other side effects, add the [workflow / HITL](./workflow-hitl-business-logic.md) layer — do not rely on retrieval routing alone:
 
 ```text
-intent → required lookup → (if mutating) command + tool gate → agent → renderer
+schema → plan → lookup → (if mutating) proposal + direct confirmation command → renderer
 ```
 
-Retrieval answers questions; gates protect writes.
+Retrieval answers questions; verified direct commands protect writes.
 
 ---
 
-## Test matrix (minimum)
+## Expected replies
 
-- “Show me laptops” / filter by price
-- Exact product question
-- Comparison and table requests
-- No matching products
-- Policy / unrelated / joke
-- Product card link while the assistant stays open (if applicable)
+| Prompt | Result |
+|---|---|
+| Show me smart phones | Cards from lookup only |
+| All available products in a table | Sheet artifact from real catalog CSV |
+| Buying guide for our smartphones | Text artifact citing lookup rows |
+| Windows vs Mac laptops | Technical text artifact, no fake SKUs |
+| Edit my cart | Cart UI, no catalog lookup |
+| Who is Elon Musk? | Short refuse, no lookup |
+| diary on the go / compare tablets vs laptops | Speaker text + Find chips; click → cards |
 
 ---
 
 ## Example references in this repo
 
-- Shop adapter: `features/shop-assistant/`
+- Live adapter: [`features/shop-assistant/`](../../shop-assistant/)
 - Runtime: `features/shop-assistant/server/shop-assistant-runtime.ts`
-- Structured request: `features/shop-assistant/model/store-request.ts`
-- Schema validation: `features/shop-assistant/schema/store-request-schema.ts`
-- Extraction: `features/shop-assistant/server/request-extraction-agent.ts`
-- Planner: `features/shop-assistant/server/store-route-planner.ts`
-- Routing flow: `features/shop-assistant/docs/agent-routing-flow.md`
+- Schema LLM: `features/shop-assistant/server/request-agent.ts`
+- Planner: `features/shop-assistant/model/execution-plan.ts`
+- Lookup: `features/shop-assistant/lib/catalog/match-catalog-products.ts`
+- Render: `features/shop-assistant/server/render/`
+- Stream-part UI: `features/shop-assistant/ui/integration/stream-part-registry.tsx`
+- Archived v1 (agents + AI tools): `features/shop-assistant-v1/`
