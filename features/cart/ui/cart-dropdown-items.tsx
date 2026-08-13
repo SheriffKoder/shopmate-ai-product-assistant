@@ -1,7 +1,7 @@
 'use client';
 
-import { CartItemCard } from '@/features/shop-assistant/tools/cart-info/cart-item-card';
-import type { ShopAssistantCommand } from '@/features/shop-assistant/model/shop-assistant-command-handler';
+import { CartItemCard } from '@/features/shop-assistant/ui/cart/cart-item-card';
+import type { ShopAssistantCommand } from '@/features/shop-assistant/model/sources/shop-assistant-command-handler';
 import type { CartDropdownItem } from './cart-dropdown.types';
 
 interface CartDropdownItemsProps {

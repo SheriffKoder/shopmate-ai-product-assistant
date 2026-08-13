@@ -1,29 +1,31 @@
 /**
- * Intro Suggestions Configuration
- * 
- * Purpose: Defines suggestion cards displayed in the empty chat state
- * Used in: features/ai-assistant/components/intro-suggestions.tsx
- * Why: Centralized configuration for suggestion cards with icons, colors, and prompts
+ * @file features/shop-assistant/config/shop-assistant-suggestions.ts
+ * Intro suggestion chips for the empty Shop Assistant chat.
+ * Used in: ui/integration/shop-assistant-config.tsx.
+ * Used for: Prompting catalog cards, cart, sheet, and technical document paths.
+ *
+ * Function Index:
+ * introSuggestions: Suggestion sets shown before the first message.
  */
 
-import { Bot, FileSpreadsheet, Laptop, Search, ShoppingCart } from 'lucide-react';
+import { FileSpreadsheet, Laptop, Search, ShoppingCart } from 'lucide-react';
 
 export interface SuggestionCard {
-  icon: typeof Bot; // Lucide icon component
-  backgroundColor: string; // Background color for the card
-  textColor: string; // Text color for the card
-  header: string; // Header text (used as prompt when clicked)
-  description: string; // Description text
+  icon: typeof Search;
+  backgroundColor: string;
+  textColor: string;
+  header: string;
+  description: string;
 }
 
 export interface SuggestionSet {
-  header: string; // Section header
-  cards: SuggestionCard[]; // Array of cards in this set
+  header: string;
+  cards: SuggestionCard[];
 }
 
 export const introSuggestions: SuggestionSet[] = [
   {
-    header: 'Try tools',
+    header: 'Try shopping',
     cards: [
       {
         icon: Search,
@@ -48,14 +50,14 @@ export const introSuggestions: SuggestionSet[] = [
         icon: FileSpreadsheet,
         backgroundColor: 'var(--color-foreground)',
         textColor: 'var(--color-foreground)',
-        header: 'All products table',
+        header: 'All available products in ShopMate in a table',
         description: '',
       },
       {
         icon: Laptop,
         backgroundColor: 'var(--color-foreground)',
         textColor: 'var(--color-foreground)',
-        header: 'Windows vs Mac laptops',
+        header: 'A document about Windows vs Mac laptops',
         description: '',
       },
     ],

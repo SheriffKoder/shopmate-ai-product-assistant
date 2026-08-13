@@ -8,7 +8,7 @@
 
 'use client';
 
-import { ShopAssistantDataStreamHandler, ShopAssistantIntegration } from '@/features/shop-assistant/ui/shop-assistant-integration';
+import { ShopAssistantDataStreamHandler, ShopAssistantIntegration } from '@/features/shop-assistant/ui/integration/shop-assistant-integration';
 import ToastContainer from '@/shared/toast-success/toast-container';
 import { ToastPosition, ToastStacking } from '@/shared/toast-success/toast';
 import { AppHeader } from '@/widgets/app-header/ui/app-header';

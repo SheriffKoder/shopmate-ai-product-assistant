@@ -1,121 +1,88 @@
 # Shop Assistant
 
-ShopMate-specific adapter for the reusable AI assistant feature.
+Live ShopMate adapter for the reusable AI assistant. One schema LLM labels the request; deterministic lookup, render, stream-part UI, and an optional speaker do the rest.
 
-This package owns the electronics catalog prompts, product/cart data sources, product/cart tools, ShopMate agent routing, and product/cart tool renderers. The reusable assistant core imports only generic contracts from `features/ai-assistant`; app entry points inject this adapter where ShopMate behavior is needed.
+Injected by [`app/api/ai-assistant/route.ts`](../../app/api/ai-assistant/route.ts) and [`components/layout-wrapper.tsx`](../../components/layout-wrapper.tsx). The previous multi-agent adapter is archived at [`features/shop-assistant-v1`](../shop-assistant-v1/).
 
-## Owns
+## Why this folder exists
 
-- ShopMate `AssistantRuntime` implementation for `/api/ai-assistant`.
-- Electronics-specific query classification, product classification, agent prompts, and routing.
-- Catalog and cart source contracts used by ShopMate tools.
-- Current mock Shop API and focused catalog/cart source adapters.
-- Product/cart tool factories and UI renderer registry.
-- App-level assistant integration component that injects ShopMate renderers and stream handling.
+v1 grew a classifier, an extractor, a planner, a router, and several specialist agents that mostly copy each other. Catalog answers still drifted because lookup used blob substring matching and AI tools searched again after lookup.
 
-## Dependency Rules
+This adapter is the same store behavior with a smaller system:
 
-- This adapter may import contracts and generic UI/server helpers from `features/ai-assistant`.
-- `features/ai-assistant` must not import this adapter.
-- Routes may import this adapter only to inject runtime composition.
-- Product/cart state remains in `features/shop`; this adapter reads it through explicit source/controller contracts.
+1. One schema LLM labels the request.
+2. A deterministic planner picks lookup / view / cart / refuse.
+3. Lookup owns unique catalog values and returns rows.
+4. Server render functions stream cards, sheets, documents, cart UI, or conversation Find chips.
+5. An optional speaker writes short prose with no tools.
 
-See [`server/README.md`](./server/README.md) for the server folder responsibilities and database-provider boundary.
+## Docs
 
-## Agent routing architecture
+| Doc | What it covers |
+|---|---|
+| [`docs/architecture.md`](./docs/architecture.md) | What the system is, why it replaced v1, expected replies |
+| [`docs/conversation.md`](./docs/conversation.md) | Rec / compare Find chips from schema `metadata` |
+| [`docs/tools.md`](./docs/tools.md) | Tool vs component vs server function — when to build which |
+| [`docs/stream-parts.md`](./docs/stream-parts.md) | What a stream part is, and how chat remounts `data-*` UI |
+| [`docs/responsibilities.md`](./docs/responsibilities.md) | Owns / does not own / dependency direction |
 
-The current incremental routing flow is documented in
-[`docs/agent-routing-flow.md`](./docs/agent-routing-flow.md). It adds typed
-intent extraction and route planning while keeping existing agents and tools
-in place.
+## Key files
 
-```mermaid
-flowchart TD
-    Request[Assistant request] --> Runtime[ShopAssistantRuntime]
-    Runtime --> Query[Existing model classifier]
-    Runtime --> Intent[Intent extractor]
-    Query --> Planner[Store route planner]
-    Intent --> Planner
-    Planner --> Router[ShopMate router]
-    Router -->|search / lookup / cart| ProductsCart[Products and cart agent]
-    Router -->|recommend / compare / table| Recommendation[Recommendation agent]
-    Router -->|filter / availability| Filtering[Filtering agent]
-    Router -->|technical| Technical[Technical discussion agent]
-    Router -->|unrelated| Unrelated[Not-related agent]
-    ProductsCart --> Tools[Business tools]
-    Recommendation --> Tools
-    Filtering --> Tools
-    Tools --> Sources[CatalogSource / CartSource]
-    Sources --> ShopApi[ShopApiClient]
-    ShopApi --> Provider[Mock API or real infrastructure provider]
-```
+| File | Role |
+|---|---|
+| [`server/shop-assistant-runtime.ts`](./server/shop-assistant-runtime.ts) | Schema → plan → lookup → render → speaker |
+| [`server/request-agent.ts`](./server/request-agent.ts) | One schema LLM (`generateObject`) |
+| [`model/assistant-request.ts`](./model/assistant-request.ts) | `action` + filters + `view` + `metadata` |
+| [`schema/assistant-request-schema.ts`](./schema/assistant-request-schema.ts) | Zod validate + defaults |
+| [`model/execution-plan.ts`](./model/execution-plan.ts) | `planFromSchema` |
+| [`lib/catalog/match-catalog-products.ts`](./lib/catalog/match-catalog-products.ts) | Deterministic catalog match |
+| [`server/render/store-output.ts`](./server/render/store-output.ts) | Cards, sheet, document from rows |
+| [`server/render/cart.ts`](./server/render/cart.ts) | Cart UI from `CartSource` |
+| [`server/render/ui-metadata.ts`](./server/render/ui-metadata.ts) | Persist Find chips |
+| [`server/speaker.ts`](./server/speaker.ts) | Optional prose, no tools |
+| [`ui/integration/stream-part-registry.tsx`](./ui/integration/stream-part-registry.tsx) | Remount cards / cart / Find chips |
+| [`ui/metadata/buttons.tsx`](./ui/metadata/buttons.tsx) | Find + `items.map` |
 
-The router chooses behavior; agents decide how to answer; tools perform structured operations; sources provide business data. Keep these responsibilities separate so changing the database does not require rewriting agents.
+## Folder shape
 
-## How tools work
+Layer folders, then subfolders by concern. No `agents/` and no `tools/`.
 
-1. An agent declares a tool with a validated input schema.
-2. The model requests the tool with structured arguments.
-3. The tool calls a focused `CatalogSource` or `CartSource` contract.
-4. The tool returns serializable data to the model and emits tool-result data to the stream.
-5. The client-side renderer registry maps the tool name to a business UI component.
-6. UI actions use an injected command callback to update application state; the assistant does not import the cart store.
+`tools/` is not a project-structure layer. v1 used it for AI SDK wrappers (`dynamicTool`). v2 splits that work:
 
-```text
-agent → tool schema → source contract → API/provider
-                         ↓
-                 tool result stream
-                         ↓
-                renderer registry → UI
-```
+| v1 `tools/` | v2 |
+|---|---|
+| `product-search-tool.ts` / `cart-info-tool.ts` | `server/render/store-output.ts`, `server/render/cart.ts` |
+| `product-card.tsx` / `cart-item-card.tsx` | `ui/cards/`, `ui/cart/` |
+| tool renderer registry | `ui/integration/stream-part-registry.tsx` |
 
-## Designing a business adapter in a new project
-
-After copying `features/ai-assistant`, create a sibling feature such as `features/support-assistant` or `features/booking-assistant`:
-
-1. Define business data contracts in `model/` (`CatalogSource`, `BookingSource`, etc.).
-2. Define a broad API client contract for the business API.
-3. Add focused source adapters that expose only what each agent needs.
-4. Create agents and prompts under `server/agents/`.
-5. Create tools under `tools/`; keep schemas, execution, and renderers together by tool.
-6. Implement the business `AssistantRuntime` in `server/`.
-7. Create a UI renderer registry and integration component.
-8. Inject the runtime and persistence adapter from the application API route.
-9. Inject client command callbacks from the application shell for state-changing actions.
-
-```mermaid
-sequenceDiagram
-    participant Page as Application shell
-    participant UI as Generic assistant UI
-    participant Route as Application API route
-    participant Runtime as Business runtime
-    participant Agent as Business agent
-    participant API as Business API
-
-    Page->>UI: mount with runtime config and renderers
-    UI->>Route: submit message
-    Route->>Runtime: handle request with business context
-    Runtime->>Agent: route query
-    Agent->>API: call source/tool
-    API-->>Agent: business data
-    Agent-->>UI: streamed answer and tool result
-    UI-->>Page: invoke injected command callback
-```
-
-## File structure
+If we ever need a real model-callable tool, add it then — not by default. See [`docs/tools.md`](./docs/tools.md).
 
 ```text
 features/shop-assistant/
-├── config/                 # Business suggestions and UI configuration.
-├── docs/                   # Responsibilities and business architecture notes.
-├── lib/                    # Pure search and classification helpers.
-├── model/                  # Business contracts and command translation.
-├── server/                 # Runtime, router, API sources, prompts, and agents.
-│   └── agents/             # One folder per business behavior.
-├── tools/                  # Tool schemas, execution, and result renderers.
-│   ├── product-search/     # Product search tool and product card renderer.
-│   └── cart-info/          # Cart information tool and cart item renderer.
-└── ui/                     # Integration mount and renderer registry.
+├── README.md
+├── docs/
+├── model/              types + planFromSchema
+│   └── sources/        catalog / cart / shop API contracts
+├── schema/             one Zod schema for the LLM
+├── lib/
+│   ├── catalog/        match, browse-all, runtime lookup helpers
+│   └── stream/         parse persisted data-productCards / data-cart / data-uiMetadata
+├── transform/
+│   └── catalog/        Product[] → CSV / markdown / card payload
+├── server/
+│   ├── sources/        mock Shop API + CatalogSource / CartSource adapters
+│   └── render/         cards, sheet, document, cart, refuse, policy, ui-metadata
+├── ui/
+│   ├── integration/    mount + stream hydration
+│   ├── cards/
+│   ├── cart/
+│   └── metadata/       schema metadata UI (Find buttons)
+└── config/             suggestion chips
 ```
 
-The application owns concrete providers under `app/infrastructure/` and owns route composition under `app/api/`. The business feature should depend on contracts, not on a specific database client.
+## Dependency rules
+
+- This feature may import contracts from `features/ai-assistant`.
+- `features/ai-assistant` must not import this feature.
+- App routes inject the runtime; they do not own ShopMate branching.
+- Catalog/cart data stays in `features/catalog` and `features/cart`.

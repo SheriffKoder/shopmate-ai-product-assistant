@@ -1,108 +1,337 @@
 /**
  * @file features/shop-assistant/server/shop-assistant-runtime.ts
- * Shop Assistant Runtime
- *
- * Purpose: Adapts the current ShopMate agent router to the reusable assistant runtime contract.
- * Used in: app/api/ai-assistant/route.ts.
- * Used for: Keeping ShopMate classification, routing, and product/cart context outside the assistant core.
+ * Shop Assistant runtime: schema → plan → lookup → render → speaker.
+ * Used in: app/api/ai-assistant/route.ts via shop-assistant-config.
+ * Used for: Deterministic shop UI from lookup rows, then optional speaker prose with no tools.
  *
  * Function Index:
- * shopAssistantRuntime: Runtime implementation for ShopMate.
+ * shopAssistantRuntime: AssistantRuntime implementation.
  *
  * Steps:
- * 1. Classify the user query with the existing query classifier.
- * 2. Rebuild the current agent request from generic business context.
- * 3. Delegate to the ShopMate router inside this adapter package.
+ * 1. Label the query with the one schema LLM.
+ * 2. planFromSchema(action + view) — no agent switch.
+ * 3. Look up catalog rows when the plan requires it (conversation skips lookup).
+ * 4. Render cards / sheet / document / cart / refuse / policy / conversation metadata.
+ * 5. Optional speaker (no tools). Deterministic text if speaker skips or fails.
  */
 
 import type { AssistantRuntime } from '@/features/ai-assistant/model/assistant-runtime';
+import { logger } from '@/features/ai-assistant/lib/logger';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
-import { classifyQuery } from './agents';
-import { createMockShopApiClient } from './mock-shop-api-client';
-import { createCatalogSourceFromShopApi, createCartSourceFromShopApi } from './shop-api-sources';
 import { getInitialProducts } from '@/features/catalog/model/initial-data';
-import { routeToAgent, type AgentRequest } from './router';
-import { writeAssistantStep } from './assistant-step';
-import { extractStoreIntent } from './intent-extractor';
-import { planStoreRoute } from './store-route-planner';
-import { extractStoreRequest } from './request-extraction-agent';
+import type { Product } from '@/features/catalog/model/product';
+import type { CartState } from '@/features/cart/model/cart';
+import type { AssistantMetadata } from '../model/assistant-request';
+import type { ExecutionPlan } from '../model/execution-plan';
+import { planFromSchema } from '../model/execution-plan';
+import { catalogRenderTitle, resolveRuntimeLookup } from '../lib/catalog/runtime-lookup';
+import { labelAssistantRequest } from './request-agent';
+import { createMockShopApiClient } from './sources/mock-shop-api-client';
+import {
+  createCatalogSourceFromShopApi,
+  createCartSourceFromShopApi,
+} from './sources/shop-api-sources';
+import {
+  EMPTY_CATALOG_MESSAGE,
+  POLICY_MESSAGE,
+  REFUSE_MESSAGE,
+  createTextReplyStream,
+} from './render/reply';
+import { renderCart } from './render/cart';
+import { renderStoreOutput, renderTechnicalDocument } from './render/store-output';
+import { renderUiMetadata } from './render/ui-metadata';
+import { createSpeakerStream } from './speaker';
+
+/** Use a client-sent cart snapshot when present; otherwise the mock starts empty. */
+function readBusinessCart(businessContext: Record<string, unknown>): CartState | undefined {
+  const cart = businessContext.cart;
+  if (!cart || typeof cart !== 'object') return undefined;
+  if (!Array.isArray((cart as { items?: unknown }).items)) return undefined;
+  return cart as CartState;
+}
 
 /**
- * Runtime that preserves current ShopMate assistant behavior behind the adapter contract.
+ * Runtime: schema → plan → lookup → render → optional speaker.
  */
 export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
   async stream(request, dataStream) {
-    writeAssistantStep(dataStream, {
-      id: 'query-classification',
-      label: 'Classifying',
-      summary: 'Understanding the type of request.',
-      status: 'loading',
-    });
-    // 1. Resolve validated request models once so every agent shares the same runtime config.
+    // 1. Resolve models once per stream. Same registry as v1.
     const models = getAssistantModels(request.modelId);
 
-    // 2. Keep current query classification behavior behind the runtime boundary.
-    const classification = await classifyQuery({ query: request.userQuery, model: models.chat });
-    const extractedStoreRequest = await extractStoreRequest({
+    // 2. One schema LLM. Failure already logged inside the request agent.
+    const assistantRequest = await labelAssistantRequest({
       query: request.userQuery,
       model: models.chat,
     });
-    const storeRoute = planStoreRoute(extractedStoreRequest
-      ? {
-          intent: extractedStoreRequest.intent,
-          entities: {
-            productNames: extractedStoreRequest.productTerms,
-            category: extractedStoreRequest.category ?? undefined,
-            minPrice: extractedStoreRequest.constraints.minPrice ?? undefined,
-            maxPrice: extractedStoreRequest.constraints.maxPrice ?? undefined,
-            colors: extractedStoreRequest.constraints.colors,
-            features: extractedStoreRequest.constraints.features,
-            useCase: extractedStoreRequest.useCase ?? undefined,
-            sortBy: extractedStoreRequest.constraints.sortBy ?? undefined,
-            wantsTable: extractedStoreRequest.outputFormat === 'table',
-            wantsComparison: extractedStoreRequest.outputFormat === 'comparison',
-          },
-        }
-      : extractStoreIntent(request.userQuery));
-    writeAssistantStep(dataStream, {
-      id: 'query-classification',
-      label: 'Classifying',
-      summary: 'Understanding the type of request.',
-      status: 'done',
+
+    // 3. Pure planner. View never overrides action.
+    const plan = planFromSchema(assistantRequest);
+    logger.node({
+      name: 'EXECUTION PLAN',
+      input: {
+        query: request.userQuery,
+        action: assistantRequest.action,
+        view: assistantRequest.view,
+        metadataType: assistantRequest.metadata.type,
+      },
+      details: 'Mapped action + view to lookup / render / speaker. No agent switch.',
+      result: plan,
+      status: 'success',
     });
 
-    // 3. Build the temporary API implementation at the server boundary.
-    // The runtime no longer accepts catalog/cart state from the assistant request.
-    const shopApi = createMockShopApiClient(getInitialProducts());
+    // 4. Compose catalog + cart sources. Prefer a client cart snapshot when the request includes one.
+    const shopApi = createMockShopApiClient(
+      getInitialProducts(),
+      readBusinessCart(request.businessContext),
+    );
     const catalogSource = createCatalogSourceFromShopApi(shopApi);
     const cartSource = createCartSourceFromShopApi(shopApi);
+    const lookup = resolveRuntimeLookup({
+      userQuery: request.userQuery,
+      request: assistantRequest,
+      plan,
+    });
 
-    // Store-first retrieval: resolve catalog candidates before any catalog agent generates text.
-    const catalogProducts = storeRoute.requiresCatalogLookup
-      ? await catalogSource.searchProducts({
-          query: extractedStoreRequest?.catalogQuery || request.userQuery,
-          category: storeRoute.entities.category,
-          maxPrice: storeRoute.entities.maxPrice,
-          limit: 8,
-        })
-      : [];
+    // 5. Deterministic CatalogSource search. Skip when the plan is cart / technical / unrelated / policy.
+    let catalogProducts: Product[] = [];
+    try {
+      catalogProducts = lookup.shouldLookup
+        ? await catalogSource.searchProducts({
+            query: lookup.lookupQuery,
+            category: assistantRequest.category ?? undefined,
+            minPrice: assistantRequest.constraints.minPrice ?? undefined,
+            maxPrice: assistantRequest.constraints.maxPrice ?? undefined,
+            colors: assistantRequest.constraints.colors,
+            keywords: assistantRequest.constraints.features,
+            sortBy: assistantRequest.constraints.sortBy ?? undefined,
+            limit: lookup.limit,
+          })
+        : [];
+      logger.node({
+        name: 'CATALOG LOOKUP',
+        input: {
+          query: request.userQuery,
+          catalogQuery: lookup.lookupQuery,
+          browseAll: lookup.browseAll,
+          category: assistantRequest.category,
+          view: assistantRequest.view,
+          requiresCatalogLookup: plan.requiresCatalogLookup,
+          limit: lookup.limit,
+        },
+        details: lookup.shouldLookup
+          ? 'Searched CatalogSource with unique-category matching.'
+          : 'Skipped lookup; this request is not a catalog answer.',
+        result: {
+          productCount: catalogProducts.length,
+          productNames: catalogProducts.slice(0, 8).map((product) => product.name),
+        },
+        status: lookup.shouldLookup ? 'success' : 'skipped',
+      });
+    } catch (error) {
+      logger.node({
+        name: 'CATALOG LOOKUP',
+        input: {
+          query: request.userQuery,
+          catalogQuery: lookup.lookupQuery,
+          browseAll: lookup.browseAll,
+        },
+        details: 'CatalogSource.searchProducts failed.',
+        status: 'error',
+        error,
+      });
+      throw error;
+    }
 
-    // 4. Adapt generic business context back into the existing ShopMate agent request shape.
-    return routeToAgent(
-      classification,
-      {
-        messages: request.messages,
-        models,
-        catalogSource,
-        cartSource,
-        userQuery: request.userQuery,
-        persistenceMode: request.persistenceMode,
-        storeRoute,
-        products: catalogProducts,
-        catalogLookupCompleted: storeRoute.requiresCatalogLookup,
-      } as AgentRequest,
-      request.userQuery,
-      dataStream
-    );
+    // 6. Render from the plan, then optional speaker prose with no tools.
+    const rendered = await renderExecution({
+      plan,
+      products: catalogProducts,
+      browseAll: lookup.browseAll,
+      userQuery: request.userQuery,
+      metadata: assistantRequest.metadata,
+      maxPrice: assistantRequest.constraints.maxPrice,
+      dataStream,
+      persistenceMode: request.persistenceMode,
+      cartSource,
+    });
+
+    const speakerStream = await createSpeakerStream({
+      model: models.chat,
+      speaker: plan.speaker,
+      render: plan.render,
+      userQuery: request.userQuery,
+      catalogNames: rendered.catalogNames,
+      cartItemCount: rendered.cartItemCount,
+      renderedTitle: rendered.renderedTitle,
+      lookupEmpty: rendered.lookupEmpty,
+      categoryHints: rendered.categoryHints,
+    });
+
+    if (speakerStream) return speakerStream;
+    return createTextReplyStream(rendered.reply);
   },
 };
+
+/** Deterministic render result. Speaker uses context; reply is the fallback stream. */
+interface RenderExecutionResult {
+  reply: string;
+  catalogNames: string[];
+  cartItemCount?: number;
+  renderedTitle?: string;
+  lookupEmpty: boolean;
+  categoryHints?: string[];
+}
+
+function renderResult(
+  reply: string,
+  rest: Omit<RenderExecutionResult, 'reply'> = { catalogNames: [], lookupEmpty: false },
+): RenderExecutionResult {
+  return { reply, ...rest };
+}
+
+/** Run the planned server render and return fallback text plus speaker context. */
+async function renderExecution(input: {
+  plan: ExecutionPlan;
+  products: Product[];
+  browseAll: boolean;
+  userQuery: string;
+  metadata: AssistantMetadata;
+  maxPrice?: number | null;
+  dataStream: Parameters<AssistantRuntime['stream']>[1];
+  persistenceMode: 'local' | 'database';
+  cartSource: ReturnType<typeof createCartSourceFromShopApi>;
+}): Promise<RenderExecutionResult> {
+  const catalogNames = input.products.map((product) => product.name);
+
+  if (input.plan.render === 'refuse') {
+    logger.node({
+      name: 'RENDER',
+      input: { render: 'refuse' },
+      details: 'Deterministic refuse. No lookup and no catalog UI.',
+      result: { kind: 'refuse' },
+      status: 'success',
+    });
+    return renderResult(REFUSE_MESSAGE);
+  }
+
+  if (input.plan.render === 'policy') {
+    logger.node({
+      name: 'RENDER',
+      input: { render: 'policy' },
+      details: 'Deterministic store policy. Schema did not invent legal copy.',
+      result: { kind: 'policy' },
+      status: 'success',
+    });
+    return renderResult(POLICY_MESSAGE);
+  }
+
+  if (input.plan.render === 'cart') {
+    const cartPayload = await renderCart({ cartSource: input.cartSource, dataStream: input.dataStream });
+    return renderResult("Here's your cart.", {
+      catalogNames: [],
+      cartItemCount: cartPayload.totalItems,
+      lookupEmpty: false,
+    });
+  }
+
+  if (input.plan.render === 'conversation') {
+    // Schema view=conversation: speaker + optional Find chips. Never dump cards.
+    const shouldWriteMetadata = input.plan.action === 'catalog'
+      && input.metadata.type === 'buttons'
+      && input.metadata.items.length > 0;
+    const metadataPart = shouldWriteMetadata
+      ? renderUiMetadata({
+          metadata: input.metadata,
+          maxPrice: input.maxPrice,
+          dataStream: input.dataStream,
+        })
+      : null;
+    const categoryHints = metadataPart?.items.map((item) => item.label)
+      ?? (input.metadata.type === 'buttons'
+        ? input.metadata.items.map((item) => item.label)
+        : []);
+
+    logger.node({
+      name: 'RENDER',
+      input: {
+        render: 'conversation',
+        action: input.plan.action,
+        metadataType: input.metadata.type,
+        itemCount: categoryHints.length,
+      },
+      details: metadataPart
+        ? 'Conversation is speaker-owned. Streamed Find chips from schema metadata. No cards.'
+        : 'Conversation is speaker-owned. No cards, no metadata chips.',
+      result: {
+        kind: 'conversation',
+        metadataType: metadataPart?.type ?? 'none',
+        values: metadataPart?.items.map((item) => item.value) ?? [],
+      },
+      status: 'success',
+    });
+
+    return renderResult('How can I help with ShopMate shopping?', {
+      catalogNames: [],
+      lookupEmpty: false,
+      categoryHints,
+    });
+  }
+
+  if (input.plan.render === 'document' && input.plan.action === 'technical') {
+    const title = input.userQuery.trim() || 'Technical note';
+    await renderTechnicalDocument({
+      title,
+      dataStream: input.dataStream,
+      persistenceMode: input.persistenceMode,
+    });
+    return renderResult('I created a document about that topic.', {
+      catalogNames: [],
+      renderedTitle: title,
+      lookupEmpty: false,
+    });
+  }
+
+  if (input.products.length === 0) {
+    logger.node({
+      name: 'RENDER',
+      input: { render: input.plan.render, productCount: 0 },
+      details: 'Empty catalog lookup. No invented cards, sheet, or document.',
+      result: { kind: 'none', empty: true },
+      status: 'skipped',
+    });
+    return renderResult(EMPTY_CATALOG_MESSAGE, { catalogNames: [], lookupEmpty: true });
+  }
+
+  const title = catalogRenderTitle(
+    input.browseAll,
+    input.plan.render as 'cards' | 'sheet' | 'document',
+    input.userQuery,
+  );
+  const rendered = await renderStoreOutput({
+    products: input.products,
+    render: input.plan.render as 'cards' | 'sheet' | 'document',
+    title,
+    dataStream: input.dataStream,
+    persistenceMode: input.persistenceMode,
+  });
+
+  if (rendered.kind === 'sheet') {
+    return renderResult('I created a catalog sheet from the store products.', {
+      catalogNames,
+      renderedTitle: rendered.title,
+      lookupEmpty: false,
+    });
+  }
+  if (rendered.kind === 'document') {
+    return renderResult('I created a document from the store products.', {
+      catalogNames,
+      renderedTitle: rendered.title,
+      lookupEmpty: false,
+    });
+  }
+  return renderResult('Here are the matching ShopMate products.', {
+    catalogNames,
+    renderedTitle: rendered.title,
+    lookupEmpty: false,
+  });
+}
