@@ -24,7 +24,7 @@ This adapter is the same store behavior with a smaller system:
 | [`docs/conversation.md`](./docs/conversation.md) | Rec / compare / product Q&A Find chips from schema `metadata` |
 | [`docs/tools.md`](./docs/tools.md) | Tool vs component vs server function — when to build which |
 | [`docs/stream-parts.md`](./docs/stream-parts.md) | What a stream part is, and how chat remounts `data-*` UI |
-| [`docs/responsibilities.md`](./docs/responsibilities.md) | Owns / does not own / dependency direction |
+| [`docs/responsibilities.md`](./docs/responsibilities.md) | Runtime as main gate + folder/file usage map |
 
 ## Key files
 

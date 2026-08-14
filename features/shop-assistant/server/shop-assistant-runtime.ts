@@ -8,10 +8,10 @@
  * shopAssistantRuntime: AssistantRuntime implementation.
  *
  * Steps:
- * 1. Label the query with the one schema LLM.
- * 2. planFromSchema(action + view) — no agent switch.
- * 3. Look up catalog rows when the plan requires it (conversation skips lookup).
- * 4. Render cards / sheet / document / cart / refuse / policy / conversation metadata.
+ * 1. Label the query with the one schema LLM → AssistantRequest (or DEFAULT on failure).
+ * 2. planFromSchema(action + view) → ExecutionPlan { requiresCatalogLookup, render, speaker }.
+ * 3. Catalog lookup when the plan / filters require it → Product[] (empty if skipped or no match).
+ * 4. Render cards / sheet / document / cart / refuse / policy / conversation / answer → fallback reply + speaker context.
  * 5. Optional speaker (no tools). Deterministic text if speaker skips or fails.
  */
 
@@ -57,16 +57,18 @@ function readBusinessCart(businessContext: Record<string, unknown>): CartState |
  */
 export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
   async stream(request, dataStream) {
-    // 1. Resolve models once per stream. Same registry as v1.
+    // ALWAYS — resolve chat model once for the labeler and optional speaker.
     const models = getAssistantModels(request.modelId);
 
-    // 2. One schema LLM. Failure already logged inside the request agent.
+    // ALWAYS — 1. Schema LLM labels the user message (action, filters, view, metadata).
+    //          Returns AssistantRequest. On failure → DEFAULT_ASSISTANT_REQUEST.
     const assistantRequest = await labelAssistantRequest({
       query: request.userQuery,
       model: models.chat,
     });
 
-    // 3. Pure planner. View never overrides action.
+    // ALWAYS — 2. Pure planner maps action + view → lookup / render / speaker.
+    //          Returns ExecutionPlan. View never overrides action.
     const plan = planFromSchema(assistantRequest);
     logger.node({
       name: 'EXECUTION PLAN',
@@ -81,20 +83,25 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
       status: 'success',
     });
 
-    // 4. Compose catalog + cart sources. Prefer a client cart snapshot when the request includes one.
+    // ALWAYS — compose catalog + cart sources (cheap mock factories today).
+    //          Prefer a client cart snapshot when the request includes one.
     const shopApi = createMockShopApiClient(
       getInitialProducts(),
       readBusinessCart(request.businessContext),
     );
     const catalogSource = createCatalogSourceFromShopApi(shopApi);
     const cartSource = createCartSourceFromShopApi(shopApi);
+
+    // ALWAYS — 3a. Decide lookup inputs (shouldLookup / query / limit). Pure; no I/O.
+    //          Conversation only looks up when category or catalogQuery can narrow the store.
     const lookup = resolveRuntimeLookup({
       userQuery: request.userQuery,
       request: assistantRequest,
       plan,
     });
 
-    // 5. Deterministic CatalogSource search. Skip when the plan is cart / technical / unrelated / policy.
+    // WHEN shouldLookup — 3b. Fetch Product[] via CatalogSource (unique-category matching).
+    //                     Else catalogProducts stays []. Never invents SKUs.
     let catalogProducts: Product[] = [];
     try {
       catalogProducts = lookup.shouldLookup
@@ -144,7 +151,9 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
       throw error;
     }
 
-    // 6. Render from the plan, then optional speaker prose with no tools.
+    // ALWAYS — 4. Call renderExecution. Branches inside on plan.render
+    //          (refuse / policy / cart / conversation / answer / cards / sheet / document).
+    //          Returns fallback reply + speaker context (facts, chips, titles).
     const rendered = await renderExecution({
       plan,
       products: catalogProducts,
@@ -157,6 +166,8 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
       cartSource,
     });
 
+    // WHEN speaker is reply|confirm — 5. Second LLM, prose only (no tools).
+    //                                 Else null → deterministic rendered.reply stream.
     const speakerStream = await createSpeakerStream({
       model: models.chat,
       speaker: plan.speaker,
@@ -208,6 +219,7 @@ async function renderExecution(input: {
 }): Promise<RenderExecutionResult> {
   const catalogNames = input.products.map((product) => product.name);
 
+  // WHEN plan.render === 'refuse'
   if (input.plan.render === 'refuse') {
     logger.node({
       name: 'RENDER',
@@ -219,6 +231,7 @@ async function renderExecution(input: {
     return renderResult(REFUSE_MESSAGE);
   }
 
+  // WHEN plan.render === 'policy'
   if (input.plan.render === 'policy') {
     logger.node({
       name: 'RENDER',
@@ -230,6 +243,7 @@ async function renderExecution(input: {
     return renderResult(POLICY_MESSAGE);
   }
 
+  // WHEN plan.render === 'cart'
   if (input.plan.render === 'cart') {
     const cartPayload = await renderCart({ cartSource: input.cartSource, dataStream: input.dataStream });
     return renderResult("Here's your cart.", {
@@ -239,8 +253,8 @@ async function renderExecution(input: {
     });
   }
 
+  // WHEN plan.render === 'conversation' — speaker-owned; Find chips; never dump cards.
   if (input.plan.render === 'conversation') {
-    // Speaker-owned. Never dump cards.
     // Prefer Find chips from matched products when lookup returned rows.
     // Else fall back to schema category chips (open rec with no filter).
     const productChips = buildFindChipsFromProducts(input.products);
@@ -293,6 +307,7 @@ async function renderExecution(input: {
     });
   }
 
+  // WHEN plan.render === 'answer' — facts + product-name Find chips; no cards.
   if (input.plan.render === 'answer') {
     // Schema view=answer: lookup already ran. Speaker owns the reply from store facts.
     // Find chips come from matched product names, not schema aisle metadata.
@@ -342,6 +357,7 @@ async function renderExecution(input: {
     );
   }
 
+  // WHEN plan.render === 'document' && action === 'technical'
   if (input.plan.render === 'document' && input.plan.action === 'technical') {
     const title = input.userQuery.trim() || 'Technical note';
     await renderTechnicalDocument({
@@ -356,6 +372,7 @@ async function renderExecution(input: {
     });
   }
 
+  // WHEN catalog path but no rows — never invent UI.
   if (input.products.length === 0) {
     logger.node({
       name: 'RENDER',
@@ -367,6 +384,7 @@ async function renderExecution(input: {
     return renderResult(EMPTY_CATALOG_MESSAGE, { catalogNames: [], lookupEmpty: true });
   }
 
+  // WHEN plan.render is cards | sheet | document (catalog) — stream store UI from rows.
   const title = catalogRenderTitle(
     input.browseAll,
     input.plan.render as 'cards' | 'sheet' | 'document',
