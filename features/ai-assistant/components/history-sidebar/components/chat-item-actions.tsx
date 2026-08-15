@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { EllipsisVertical, Send, Trash } from 'lucide-react';
-import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
+import { useUserSession } from '@/features/ai-assistant/providers/user-session-context';
 import { copyChatLink, deleteChatWithMessages } from '../utils/chat-item-actions';
 
 interface ChatItemActionsProps {

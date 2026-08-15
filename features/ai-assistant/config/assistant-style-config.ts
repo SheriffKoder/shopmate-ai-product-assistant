@@ -66,6 +66,7 @@ export interface AssistantStyleConfig {
     itemClassName?: string;
     summaryClassName?: string;
     iconClassName?: string;
+    headerClassName?: string;
   };
   loading?: {
     containerClassName?: string;
@@ -180,10 +181,11 @@ export const defaultAssistantStyleConfig: AssistantStyleConfig = {
     shimmerClassName: '',
   },
   thinkingSteps: {
-    containerClassName: 'mb-3 border-l-2 border-primary/30 pl-3',
+    containerClassName: 'mb-3',
     itemClassName: 'flex items-start gap-2 py-1 text-xs text-black/70',
     summaryClassName: 'text-black/50',
     iconClassName: 'mt-0.5 text-primary',
+    headerClassName: 'flex w-fit items-center gap-2 py-1 text-left text-xs text-black/70',
   },
   loading: {
     containerClassName: 'flex flex-row items-center justify-start gap-2 opacity-70 pl-4',

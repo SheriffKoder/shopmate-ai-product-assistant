@@ -4,6 +4,12 @@
  * prompt input, and artifact panel composition.
  * Used in: features/ai-assistant/chat-wrapper.tsx.
  * Used for: Keeping the reusable chat body separate from app shell and header chrome.
+ *
+ * Steps:
+ * 1. Wire useChat + data stream + model selection.
+ * 2. On finish — refresh sidebar/URL; guests save via prepareGuestChatSave.
+ * 3. Load history via useChatMessages; clear live thinking steps on chat change.
+ * 4. Compose conversation UI, prompt, and artifact panel.
  */
 
 'use client';
@@ -13,7 +19,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from '@/features/ai-assistant/components/generic/ai-elements/conversation';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { Loader } from '@/features/ai-assistant/components/generic/ai-elements/loader';
@@ -34,8 +40,9 @@ import type { AssistantToolRendererRegistry } from './model/tool-renderer-regist
 import { assistantApiEndpoints } from './model/api-endpoints';
 import { getDictationConfig } from './dictation/model/dictation-config';
 import { useArtifact } from './components/artifacts/hooks/use-artifact';
-import { useUserSession } from './hooks/use-user-session';
+import { useUserSession } from './providers/user-session-context';
 import { MessageSavingOrchestrator } from './message-persistence/saving-orchestrator';
+import { prepareGuestChatSave } from './message-persistence/lib/prepare-guest-chat-save';
 
 interface ChatContainerProps {
   chatId: string; // Combined chatId (URL or fallback)
@@ -60,6 +67,10 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, streamP
   //////////////////////////////////
   const { setDataStream, assistantSteps, setAssistantSteps } = useDataStream();
   const { setArtifact } = useArtifact();
+  // Keep a ref so guest localStorage save always sees the latest steps (useChat may
+  // hold a stale onFinish closure over the render that started the request).
+  const assistantStepsRef = useRef(assistantSteps);
+  assistantStepsRef.current = assistantSteps;
 
   //////////////////////////////////
   // Assistant Model Selection: Reusable model picker state included in every request
@@ -123,28 +134,17 @@ const ChatContainer = ({ chatId, urlChatId, onChatFinish, toolRenderers, streamP
         onChatFinish();
       }
 
+      // Guest: persist the finished turn (title + thinking-steps snapshot) to localStorage.
+      // Signed-in chats are saved on the server in handle-assistant-request onFinish.
       if (!user) {
-        const messagesWithThinkingSteps = assistantSteps.length === 0
-          ? finishedMessages
-          : finishedMessages.map((message, index) => {
-              const lastAssistantIndex = finishedMessages.findLastIndex((item) => item.role === 'assistant');
-              if (index !== lastAssistantIndex) return message;
-
-              return {
-                ...message,
-                parts: [
-                  ...(message.parts || []).filter((part: any) => part.type !== 'data-assistant-thinking-steps'),
-                  { type: 'data-assistant-thinking-steps' as const, data: assistantSteps },
-                ],
-              };
-            });
-
+        const prepared = prepareGuestChatSave({
+          messages: finishedMessages,
+          thinkingSteps: assistantStepsRef.current,
+        });
         savingOrchestrator.saveLocalChat({
           chatId,
-          title: finishedMessages.find((message) => message.role === 'user')?.parts?.[0]?.type === 'text'
-            ? String((finishedMessages.find((message) => message.role === 'user')?.parts?.[0] as { text?: string }).text || 'New conversation')
-            : 'New conversation',
-          messages: messagesWithThinkingSteps,
+          title: prepared.title,
+          messages: prepared.messages,
         });
       }
     },

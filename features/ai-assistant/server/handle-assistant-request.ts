@@ -27,24 +27,10 @@ import { logger } from '../lib/logger';
 import { extractUserQuery, generateUUID } from '../lib/utils';
 import { parseAssistantRequest } from './parse-assistant-request';
 import type { AssistantStepEvent } from '../model/assistant-events';
-
-const THINKING_STEPS_PART_TYPE = 'data-assistant-thinking-steps';
-
-function appendThinkingSteps(messages: UIMessage[], steps: AssistantStepEvent[]): UIMessage[] {
-  if (steps.length === 0) return messages;
-
-  const lastAssistantIndex = messages.findLastIndex((message) => message.role === 'assistant');
-  if (lastAssistantIndex < 0) return messages;
-
-  return messages.map((message, index) => {
-    if (index !== lastAssistantIndex) return message;
-    const parts = (message.parts || []).filter((part: any) => part.type !== THINKING_STEPS_PART_TYPE);
-    return {
-      ...message,
-      parts: [...parts, { type: THINKING_STEPS_PART_TYPE, data: steps }],
-    } as UIMessage;
-  });
-}
+import {
+  THINKING_STEPS_PART_TYPE,
+  attachThinkingStepsToMessages,
+} from '../lib/thinking-steps-part';
 
 /**
  * Handle an assistant HTTP request using an injected business runtime.
@@ -116,6 +102,7 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
         });
 
         // 7. Delegate classification, tool selection, and model stream creation to the runtime.
+        //    Steps are written as transient data-assistantStep during the turn.
         const agentStream = await runtime.stream(runtimeRequest, collectingWriter);
 
         if (agentStream instanceof Response) {
@@ -123,30 +110,40 @@ export async function handleAssistantRequest<TBusinessContext = Record<string, u
           return;
         }
 
-        // 8. Merge the runtime's stream into the reusable assistant stream.
+        // 8. Persist a non-transient snapshot on the assistant message (same pattern as
+        //    data-productCards). Transient step events alone never land in message.parts,
+        //    so refresh/history would otherwise lose the thinking panel.
+        if (thinkingSteps.length > 0) {
+          dataStream.write({
+            type: THINKING_STEPS_PART_TYPE,
+            data: thinkingSteps.map((step) => ({ ...step })),
+          });
+        }
+
+        // 9. Merge the runtime's stream into the reusable assistant stream.
         dataStream.merge(agentStream);
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
-        const persistedMessages = appendThinkingSteps(
+        const persistedMessages = attachThinkingStepsToMessages(
           messages,
           thinkingSteps
         );
 
-        // 9. Persist assistant messages after streaming so response delivery stays responsive.
+        // 10. Persist assistant messages after streaming so response delivery stays responsive.
         if (parsedRequest.persistenceMode === 'database') {
           await persistence.saveAssistantMessages({ chatId: chat.chatId, messages: persistedMessages });
         }
 
-        // 10. Let the business runtime perform optional finish-time work after core persistence.
+        // 11. Let the business runtime perform optional finish-time work after core persistence.
         await runtime.onFinish?.({
           request: runtimeRequest,
-          messages,
+          messages: persistedMessages,
         });
       },
     });
 
-    // 11. Convert AI SDK JSON chunks to SSE for the current browser client.
+    // 12. Convert AI SDK JSON chunks to SSE for the current browser client.
     return new Response(stream.pipeThrough(new JsonToSseTransformStream()), {
       headers: {
         'Content-Type': 'text/event-stream',

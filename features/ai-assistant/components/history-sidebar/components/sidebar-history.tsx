@@ -11,7 +11,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { RotateCw, Plus } from 'lucide-react';
 import useSWRInfinite from 'swr/infinite';
-import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
+import { useUserSession } from '@/features/ai-assistant/providers/user-session-context';
 import { assistantHttpHistoryClient } from '@/features/ai-assistant/client/assistant-history-client';
 import { getChatHistoryPaginationKey, groupChatsByDate, useCurrentChatId, useClearChat, type ChatHistory } from '../utils';
 import { ChatItem } from './chat-item';

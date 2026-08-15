@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
+import { useUserSession } from '@/features/ai-assistant/providers/user-session-context';
 import { clearLocalChatHistory, readLocalChatHistory } from '../lib/local-chat-history';
 
 export function useMessagePersistenceSync(onMerged?: () => void) {

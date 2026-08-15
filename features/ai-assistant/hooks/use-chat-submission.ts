@@ -7,7 +7,7 @@
  */
 
 import { useState } from 'react';
-import { useUserSession } from './use-user-session';
+import { useUserSession } from '../providers/user-session-context';
 
 type ChatRequestBody = Record<string, unknown>;
 

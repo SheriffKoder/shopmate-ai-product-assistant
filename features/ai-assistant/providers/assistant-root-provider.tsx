@@ -3,7 +3,8 @@
  * Assistant root provider: composes reusable assistant contexts behind one shell.
  * Used in: ShopMate assistant integrations and future host app assistant mounts.
  * Used for: Hiding assistant provider internals from app layouts while allowing
- * host apps to inject their own invisible stream processor.
+ * host apps to inject their own invisible stream processor. Includes the shared
+ * UserSessionProvider so demo login state is not wiped by multi-hook mounts.
  */
 
 'use client';
@@ -13,6 +14,7 @@ import { DataStreamProvider } from '../data-stream/data-stream-provider';
 import { FullscreenProvider } from './fullscreen-context';
 import { AssistantShellProvider } from './assistant-shell-context';
 import { AssistantStyleProvider } from './assistant-style-context';
+import { UserSessionProvider } from './user-session-context';
 
 /**
  * Props for {@link AssistantRootProvider}.
@@ -41,12 +43,14 @@ export function AssistantRootProvider({
   return (
     <AssistantShellProvider>
       <AssistantStyleProvider>
-        <FullscreenProvider>
-          <DataStreamProvider>
-            {children}
-            {streamHandler}
-          </DataStreamProvider>
-        </FullscreenProvider>
+        <UserSessionProvider>
+          <FullscreenProvider>
+            <DataStreamProvider>
+              {children}
+              {streamHandler}
+            </DataStreamProvider>
+          </FullscreenProvider>
+        </UserSessionProvider>
       </AssistantStyleProvider>
     </AssistantShellProvider>
   );

@@ -1,14 +1,14 @@
 /**
- * Message List Component
- * 
- * Purpose: Renders the list of messages in the conversation
- * Used in: chat-container.tsx
- * Why: Separates message list rendering from main component and forwards adapter tool rendering.
+ * @file features/ai-assistant/components/message-list.tsx
+ * Renders the conversation message list for the assistant shell.
+ * Used in: chat-container.tsx.
+ * Used for: Mounting thinking steps, text, tools, and adapter stream-part UI.
  *
  * Steps:
- * 1. Hide internal parts (thinking steps, deltas).
- * 2. Display conversation metadata (data-uiMetadata) after text on the same message.
- * 3. Forward sendMessage into MessagePartRenderer so stream-part UI can start a new turn.
+ * 1. Prefer live assistantSteps for the in-flight last message; else persisted snapshot.
+ * 2. Hide internal parts (thinking-steps snapshot, deltas).
+ * 3. Display conversation metadata (data-uiMetadata) after text on the same message.
+ * 4. Forward sendMessage into MessagePartRenderer so stream-part UI can start a new turn.
  */
 
 'use client';
@@ -26,6 +26,10 @@ import type { AssistantStreamPartRendererRegistry } from '../model/stream-part-r
 import type { AssistantToolRendererRegistry } from '../model/tool-renderer-registry';
 import type { AssistantStepEvent } from '../model/assistant-events';
 import { orderMessagePartsForDisplay } from '../lib/order-message-parts-for-display';
+import {
+  THINKING_STEPS_PART_TYPE,
+  getThinkingStepsPart,
+} from '../lib/thinking-steps-part';
 import { ThinkingSteps } from './thinking-steps/thinking-steps';
 import { useAssistantStyleConfig } from '../providers/assistant-style-context';
 
@@ -56,17 +60,11 @@ export const MessageList = ({
   return (
     <>
       {messages.map((message) => {
-        console.log('message', message);
+        // Persisted snapshot from data-assistant-thinking-steps (refresh / history).
         const persistedThinkingPart = message.parts?.find(
-          (part: any) => part.type === 'data-assistant-thinking-steps'
+          (part: { type?: string }) => part.type === THINKING_STEPS_PART_TYPE,
         );
-        const persistedThinkingSteps = Array.isArray(persistedThinkingPart?.data)
-          ? persistedThinkingPart.data.reduce((steps: any[], step: any) => {
-              const existingIndex = steps.findIndex((currentStep) => currentStep.id === step.id);
-              if (existingIndex === -1) return [...steps, step];
-              return steps.map((currentStep, index) => index === existingIndex ? step : currentStep);
-            }, [])
-          : [];
+        const persistedThinkingSteps = getThinkingStepsPart(persistedThinkingPart) ?? [];
         
         // Check if this is a user message that starts with "@" - don't display it
         // We added @ in the discussion card to not show the user message, so we don't need to display it here.
@@ -108,7 +106,7 @@ export const MessageList = ({
               // Note: adapter data-* parts (cards, cart, uiMetadata) mount via streamPartRenderers
               // Note: data-uiMetadata is ordered after text so Find chips sit under the reply
               // Note: reasoning and step-start are now displayed
-              const internalPartTypes = ['step-finish', 'text-delta', 'data-assistant-thinking-steps'];
+              const internalPartTypes = ['step-finish', 'text-delta', THINKING_STEPS_PART_TYPE];
               if (internalPartTypes.includes(part.type)) {
                 return null;
               }

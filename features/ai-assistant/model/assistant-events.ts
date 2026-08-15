@@ -32,6 +32,9 @@ export interface AssistantArtifactEvent<TArtifact = unknown> {
 /** Safe, user-facing progress state for one routed assistant operation. */
 export type AssistantStepStatus = 'loading' | 'done' | 'error';
 
+/** Detail row vs collapsed group header for the thinking panel. */
+export type AssistantStepKind = 'step' | 'resolution';
+
 /**
  * Progress summary shown before the assistant's final response.
  * This intentionally describes observable work rather than private reasoning.
@@ -41,4 +44,6 @@ export interface AssistantStepEvent {
   label: string;
   summary?: string;
   status: AssistantStepStatus;
+  /** Defaults to `step`. `resolution` is the finished-group header for collapse. */
+  kind?: AssistantStepKind;
 }

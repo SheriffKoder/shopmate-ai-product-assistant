@@ -149,7 +149,7 @@ export function Table({ csvContent, isPreview = false, className, isStreaming = 
               {Array.from({ length: finalMaxColumns }, (_, colIndex) => (
                 <td
                   key={colIndex}
-                  className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm"
+                  className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm truncate"
                 >
                   {row[colIndex] || ''}
                 </td>

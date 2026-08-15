@@ -114,7 +114,7 @@ After the user explicitly clicks the demo login button:
 - `features/ai-assistant/chat-container.tsx`
 - `features/ai-assistant/components/history-sidebar/components/sidebar-history.tsx`
 - `features/ai-assistant/components/history-sidebar/hooks/use-chat-messages.ts`
-- `features/ai-assistant/hooks/use-user-session.ts`
+- `features/ai-assistant/providers/user-session-context.tsx`
 - `features/ai-assistant/schema/assistant-request-schema.ts`
 - `features/ai-assistant/server/handle-assistant-request.ts`
 

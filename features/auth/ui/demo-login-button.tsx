@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useUserSession } from '@/features/ai-assistant/hooks/use-user-session';
+import { useUserSession } from '@/features/ai-assistant/providers/user-session-context';
 
 /** Renders a reusable button for loading the server-configured demo user. */
 export function DemoLoginButton() {
