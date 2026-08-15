@@ -247,6 +247,55 @@ Then execute in order: lookup → render → optional speaker.
 
 Node logs: `REQUEST SCHEMA`, `EXECUTION PLAN`, `CATALOG LOOKUP`, `RENDER`, `SPEAKER`. Injected by `/api/ai-assistant`.
 
+### Thinking steps
+
+The UI thinking panel is fed by transient `data-assistantStep` events. Generic assistant only renders them; Shop Assistant owns the labels via [`lib/runtime-steps.ts`](../lib/runtime-steps.ts).
+
+```text
+Classifying → action gate → Checking store? → presentation → Creating artifact? → resolution
+```
+
+| Step | When |
+|---|---|
+| Classifying | Always (schema LLM) |
+| Catalog / Cart / Store policy / Technical discussion / Not related | Always after `planFromSchema` |
+| Checking store | When `shouldLookup` |
+| Showing products / Preparing table / Preparing document / Answering product / Preparing response | When render adds signal beyond the action |
+| Creating artifact | Sheet/document artifact helpers (existing) |
+| Resolution (`kind: 'resolution'`) | Always after deterministic work finishes (`done` or `error`) |
+
+While steps are still loading, the panel shows every detail row. After the resolution event arrives:
+
+- **≤ 2 detail steps** — stay expanded (no collapser).
+- **> 2 detail steps** — collapse under `[CircleCheck | CircleX] {resolution.label}` with a chevron; expand to see the detail list.
+
+Examples (live / short):
+
+```text
+Classifying · done
+Cart · done
+→ Cart ready   (≤ 2 details; no collapse)
+```
+
+Examples (collapsed after finish):
+
+```text
+✓ Products ready  ▾
+  Classifying · done
+  Catalog · done
+  Checking store · done
+  Showing products · done
+```
+
+```text
+✓ Table ready  ▾
+  Classifying · done
+  Catalog · done
+  Checking store · done
+  Preparing table · done
+  Creating artifact · done
+```
+
 ## Lookup
 
 Catalog lookup does **not** use AI. `CatalogSource.searchProducts` is deterministic (`lib/catalog/match-catalog-products.ts`).

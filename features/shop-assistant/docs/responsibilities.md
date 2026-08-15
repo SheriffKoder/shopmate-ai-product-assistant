@@ -30,7 +30,7 @@ Client mount (separate from the API gate): [`components/layout-wrapper.tsx`](../
 
 ## Owns / does not own
 
-**Owns:** schema labeling, planning, catalog/cart lookup adapters, server render + Find chips, optional speaker, product/cart/metadata UI, stream-part hydration, suggestion chips.
+**Owns:** schema labeling, planning, catalog/cart lookup adapters, server render + Find chips, optional speaker, product/cart/metadata UI, stream-part hydration, suggestion chips, ShopMate thinking-step labels.
 
 **Does not own:** generic SSE / persistence / runtime contracts (`features/ai-assistant`); artifact storage / panel; storefront catalog/cart state (`features/catalog`, `features/cart`, `entities/*`).
 
@@ -113,6 +113,12 @@ app/api + layout
 | [`build-catalog-facts.ts`](../lib/catalog/build-catalog-facts.ts) | Product rows → speaker fact lines | Runtime answer / conversation render |
 | [`find-chips-from-products.ts`](../lib/catalog/find-chips-from-products.ts) | Product names → Find chip items | Runtime answer / conversation when rows exist |
 
+#### `lib/` (root)
+
+| File | Role | Used by / used for |
+|---|---|---|
+| [`runtime-steps.ts`](../lib/runtime-steps.ts) | User-facing thinking-step labels (Classifying → action → lookup → render → resolution) | Runtime emits via `writeAssistantStep` |
+
 #### `lib/stream/`
 
 | File | Role | Used by / used for |
@@ -182,6 +188,7 @@ API route
        ├─ planFromSchema         → model/execution-plan
        ├─ sources                → model/sources contracts + lib/catalog/match
        ├─ resolveRuntimeLookup   → lib/catalog/runtime-lookup
+       ├─ runtime-steps          → writeAssistantStep (Classifying / action / lookup / render / resolution)
        ├─ searchProducts         → WHEN shouldLookup
        ├─ renderExecution
        │    ├─ render/cart | store-output | ui-metadata | reply

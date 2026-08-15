@@ -7,16 +7,18 @@
  * Function Index:
  * shopAssistantRuntime: AssistantRuntime implementation.
  *
- * Steps:
- * 1. Label the query with the one schema LLM → AssistantRequest (or DEFAULT on failure).
- * 2. planFromSchema(action + view) → ExecutionPlan { requiresCatalogLookup, render, speaker }.
- * 3. Catalog lookup when the plan / filters require it → Product[] (empty if skipped or no match).
- * 4. Render cards / sheet / document / cart / refuse / policy / conversation / answer → fallback reply + speaker context.
- * 5. Optional speaker (no tools). Deterministic text if speaker skips or fails.
+ * Steps (ALWAYS = every turn; WHEN = branch of the plan):
+ * 1. ALWAYS — Label with the one schema LLM → AssistantRequest (or DEFAULT on failure). Emit Classifying.
+ * 2. ALWAYS — planFromSchema(action + view) → ExecutionPlan. Emit action gate step.
+ * 3. ALWAYS decide; WHEN shouldLookup — CatalogSource.searchProducts → Product[]. Emit Checking store.
+ * 4. ALWAYS call renderExecution; WHEN plan.render — stream UI. Emit presentation step.
+ * 5. ALWAYS emit resolution header (done/error) so the UI can collapse detail steps.
+ * 6. WHEN speaker is reply|confirm — createSpeakerStream; else deterministic rendered.reply.
  */
 
 import type { AssistantRuntime } from '@/features/ai-assistant/model/assistant-runtime';
 import { logger } from '@/features/ai-assistant/lib/logger';
+import { writeAssistantStep } from '@/features/ai-assistant/server/assistant-step';
 import { getAssistantModels } from '@/features/ai-assistant/server/assistant-model-provider';
 import { getInitialProducts } from '@/features/catalog/model/initial-data';
 import type { Product } from '@/features/catalog/model/product';
@@ -27,6 +29,13 @@ import { planFromSchema } from '../model/execution-plan';
 import { catalogRenderTitle, resolveRuntimeLookup } from '../lib/catalog/runtime-lookup';
 import { buildCatalogFacts } from '../lib/catalog/build-catalog-facts';
 import { buildFindChipsFromProducts } from '../lib/catalog/find-chips-from-products';
+import {
+  getActionStep,
+  getCheckingStoreStep,
+  getClassifyingStep,
+  getRenderStep,
+  getResolutionStep,
+} from '../lib/runtime-steps';
 import { labelAssistantRequest } from './request-agent';
 import { createMockShopApiClient } from './sources/mock-shop-api-client';
 import {
@@ -62,14 +71,17 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
 
     // ALWAYS — 1. Schema LLM labels the user message (action, filters, view, metadata).
     //          Returns AssistantRequest. On failure → DEFAULT_ASSISTANT_REQUEST.
+    writeAssistantStep(dataStream, getClassifyingStep('loading'));
     const assistantRequest = await labelAssistantRequest({
       query: request.userQuery,
       model: models.chat,
     });
+    writeAssistantStep(dataStream, getClassifyingStep('done'));
 
     // ALWAYS — 2. Pure planner maps action + view → lookup / render / speaker.
     //          Returns ExecutionPlan. View never overrides action.
     const plan = planFromSchema(assistantRequest);
+    writeAssistantStep(dataStream, getActionStep(plan.action, 'done'));
     logger.node({
       name: 'EXECUTION PLAN',
       input: {
@@ -104,6 +116,9 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
     //                     Else catalogProducts stays []. Never invents SKUs.
     let catalogProducts: Product[] = [];
     try {
+      if (lookup.shouldLookup) {
+        writeAssistantStep(dataStream, getCheckingStoreStep('loading'));
+      }
       catalogProducts = lookup.shouldLookup
         ? await catalogSource.searchProducts({
             query: lookup.lookupQuery,
@@ -116,6 +131,9 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
             limit: lookup.limit,
           })
         : [];
+      if (lookup.shouldLookup) {
+        writeAssistantStep(dataStream, getCheckingStoreStep('done'));
+      }
       logger.node({
         name: 'CATALOG LOOKUP',
         input: {
@@ -137,6 +155,17 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
         status: lookup.shouldLookup ? 'success' : 'skipped',
       });
     } catch (error) {
+      if (lookup.shouldLookup) {
+        writeAssistantStep(dataStream, getCheckingStoreStep('error'));
+      }
+      writeAssistantStep(
+        dataStream,
+        getResolutionStep({
+          action: plan.action,
+          render: plan.render,
+          status: 'error',
+        }),
+      );
       logger.node({
         name: 'CATALOG LOOKUP',
         input: {
@@ -154,19 +183,50 @@ export const shopAssistantRuntime: AssistantRuntime<Record<string, unknown>> = {
     // ALWAYS — 4. Call renderExecution. Branches inside on plan.render
     //          (refuse / policy / cart / conversation / answer / cards / sheet / document).
     //          Returns fallback reply + speaker context (facts, chips, titles).
-    const rendered = await renderExecution({
-      plan,
-      products: catalogProducts,
-      browseAll: lookup.browseAll,
-      userQuery: request.userQuery,
-      metadata: assistantRequest.metadata,
-      maxPrice: assistantRequest.constraints.maxPrice,
-      dataStream,
-      persistenceMode: request.persistenceMode,
-      cartSource,
-    });
+    const renderStepLoading = getRenderStep(plan.render, 'loading');
+    if (renderStepLoading) {
+      writeAssistantStep(dataStream, renderStepLoading);
+    }
+    let rendered: Awaited<ReturnType<typeof renderExecution>>;
+    try {
+      rendered = await renderExecution({
+        plan,
+        products: catalogProducts,
+        browseAll: lookup.browseAll,
+        userQuery: request.userQuery,
+        metadata: assistantRequest.metadata,
+        maxPrice: assistantRequest.constraints.maxPrice,
+        dataStream,
+        persistenceMode: request.persistenceMode,
+        cartSource,
+      });
+    } catch (error) {
+      writeAssistantStep(
+        dataStream,
+        getResolutionStep({
+          action: plan.action,
+          render: plan.render,
+          status: 'error',
+        }),
+      );
+      throw error;
+    }
+    const renderStepDone = getRenderStep(plan.render, 'done');
+    if (renderStepDone) {
+      writeAssistantStep(dataStream, renderStepDone);
+    }
 
-    // WHEN speaker is reply|confirm — 5. Second LLM, prose only (no tools).
+    // ALWAYS — 5. Resolution header for the thinking-panel collapser (done).
+    writeAssistantStep(
+      dataStream,
+      getResolutionStep({
+        action: plan.action,
+        render: plan.render,
+        status: 'done',
+      }),
+    );
+
+    // WHEN speaker is reply|confirm — 6. Second LLM, prose only (no tools).
     //                                 Else null → deterministic rendered.reply stream.
     const speakerStream = await createSpeakerStream({
       model: models.chat,
